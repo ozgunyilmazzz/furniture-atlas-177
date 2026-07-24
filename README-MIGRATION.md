@@ -911,3 +911,35 @@ gorunumunu aynen koruyor.
   liste maddeleri) sayfa ciktisinda mevcut
 - globalReportsModal'in HTML'i `info-doc-body` sinifi icermiyor -
   etkilenmedi
+
+## Faz 28 - Mobil zoom butonlari + ozet kart geri geldi (TAMAMLANDI)
+
+**1) KOK NEDEN: +/- yakinlastirma butonlari mobilde tiklama uretmiyordu**
+`.zoom-controls` butonlari, kureyi surukleme icin kullanilan
+`#globeStage` (`stage`) elementinin ICINDE duruyor. `stage`'in
+`touchstart` dinleyicisi HER dokunusta `e.preventDefault()` cagiriyordu
+- bu da tarayicinin o dokunustan normalde uretecegi "click" olayini
+tamamen iptal ediyordu, butonlar dahil. Duzeltme: touchstart
+handler'ina, dokunulan yer `.zoom-controls` icindeyse hicbir sey
+yapmadan cikan bir kontrol eklendi - artik +/- butonlarina dokunmak
+normal sekilde tiklama olusturuyor, kureyi surukleme mantigi devreye
+girmiyor.
+
+**2) Mobilde artik masaustundeki gibi once ozet kart aciliyor**
+Kodda zaten hazir duran ama kullanilmayan bir fonksiyon bulundu:
+`tryPreviewAtPoint()` - masaustu "uzerine gelme" kartinin AYNISINI
+(+ "Detaya Git ->" butonu) mobilde de gostermek icin yazilmis, ama
+bir asamada devre disi birakilip yerine dogrudan tam sayfa acan
+`tryOpenAtPoint()` kullanilmaya baslanmisti.
+
+Duzeltme: `endDrag()` icinde artik parmakla dokunma (touch) ile
+tiklama ayirt ediliyor - dokunmatikse `tryPreviewAtPoint()` (ozet
+kart + "Detaya Git" butonu), fare tiklamasiysa eskisi gibi
+`tryOpenAtPoint()` (dogrudan sayfa) cagriliyor. "Detaya Git"
+butonunun kendi tiklama mantigi zaten tam calisir haldeydi
+(`hcDetailBtn`), sadece bu yeni yola hic yonlendirilmiyordu.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Uretim sunucusunda hem zoom-controls touchstart korumasi hem
+  `tryPreviewAtPoint` cagrisi bundle'da dogrulandi

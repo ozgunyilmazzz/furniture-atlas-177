@@ -2217,7 +2217,10 @@ function endDrag(clientX, clientY, isTouch){
   if(!wasDrag && clientX !== undefined){
     autoRotate = isTouch || !mouseOverStage;
     isInteracting = false;
-    tryOpenAtPoint(clientX, clientY); // mobilde de artık doğrudan ülke sayfası açılır, önizleme baloncuğu yok
+    // Mobilde artık masaüstündeki gibi önce özet kart (+ "Detaya Git" butonu) açılıyor;
+    // masaüstünde fare zaten hover'da önizlemeyi gösterdiği için tıklama direkt sayfayı açar.
+    if(isTouch) tryPreviewAtPoint(clientX, clientY);
+    else tryOpenAtPoint(clientX, clientY);
   } else if(wasDrag && (Math.abs(velRotY) > 0.0005 || Math.abs(velTiltX) > 0.0005)){
     momentumActive = true; // oyun hissi: sürükleme hızıyla dönmeye devam eder, sonra yavaşlar — hafif çizim modu sürer
   } else {
@@ -2235,6 +2238,9 @@ stage.addEventListener('mouseleave', ()=>{ mouseOverStage = false; if(!dragging)
 
 let touchActiveOnStage = false;
 stage.addEventListener('touchstart', e=>{
+  // +/- yakınlaştırma butonlarına dokunuşu küre-sürükleme mantığı yutmasın —
+  // aksi halde preventDefault() tarayıcının "tıklama" olayını hiç oluşturmuyordu.
+  if(e.target.closest('.zoom-controls')) return;
   touchActiveOnStage = true;
   if(e.cancelable) e.preventDefault();
   startDrag(e.touches[0].clientX, e.touches[0].clientY);
