@@ -861,3 +861,53 @@ Sadece CSS - yapi, linkler, metinler HIC degismedi.
 - Uretim sunucusunda yeni `.footer-col-title` rengi (#d6b56c) ve tum
   orijinal link/metinlerin (Hakkimizda, Yardim Merkezi, Kuresel
   Raporlar vb.) degismeden durdugu dogrulandi
+
+## Faz 27 - Footer bilgi sayfalari premium yeniden tasarim (TAMAMLANDI)
+
+Hakkimizda, Yardim Merkezi, Iletisim, Gizlilik Politikasi, Kullanim
+Sartlari, Cerez Politikasi, Is Ortaklari (7 modal) - SADECE sunum
+bicimi degisti. Hicbir metin, link veya icerik degistirilmedi/silinmedi
+(Python script ile otomatik dogrulandi: her modalin normallestirilmis
+duz metni islem oncesi/sonrasi birebir karsilastirildi).
+
+**Onemli mimari karar:** Yeni stiller `.info-doc-body` diye YENI bir
+scope sinifi altinda tanimlandi (sadece bu 7 modal'a eklendi). Eski
+`.gr-card`, `.gr-list`, `.cp-section-title` gibi PAYLASILAN siniflar
+degistirilmedi - cunku bunlar Kuresel Raporlar modalinda VE ulke
+dashboard sayfalarinin kendi bolum basliklarinda da kullaniliyor.
+Degistirseydik, istemeden butun siteyi etkilerdik. Dogruladim:
+globalReportsModal HTML'i `info-doc-body` sinifini icermiyor, eski
+gorunumunu aynen koruyor.
+
+**Yapilan degisiklikler:**
+- Her modalin `.compare-body`'sine `info-doc-body` sinifi eklendi,
+  eski inline `max-width:760/820px` kaldirildi - hepsi artik tutarli
+  960px genislikte
+- Giris paragraflari `.info-intro` icine sarildi, `.gr-lead` (zaten
+  var olan "hero" sinifi) buyutuldu (19px->25px, italik serif)
+- Her `<h3 class="cp-section-title">...</h3>` + sonrasindaki icerik
+  otomatik olarak `.info-section` paneline sarildi (koyu, #11161f
+  arka planli, yumusak kenarli kutu) - "bol dikey bosluk" ve "bolum
+  ayirimi" boyle saglandi
+- Baslik altina altin renkli (#d6b56c) kisa accent cizgi eklendi
+  (::after ile, mevcut kalin border-bottom yerine)
+- Kart (`gr-card`) basliklarina altin checkmark ikon eklendi (CSS
+  mask ile, ekstra HTML gerekmedi)
+- Liste maddelerinin ('—' tire yerine) artik ince altin halka
+  (outline nokta) ikonu var
+- Satir yuksekligi genel olarak artirildi (1.9)
+- **Icerik yapisi degisikligi (metin AYNI, sadece HTML sarmalayici
+  degisti):** aboutModal'daki "Neler Sunuyoruz?" ve partnersModal'daki
+  "Neden Furniture Atlas?" listeleri, ayni 6/5 maddeyi birebir
+  koruyarak duz liste yerine 2-3 sutunlu feature kart izgarasina
+  cevrildi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Python script ile TUM 7 modalin metni (etiketler cikarilip
+  normallestirildikten sonra) islem oncesi/sonrasi birebir ayni
+  cikti dogrulandi
+- Uretim sunucusunda tum orijinal metinler (basliklar, e-postalar,
+  liste maddeleri) sayfa ciktisinda mevcut
+- globalReportsModal'in HTML'i `info-doc-body` sinifi icermiyor -
+  etkilenmedi
