@@ -1960,7 +1960,12 @@ let sphereCircleEl = null;
 let targetIdsCache = null;
 function getTargetIdsCache(){
   if(targetIdsCache) return targetIdsCache;
-  const user = getCurrentUser();
+  // NOT: render() sayfa yüklenirken çok erken, senkron olarak çağrılıyor —
+  // bu noktada aşağıda tanımlanan `currentSupabaseSession` değişkeni henüz
+  // "temporal dead zone" içinde olabilir. try/catch olmadan bu, TÜM script'in
+  // burada çökmesine (sekmelerin/kürenin hiç çalışmamasına) yol açıyordu.
+  let user = null;
+  try{ user = getCurrentUser(); }catch(e){ user = null; }
   targetIdsCache = new Set(user ? getTargets(user) : []);
   return targetIdsCache;
 }
@@ -4260,6 +4265,7 @@ sb.auth.getSession().then(async ({ data }) => {
   if(data.session) await syncMembershipFromServer();
   updatePremiumUI(); // Keşif (ücretsiz) üyede memberships satırı yok — syncMembershipFromServer
                       // sessizce çıkar, bu yüzden burada her koşulda tekrar çağırmak gerekiyor.
+  invalidateTargetIdsCache();
   if(dashboard.classList.contains('open')){ updateFavButton(); applyContentGate(); }
 });
 sb.auth.onAuthStateChange((event, session) => {
