@@ -1,0 +1,1157 @@
+
+<header>
+  <div class="brand" id="brandLogo" style="cursor:pointer;">
+    <span class="brand-mark"><span class="brand-atlas">Atlas<span class="brand-dot">.</span></span></span>
+    <span class="brand-sub" lang="en">Furniture Export Intelligence</span>
+  </div>
+  <div class="header-actions">
+    <div class="header-right">
+      <span class="header-stat">İZLENEN PAZAR <b id="mkt-count">10</b></span>
+      <span class="header-stat">SON GÜNCELLEME <b>10 TEM 2026</b></span>
+      <span class="pill">TR → DÜNYA</span>
+    </div>
+    <button class="travel-btn" id="newsBtn" style="background:transparent; border:1px solid var(--border-soft); color:var(--text-1); display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Haberler</button>
+    <button class="travel-btn" id="fairsBtn" style="background:transparent; border:1px solid var(--border-soft); color:var(--text-1); display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Fuarlar</button>
+    <button class="travel-btn" id="myTargetsBtn" style="background:transparent; border:1px solid var(--border-soft); color:var(--text-1); display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg>Hedef Ülkelerim <span id="myTargetsCount"></span></button>
+    <button class="travel-btn" id="travelPlanBtn" style="background:transparent; border:1px solid var(--border-soft); color:var(--text-1); display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Seyahat Planla</button>
+    <button class="travel-btn" id="loginBtn" style="background:transparent; border:1px solid var(--border-soft); color:var(--text-1);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Giriş Yap</button>
+    <span id="membershipBadge" class="membership-badge" style="display:none;"></span>
+    <button class="travel-btn" id="reportIssueBtn" style="background:transparent; border:1px solid var(--red); color:var(--red); display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/></svg>Hata Bildir</button>
+  </div>
+</header>
+
+<div class="compare-modal" id="reportModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner" style="max-width:520px; margin:60px auto;">
+    <div class="modal-header" style="border-radius:16px 16px 0 0;">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:20px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/></svg>Hata Bildir</div></div>
+      <button class="close-btn modal-close-btn" id="closeReport" aria-label="Kapat">✕</button>
+    </div>
+    <div class="compare-body" style="padding:24px 28px;">
+      <div id="reportFormWrap">
+        <div class="footnote" style="margin-bottom:16px; line-height:1.6;">Furniture Atlas şu an <b>beta</b> aşamasında ve verilerin büyük kısmı örnek/tahminidir. Yanlış veya güncel olmayan bir bilgi görürsen, elindeki kanıtla (kaynak linki, resmi belge, ekran görüntüsü vb.) bize bildir — düzeltelim. Gelişime açığız.</div>
+        <div class="card-label" style="margin-bottom:8px;">Hangi ülke/bölüm ile ilgili?</div>
+        <input type="text" id="reportCountryInput" class="search-input" aria-label="Hangi ülke/bölüm ile ilgili" placeholder="örn. Meksika — İthalat Vergisi" style="padding:11px 16px; margin-bottom:14px; width:100%;">
+        <div class="card-label" style="margin-bottom:8px;">Sorun ve kanıtın (varsa link) *</div>
+        <textarea id="reportDetailInput" class="note-textarea" aria-label="Sorun ve kanıtın" placeholder="Neyin yanlış olduğunu ve elindeki gerçek kaynağı (link, resmi belge vb.) yazabilirsin..." style="min-height:110px; margin-bottom:14px;"></textarea>
+        <div class="card-label" style="margin-bottom:8px;">E-posta (opsiyonel, geri dönüş için)</div>
+        <input type="email" id="reportEmailInput" class="search-input" aria-label="E-posta (opsiyonel)" placeholder="örn. sen@sirket.com" style="padding:11px 16px; margin-bottom:18px; width:100%;">
+        <button class="tray-btn tray-btn-primary" id="reportSubmitBtn" style="width:100%; padding:12px;">Bildir</button>
+      </div>
+      <div id="reportThanksWrap" style="display:none; text-align:center; padding:20px 0;">
+        <div style="width:52px; height:52px; margin:0 auto 16px; border-radius:50%; background:rgba(63,208,192,0.14); border:1px solid rgba(63,208,192,0.4); display:flex; align-items:center; justify-content:center; font-size:24px; color:var(--teal);">✓</div>
+        <div style="font-family:var(--display); font-style:italic; font-weight:700; font-size:20px; color:var(--text-0); margin-bottom:10px;">Teşekkürler</div>
+        <div class="footnote" style="margin-bottom:20px; line-height:1.6;">Bildirimin bize ulaştı. Kanıtını inceleyip en kısa sürede düzelteceğiz — gelişmemize katkın için teşekkür ederiz.</div>
+        <button class="tray-btn" id="reportThanksCloseBtn" style="padding:11px 26px;">Kapat</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="turkeyModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;">🇹🇷 Türkiye — İhracat Genel Bakış</div></div>
+      <button class="close-btn modal-close-btn" id="closeTurkey">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" id="turkeyBody" style="max-width:820px; margin:0 auto;"></div>
+  </div>
+</div>
+
+<div class="compare-modal" id="newsModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Sektör Haberleri</div></div>
+      <button class="close-btn modal-close-btn" id="closeNews">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" id="newsBody" style="max-width:800px; margin:0 auto;"></div>
+  </div>
+</div>
+
+<div class="compare-modal" id="fairsModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Fuar Takvimi</div></div>
+      <button class="close-btn modal-close-btn" id="closeFairs">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" id="fairsBody" style="max-width:900px; margin:0 auto;"></div>
+  </div>
+</div>
+
+<div class="compare-modal" id="atlasResearchModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Atlas Research+</div></div>
+      <button class="close-btn modal-close-btn" id="closeAtlasResearch">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" style="max-width:820px; margin:0 auto;">
+      <p class="gr-lead">Daha derin analizler. Daha akıllı ihracat kararları.</p>
+      <p>Atlas Research+, Furniture Atlas'ın gelişmiş araştırma ve analiz hizmetidir. Standart ticaret verilerinin ötesine geçerek, küresel mobilya pazarlarına yönelik kapsamlı raporlar, sektörel içgörüler ve stratejik değerlendirmeler sunar.</p>
+      <p>Araştırmalarımız; üreticiler, ihracatçılar, yatırımcılar ve sektör profesyonellerinin yeni pazarlara güvenle açılmasına yardımcı olmak amacıyla hazırlanır.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Neler Sunuyoruz?</h3>
+
+      <div class="gr-card" style="margin-top:4px;">
+        <div class="gr-card-title">Ülke Pazar Raporları</div>
+        <p style="margin-bottom:10px;">Belirli bir ülkenin mobilya sektörünü detaylı olarak inceleyin. Raporda yer alabilecek başlıca bilgiler:</p>
+        <ul class="gr-list gr-list-wide">
+          <li>Pazar büyüklüğü</li>
+          <li>İthalat ve ihracat eğilimleri</li>
+          <li>En büyük tedarikçi ülkeler</li>
+          <li>Türkiye'nin pazar konumu</li>
+          <li>Büyüme potansiyeli</li>
+          <li>Risk değerlendirmesi</li>
+          <li>Gümrük vergileri ve ticaret koşulları</li>
+        </ul>
+      </div>
+
+      <div class="gr-card" style="margin-top:14px;">
+        <div class="gr-card-title">Sektörel Araştırmalar</div>
+        <p style="margin-bottom:10px;">Belirli ürün gruplarına yönelik küresel analizler. Örnek konular:</p>
+        <ul class="gr-list gr-list-wide">
+          <li>Döşemeli mobilyalar</li>
+          <li>Yatak odası mobilyaları</li>
+          <li>Ofis mobilyaları</li>
+          <li>Dış mekân mobilyaları</li>
+          <li>Ahşap mobilyalar</li>
+          <li>Mutfak mobilyaları</li>
+        </ul>
+      </div>
+
+      <div class="gr-card" style="margin-top:14px;">
+        <div class="gr-card-title">Trend Analizleri</div>
+        <p style="margin-bottom:10px;">Küresel mobilya sektöründeki değişimleri takip edin. Araştırmalar şunları kapsayabilir:</p>
+        <ul class="gr-list gr-list-wide">
+          <li>En hızlı büyüyen pazarlar</li>
+          <li>Yükselen ithalatçılar</li>
+          <li>Yeni ticaret fırsatları</li>
+          <li>Bölgesel büyüme eğilimleri</li>
+          <li>Değişen tüketici talepleri</li>
+        </ul>
+      </div>
+
+      <div class="gr-card" style="margin-top:14px;">
+        <div class="gr-card-title">Yapay Zekâ Destekli İçgörüler</div>
+        <p style="margin-bottom:10px;">Atlas Research+, büyük veri kümelerini analiz ederek karmaşık ticaret verilerini anlaşılır özetlere dönüştürür. Bu sayede kullanıcılar;</p>
+        <ul class="gr-list gr-list-wide">
+          <li>Pazar fırsatlarını daha hızlı belirleyebilir</li>
+          <li>Riskleri önceden görebilir</li>
+          <li>Rakip hareketlerini takip edebilir</li>
+          <li>Daha bilinçli ihracat stratejileri geliştirebilir</li>
+        </ul>
+      </div>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Kimler İçin?</h3>
+      <p style="margin-bottom:4px;">Atlas Research+ özellikle;</p>
+      <div class="gr-audience">
+        <span class="gr-chip">Mobilya üreticileri</span>
+        <span class="gr-chip">İhracatçılar</span>
+        <span class="gr-chip">İthalatçılar</span>
+        <span class="gr-chip">Satın alma ekipleri</span>
+        <span class="gr-chip">Uluslararası ticaret danışmanları</span>
+        <span class="gr-chip">Yatırımcılar</span>
+        <span class="gr-chip">Sektör araştırmacıları</span>
+      </div>
+      <p class="footnote" style="margin-top:10px;">için geliştirilmiştir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Sürekli Güncellenen İçerikler</h3>
+      <p>Yeni raporlar ve analizler düzenli olarak Atlas Research+ kütüphanesine eklenir.</p>
+      <p>Amacımız yalnızca geçmişi raporlamak değil, gelecekte oluşabilecek ticaret fırsatlarını da öngörebilen stratejik analizler sunmaktır.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Daha Güçlü Kararlar İçin</h3>
+      <p>Atlas Research+, veriyi bilgiye, bilgiyi ise rekabet avantajına dönüştürmek isteyen profesyoneller için tasarlanmıştır.</p>
+
+      <div class="gr-closing">Daha doğru pazarları keşfedin, daha bilinçli kararlar alın ve küresel mobilya ticaretinde bir adım öne geçin.</div>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="globalReportsModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Küresel Raporlar</div></div>
+      <button class="close-btn modal-close-btn" id="closeGlobalReports">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" style="max-width:820px; margin:0 auto;">
+      <p class="gr-lead">Dünyanın mobilya pazarlarını tek bir platformdan keşfedin.</p>
+      <p>Küresel Raporlar, Furniture Atlas tarafından hazırlanan kapsamlı pazar analizleri, ticaret raporları ve stratejik içgörülerden oluşan araştırma kütüphanesidir.</p>
+      <p>Her rapor; ihracatçılar, üreticiler, yatırımcılar ve uluslararası ticaret profesyonellerinin daha bilinçli kararlar alabilmesi için güvenilir veriler ve analizler sunmayı amaçlar.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Raporlarda Neler Bulabilirsiniz?</h3>
+      <p class="footnote" style="margin-bottom:20px;">Her rapor, ilgili ülke veya pazar hakkında kapsamlı bilgiler içerebilir.</p>
+      <div class="gr-grid">
+        <div class="gr-card">
+          <div class="gr-card-title">Pazar Genel Görünümü</div>
+          <ul class="gr-list">
+            <li>Pazar büyüklüğü</li>
+            <li>Mobilya tüketimi</li>
+            <li>Üretim kapasitesi</li>
+            <li>Büyüme eğilimleri</li>
+            <li>Gelecek beklentileri</li>
+          </ul>
+        </div>
+        <div class="gr-card">
+          <div class="gr-card-title">Uluslararası Ticaret Analizi</div>
+          <ul class="gr-list">
+            <li>İthalat ve ihracat hacimleri</li>
+            <li>En büyük tedarikçi ülkeler</li>
+            <li>Başlıca ithalatçı ülkeler</li>
+            <li>Ticaret akışları</li>
+            <li>Türkiye'nin pazar payı ve rekabet durumu</li>
+          </ul>
+        </div>
+        <div class="gr-card">
+          <div class="gr-card-title">Rekabet Analizi</div>
+          <ul class="gr-list">
+            <li>Pazardaki önde gelen markalar</li>
+            <li>Yerel üreticiler</li>
+            <li>Uluslararası oyuncular</li>
+            <li>Rekabet yoğunluğu</li>
+            <li>Fiyat ve konumlandırma değerlendirmeleri</li>
+          </ul>
+        </div>
+        <div class="gr-card">
+          <div class="gr-card-title">Ticaret ve Düzenleyici Bilgiler</div>
+          <ul class="gr-list">
+            <li>Gümrük vergileri</li>
+            <li>Ticaret anlaşmaları</li>
+            <li>Vergi ve düzenleyici gereklilikler</li>
+            <li>İthalat süreçlerine ilişkin temel bilgiler</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Pazar Fırsatları</h3>
+      <p>Yapay zekâ destekli analizlerle aşağıdaki gibi stratejik içgörüler sunulabilir:</p>
+      <ul class="gr-list gr-list-wide">
+        <li>Hızla büyüyen pazarlar</li>
+        <li>Yeni ihracat fırsatları</li>
+        <li>Yükselen ürün kategorileri</li>
+        <li>Talep değişimleri</li>
+        <li>Potansiyel riskler ve dikkat edilmesi gereken gelişmeler</li>
+      </ul>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Kimler İçin?</h3>
+      <p style="margin-bottom:4px;">Küresel Raporlar özellikle;</p>
+      <div class="gr-audience">
+        <span class="gr-chip">Mobilya üreticileri</span>
+        <span class="gr-chip">İhracat ve satış ekipleri</span>
+        <span class="gr-chip">İthalatçılar</span>
+        <span class="gr-chip">İş geliştirme yöneticileri</span>
+        <span class="gr-chip">Yatırımcılar</span>
+        <span class="gr-chip">Ticaret danışmanları</span>
+        <span class="gr-chip">Sektör araştırmacıları</span>
+      </div>
+      <p class="footnote" style="margin-top:10px;">için hazırlanmıştır.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Veriye Dayalı Stratejik Kararlar</h3>
+      <p>Uluslararası mobilya ticareti sürekli değişmektedir. Yeni pazarlar ortaya çıkarken, ticaret politikaları, tüketici eğilimleri ve rekabet koşulları da hızla dönüşmektedir.</p>
+      <p>Furniture Atlas Küresel Raporlar, bu değişimleri anlamanıza yardımcı olarak yalnızca geçmişi analiz etmekle kalmaz; gelecekteki fırsatları öngörmenizi sağlayacak stratejik içgörüler de sunmayı hedefler. Benzer kapsamlı küresel mobilya raporları sektörde yüksek maliyetlerle sunulurken, Furniture Atlas bu bilgileri daha erişilebilir ve kullanıcı dostu bir platformda bir araya getirmeyi amaçlamaktadır.</p>
+
+      <div class="gr-closing">Küresel pazarları anlayın. Doğru fırsatları keşfedin. Güvenle ihracat yapın.</div>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="termsModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>Kullanım Şartları</div></div>
+      <button class="close-btn modal-close-btn" id="closeTerms">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" style="max-width:760px; margin:0 auto;">
+      <p class="footnote" style="margin-bottom:20px;">Son Güncelleme: 18 Temmuz 2026</p>
+      <p>Furniture Atlas'a hoş geldiniz. Bu Kullanım Şartları, Furniture Atlas web sitesi ve sunduğu tüm hizmetlerin kullanımını düzenlemektedir.</p>
+      <p>Platformu kullanarak aşağıdaki şartları kabul etmiş sayılırsınız. Bu şartları kabul etmiyorsanız lütfen platformu kullanmayınız.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">1. Hizmetin Kapsamı</h3>
+      <p>Furniture Atlas, mobilya sektörüne yönelik uluslararası ticaret verileri, pazar analizleri, şirket istihbaratı, yapay zekâ destekli içgörüler ve ilgili araştırma araçları sunan dijital bir platformdur.</p>
+      <p>Sunulan hizmetler zaman içinde güncellenebilir, genişletilebilir veya değiştirilebilir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">2. Hesap Oluşturma</h3>
+      <p>Bazı özelliklerden yararlanabilmek için kullanıcı hesabı oluşturmanız gerekebilir.</p>
+      <p>Hesabınızı oluştururken verdiğiniz bilgilerin doğru ve güncel olmasından siz sorumlusunuz.</p>
+      <p>Hesabınızın güvenliğini sağlamak ve giriş bilgilerinizi korumak tamamen sizin sorumluluğunuzdadır.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">3. Abonelik ve Ödemeler</h3>
+      <p>Furniture Atlas'ın bazı hizmetleri ücretli abonelik kapsamında sunulmaktadır. Abonelik ücretleri satın alma sırasında belirtilir.</p>
+      <p>Aksi belirtilmediği sürece abonelikler otomatik olarak yenilenebilir ve kullanıcı tarafından istenildiği zaman bir sonraki yenileme dönemi öncesinde iptal edilebilir.</p>
+      <p>Kurucu Üye gibi özel fiyatlandırmalar yalnızca belirtilen koşullar kapsamında geçerlidir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">4. Kabul Edilebilir Kullanım</h3>
+      <p style="margin-bottom:10px;">Platformu kullanırken aşağıdaki davranışlarda bulunmamayı kabul edersiniz:</p>
+      <ul class="gr-list gr-list-wide">
+        <li>Hukuka aykırı faaliyetlerde bulunmak</li>
+        <li>Sisteme yetkisiz erişim sağlamaya çalışmak</li>
+        <li>Platformun güvenliğini veya performansını olumsuz etkileyecek işlemler yapmak</li>
+        <li>Otomatik yazılımlar kullanarak izinsiz veri toplamak</li>
+        <li>Platformdaki içerikleri izinsiz çoğaltmak, dağıtmak veya ticari amaçla kullanmak</li>
+        <li>Diğer kullanıcıların hizmeti kullanımını engelleyecek davranışlarda bulunmak</li>
+      </ul>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">5. Fikri Mülkiyet Hakları</h3>
+      <p>Furniture Atlas'ta yer alan yazılımlar, tasarımlar, grafikler, logolar, analizler, veri sunumları ve diğer içerikler, aksi belirtilmedikçe Furniture Atlas'a veya ilgili hak sahiplerine aittir.</p>
+      <p>Önceden yazılı izin alınmaksızın bu içerikler kopyalanamaz, yeniden yayımlanamaz veya ticari amaçlarla kullanılamaz.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">6. Veri ve Analizler</h3>
+      <p>Platformda sunulan ticaret verileri ve analizler güvenilir kaynaklardan derlenmeye çalışılmaktadır. Bununla birlikte, tüm verilerin eksiksiz, güncel veya hatasız olduğu garanti edilmez.</p>
+      <p>Furniture Atlas'ta yer alan içerikler yalnızca bilgilendirme amacıyla sunulmaktadır ve yatırım, ticari, hukuki veya finansal tavsiye niteliği taşımaz.</p>
+      <p>Kullanıcılar, platformdaki bilgilere dayanarak aldıkları ticari kararlardan kendileri sorumludur.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">7. Hizmetin Kullanılabilirliği</h3>
+      <p>Furniture Atlas, platformun kesintisiz ve hatasız çalışması için makul çabayı gösterir.</p>
+      <p>Ancak bakım çalışmaları, teknik sorunlar veya üçüncü taraf hizmet sağlayıcılarından kaynaklanan nedenlerle hizmette geçici kesintiler yaşanabilir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">8. Hesabın Askıya Alınması</h3>
+      <p>Furniture Atlas, bu Kullanım Şartlarını ihlal eden veya platformun güvenliğini tehlikeye atan kullanıcıların hesaplarını önceden bildirimde bulunmaksızın askıya alma veya sonlandırma hakkını saklı tutar.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">9. Üçüncü Taraf Hizmetleri</h3>
+      <p>Platform, üçüncü taraf web sitelerine veya hizmetlerine bağlantılar içerebilir.</p>
+      <p>Furniture Atlas, bu hizmetlerin içeriklerinden, güvenliğinden veya uygulamalarından sorumlu değildir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">10. Sorumluluğun Sınırlandırılması</h3>
+      <p>Yürürlükteki hukukun izin verdiği ölçüde Furniture Atlas, platformun kullanımından veya kullanılamamasından kaynaklanan doğrudan veya dolaylı zararlardan sorumlu tutulamaz.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">11. Değişiklikler</h3>
+      <p>Furniture Atlas, bu Kullanım Şartlarını dilediği zaman güncelleme hakkını saklı tutar.</p>
+      <p>Güncel sürüm her zaman bu sayfada yayımlanır ve yayımlandığı tarihten itibaren yürürlüğe girer.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">12. İletişim</h3>
+      <p>Bu Kullanım Şartları hakkında sorularınız varsa bizimle iletişime geçebilirsiniz.</p>
+      <p style="margin-bottom:0;">E-posta: <a href="mailto:info@furnitureatlas.org" style="color:var(--teal);">info@furnitureatlas.org</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="privacyPolicyModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d="M12 3l8 3v6c0 4.5-3.2 8.3-8 9-4.8-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Gizlilik Politikası</div></div>
+      <button class="close-btn modal-close-btn" id="closePrivacyPolicy">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" style="max-width:760px; margin:0 auto;">
+      <p class="footnote" style="margin-bottom:20px;">Son Güncelleme: 18 Temmuz 2026</p>
+      <p>Furniture Atlas olarak kullanıcılarımızın gizliliğine önem veriyoruz. Bu Gizlilik Politikası, platformumuzu kullanırken hangi bilgilerin toplandığını, bu bilgilerin nasıl kullanıldığını ve nasıl korunduğunu açıklamaktadır.</p>
+      <p>Platformu kullanarak bu politikada belirtilen uygulamaları kabul etmiş olursunuz.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">1. Toplanan Bilgiler</h3>
+      <p style="margin-bottom:10px;">Hizmetlerimizi sunabilmek amacıyla aşağıdaki bilgileri toplayabiliriz:</p>
+      <ul class="gr-list gr-list-wide">
+        <li>Ad ve soyad</li>
+        <li>E-posta adresi</li>
+        <li>Hesap bilgileri</li>
+        <li>Abonelik ve ödeme bilgileri (ödeme işlemleri güvenli ödeme sağlayıcıları tarafından yürütülür)</li>
+        <li>IP adresi</li>
+        <li>Tarayıcı ve cihaz bilgileri</li>
+        <li>Kullanım istatistikleri ve platform etkileşimleri</li>
+      </ul>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">2. Bilgileri Nasıl Kullanıyoruz?</h3>
+      <p style="margin-bottom:10px;">Toplanan bilgiler aşağıdaki amaçlarla kullanılabilir:</p>
+      <ul class="gr-list gr-list-wide">
+        <li>Hesabınızı oluşturmak ve yönetmek</li>
+        <li>Hizmetlerimizi sunmak ve geliştirmek</li>
+        <li>Kimlik doğrulaması yapmak</li>
+        <li>Teknik destek sağlamak</li>
+        <li>Abonelik işlemlerini yürütmek</li>
+        <li>Platform güvenliğini sağlamak</li>
+        <li>Hizmetle ilgili önemli bildirimler göndermek</li>
+        <li>Kullanıcı deneyimini iyileştirmek</li>
+      </ul>
+      <p style="margin-top:12px;">Pazarlama amaçlı e-postalar yalnızca ilgili onayı vermeniz halinde gönderilir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">3. Çerezler</h3>
+      <p>Furniture Atlas, kullanıcı deneyimini geliştirmek ve platform performansını analiz etmek amacıyla çerezlerden ve benzer teknolojilerden yararlanabilir.</p>
+      <p>Çerez tercihlerinizi tarayıcı ayarlarınız üzerinden yönetebilirsiniz.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">4. Bilgi Paylaşımı</h3>
+      <p>Kişisel bilgileriniz satılmaz veya kiralanmaz. Bilgiler yalnızca aşağıdaki durumlarda üçüncü taraflarla paylaşılabilir:</p>
+      <ul class="gr-list gr-list-wide" style="margin-top:10px;">
+        <li>Ödeme hizmet sağlayıcıları</li>
+        <li>Barındırma ve altyapı hizmetleri</li>
+        <li>Analitik hizmet sağlayıcıları</li>
+        <li>Yasal yükümlülüklerin yerine getirilmesi gerektiğinde</li>
+      </ul>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">5. Veri Güvenliği</h3>
+      <p>Kullanıcı verilerini yetkisiz erişime, kayba veya kötüye kullanıma karşı korumak amacıyla makul teknik ve idari güvenlik önlemleri uygulanmaktadır.</p>
+      <p>Ancak internet üzerinden gerçekleştirilen hiçbir veri aktarımının tamamen güvenli olduğu garanti edilemez.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">6. Veri Saklama</h3>
+      <p>Kişisel veriler, hizmetlerin sunulması ve yasal yükümlülüklerin yerine getirilmesi için gerekli olduğu süre boyunca saklanır.</p>
+      <p>Hesabınızı silmeniz durumunda, yasal olarak saklanması gereken bilgiler dışında kişisel verileriniz makul süre içerisinde silinir veya anonim hale getirilir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">7. Haklarınız</h3>
+      <p style="margin-bottom:10px;">Bulunduğunuz ülkenin yürürlükteki veri koruma mevzuatına bağlı olarak aşağıdaki haklara sahip olabilirsiniz:</p>
+      <ul class="gr-list gr-list-wide">
+        <li>Hakkınızda tutulan verilere erişme</li>
+        <li>Yanlış bilgilerin düzeltilmesini talep etme</li>
+        <li>Verilerinizin silinmesini isteme</li>
+        <li>İşleme faaliyetlerine itiraz etme</li>
+        <li>Veri taşınabilirliği talep etme</li>
+      </ul>
+      <p style="margin-top:12px;">Bu haklarınızı kullanmak için bizimle iletişime geçebilirsiniz.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">8. Üçüncü Taraf Hizmetleri</h3>
+      <p>Furniture Atlas, hizmetlerini sunarken üçüncü taraf servislerden yararlanabilir. Bu servislerin kendi gizlilik politikaları geçerli olabilir.</p>
+      <p>Bu kapsamda kullanılan hizmetler arasında; analiz araçları, e-posta servisleri, ödeme altyapıları ve bulut hizmet sağlayıcıları yer alabilir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">9. Çocukların Gizliliği</h3>
+      <p>Furniture Atlas, 18 yaşın altındaki bireylere yönelik bir hizmet değildir ve bilerek çocuklardan kişisel veri toplamaz.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">10. Politika Değişiklikleri</h3>
+      <p>Bu Gizlilik Politikası zaman zaman güncellenebilir.</p>
+      <p>Önemli değişiklikler platform üzerinden veya kayıtlı e-posta adresiniz aracılığıyla duyurulabilir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">11. İletişim</h3>
+      <p>Bu Gizlilik Politikası ile ilgili sorularınız için bizimle iletişime geçebilirsiniz.</p>
+      <p style="margin-bottom:0;">E-posta: <a href="mailto:info@furnitureatlas.org" style="color:var(--teal);">info@furnitureatlas.org</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="cookiePolicyModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="14" cy="8.5" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="13.5" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="15" r="1" fill="currentColor" stroke="none"/></svg>Çerez Politikası</div></div>
+      <button class="close-btn modal-close-btn" id="closeCookiePolicy">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" style="max-width:760px; margin:0 auto;">
+      <p class="footnote" style="margin-bottom:20px;">Son Güncelleme: 18 Temmuz 2026</p>
+      <p>Bu Çerez Politikası, Furniture Atlas'ın web sitesini ziyaret ettiğinizde çerezlerin ve benzer teknolojilerin nasıl kullanıldığını açıklamaktadır.</p>
+      <p>Web sitemizi kullanarak, bu politikada belirtilen çerez kullanımını kabul etmiş olursunuz. Çerez tercihlerinizi dilediğiniz zaman tarayıcı ayarlarınız veya çerez tercih paneli üzerinden yönetebilirsiniz.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">1. Çerez Nedir?</h3>
+      <p>Çerezler (cookies), ziyaret ettiğiniz web siteleri tarafından tarayıcınıza kaydedilen küçük metin dosyalarıdır.</p>
+      <p>Çerezler sayesinde web sitesi sizi tanıyabilir, tercihlerinizi hatırlayabilir ve daha güvenli, hızlı ve kişiselleştirilmiş bir deneyim sunabilir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">2. Hangi Çerezleri Kullanıyoruz?</h3>
+
+      <div class="gr-card" style="margin-top:4px;">
+        <div class="gr-card-title">Zorunlu Çerezler</div>
+        <p style="margin-bottom:10px;">Bu çerezler web sitesinin düzgün çalışması için gereklidir. Örneğin;</p>
+        <ul class="gr-list gr-list-wide">
+          <li>Oturum yönetimi</li>
+          <li>Giriş doğrulama</li>
+          <li>Güvenlik kontrolleri</li>
+          <li>Tercihlerin saklanması</li>
+        </ul>
+        <p class="footnote" style="margin-top:10px; margin-bottom:0;">Bu çerezler devre dışı bırakılamaz.</p>
+      </div>
+
+      <div class="gr-card" style="margin-top:14px;">
+        <div class="gr-card-title">Analitik Çerezler</div>
+        <p style="margin-bottom:10px;">Bu çerezler ziyaretçilerin platformu nasıl kullandığını anlamamıza yardımcı olur. Toplanan bilgiler anonim veya toplulaştırılmış şekilde kullanılabilir. Örneğin;</p>
+        <ul class="gr-list gr-list-wide">
+          <li>Sayfa görüntüleme sayıları</li>
+          <li>En çok ziyaret edilen içerikler</li>
+          <li>Hata analizleri</li>
+          <li>Performans ölçümleri</li>
+        </ul>
+      </div>
+
+      <div class="gr-card" style="margin-top:14px;">
+        <div class="gr-card-title">İşlevsellik Çerezleri</div>
+        <p style="margin-bottom:10px;">Bu çerezler kullanıcı tercihlerini hatırlayarak daha iyi bir deneyim sunar. Örneğin;</p>
+        <ul class="gr-list gr-list-wide">
+          <li>Dil tercihi</li>
+          <li>Tema ayarları</li>
+          <li>Son görüntülenen sayfalar</li>
+          <li>Kullanıcı tercihleri</li>
+        </ul>
+      </div>
+
+      <div class="gr-card" style="margin-top:14px;">
+        <div class="gr-card-title">Performans Çerezleri</div>
+        <p style="margin-bottom:0;">Platformun hızını, güvenilirliğini ve genel performansını iyileştirmek amacıyla kullanılabilir.</p>
+      </div>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">3. Üçüncü Taraf Çerezleri</h3>
+      <p>Furniture Atlas, hizmetlerini sunarken üçüncü taraf servislerden yararlanabilir. Bunlar arasında;</p>
+      <ul class="gr-list gr-list-wide" style="margin-bottom:14px;">
+        <li>Analitik hizmetleri</li>
+        <li>Ödeme altyapıları</li>
+        <li>E-posta servisleri</li>
+        <li>Harita ve görselleştirme hizmetleri</li>
+        <li>İçerik dağıtım ağları (CDN)</li>
+      </ul>
+      <p>yer alabilir. Bu servislerin kendi gizlilik ve çerez politikaları geçerli olabilir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">4. Çerezleri Nasıl Yönetebilirsiniz?</h3>
+      <p>Tarayıcı ayarlarınızı kullanarak;</p>
+      <ul class="gr-list gr-list-wide" style="margin-bottom:14px;">
+        <li>Çerezleri görüntüleyebilir</li>
+        <li>Çerezleri silebilir</li>
+        <li>Belirli çerezleri engelleyebilir</li>
+        <li>Tüm çerezleri devre dışı bırakabilirsiniz</li>
+      </ul>
+      <p>Bazı çerezlerin devre dışı bırakılması, platformun belirli özelliklerinin düzgün çalışmamasına neden olabilir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">5. Politika Değişiklikleri</h3>
+      <p>Bu Çerez Politikası zaman zaman güncellenebilir. Güncel sürüm her zaman bu sayfada yayımlanır ve yayımlandığı tarihten itibaren yürürlüğe girer.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">6. İletişim</h3>
+      <p>Çerez Politikası hakkında sorularınız veya talepleriniz için bizimle iletişime geçebilirsiniz.</p>
+      <p style="margin-bottom:0;">E-posta: <a href="mailto:info@furnitureatlas.org" style="color:var(--teal);">info@furnitureatlas.org</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="helpCenterModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2 1.8-2 3.5"/><path d="M12 17h.01"/></svg>Yardım Merkezi</div></div>
+      <button class="close-btn modal-close-btn" id="closeHelpCenter">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" style="max-width:820px; margin:0 auto;">
+      <p class="gr-lead">Size yardımcı olmak için buradayız.</p>
+      <p>Furniture Atlas'ı kullanırken ihtiyaç duyabileceğiniz bilgi ve desteğe bu sayfa üzerinden ulaşabilirsiniz. Hesabınız, aboneliğiniz veya platform kullanımıyla ilgili sorularınız için aşağıdaki konulara göz atabilir ya da bizimle iletişime geçebilirsiniz.</p>
+
+      <div class="gr-grid" style="margin-top:24px;">
+        <div class="gr-card">
+          <div class="gr-card-title">Hesap ve Üyelik</div>
+          <ul class="gr-list">
+            <li>Nasıl hesap oluşturabilirim?</li>
+            <li>E-posta adresimi nasıl doğrularım?</li>
+            <li>Şifremi unuttum, ne yapmalıyım?</li>
+            <li>Hesap bilgilerimi nasıl güncellerim?</li>
+            <li>Hesabımı nasıl silebilirim?</li>
+          </ul>
+        </div>
+        <div class="gr-card">
+          <div class="gr-card-title">Abonelik</div>
+          <ul class="gr-list">
+            <li>Kurucu Üye üyeliği nedir?</li>
+            <li>Premium üyelik avantajları nelerdir?</li>
+            <li>Aboneliğimi nasıl yükseltebilirim?</li>
+            <li>Aboneliğimi nasıl iptal edebilirim?</li>
+            <li>Ödeme yöntemlerini nasıl güncelleyebilirim?</li>
+          </ul>
+        </div>
+        <div class="gr-card">
+          <div class="gr-card-title">Platform Kullanımı</div>
+          <ul class="gr-list">
+            <li>Ülkeleri nasıl karşılaştırabilirim?</li>
+            <li>Ticaret verilerini nasıl yorumlayabilirim?</li>
+            <li>Filtreleri nasıl kullanabilirim?</li>
+            <li>Pazar analizlerine nasıl erişebilirim?</li>
+            <li>AI destekli analizler nasıl çalışır?</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Veri ve Güncellemeler</h3>
+      <p>Furniture Atlas'ta yer alan veriler güvenilir kamu kaynakları, ticari veri sağlayıcıları ve kendi analiz modellerimiz kullanılarak oluşturulur.</p>
+      <p>Veriler, kaynaklarına bağlı olarak düzenli aralıklarla güncellenir. Bazı göstergeler gerçek zamanlıya yakın güncellenirken, bazı ekonomik ve ticari veriler aylık veya yıllık periyotlarda yenilenebilir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Teknik Destek</h3>
+      <p>Platformu kullanırken teknik bir sorunla karşılaşırsanız veya beklenmeyen bir hata fark ederseniz, lütfen bizimle iletişime geçin.</p>
+      <p style="margin-bottom:0;">E-posta: <a href="mailto:info@furnitureatlas.org" style="color:var(--teal);">info@furnitureatlas.org</a></p>
+      <p class="footnote" style="margin-top:10px;">Sorununuzu bildirirken mümkünse ekran görüntüsü, kullandığınız cihaz ve tarayıcı bilgilerini de paylaşmanız, daha hızlı çözüm sunabilmemize yardımcı olacaktır.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Geri Bildirim</h3>
+      <p>Furniture Atlas sürekli gelişen bir platformdur.</p>
+      <p>Yeni özellik önerileri, iyileştirme fikirleri ve kullanıcı geri bildirimleri platformun gelişiminde önemli bir rol oynamaktadır. Görüşlerinizi bizimle paylaşmanızdan memnuniyet duyarız.</p>
+
+      <div class="gr-closing">Hâlâ yardıma mı ihtiyacınız var?<br><span style="font-family:var(--mono); font-style:normal; font-size:13px;">Ekibimiz size yardımcı olmaktan memnuniyet duyacaktır — <a href="mailto:info@furnitureatlas.org" style="color:var(--teal);">info@furnitureatlas.org</a></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="partnersModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="8" cy="12" r="3.5"/><circle cx="16" cy="12" r="3.5"/></svg>İş Ortakları</div></div>
+      <button class="close-btn modal-close-btn" id="closePartners">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" style="max-width:820px; margin:0 auto;">
+      <p class="gr-lead">Küresel mobilya ekosistemini birlikte geliştiriyoruz.</p>
+      <p>Furniture Atlas, mobilya sektörüne yönelik dünyanın en kapsamlı ticaret istihbaratı platformlarından birini oluşturmayı hedeflemektedir. Bu hedef doğrultusunda veri sağlayıcıları, sektör kuruluşları, teknoloji şirketleri ve ticari hizmet sağlayıcılarıyla uzun vadeli iş birlikleri kuruyoruz.</p>
+      <p>Birlikte çalışarak uluslararası ticaret verilerine erişimi kolaylaştırmayı, ihracatçıların daha bilinçli kararlar almasını sağlamayı ve küresel mobilya sektörüne değer katmayı amaçlıyoruz.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">İş Birliği Alanları</h3>
+      <div class="gr-grid" style="margin-top:4px;">
+        <div class="gr-card">
+          <div class="gr-card-title">Veri Ortaklıkları</div>
+          <p style="margin-bottom:0;">Küresel ticaret, gümrük, lojistik ve sektör verilerini sağlayan kuruluşlarla birlikte çalışıyoruz.</p>
+        </div>
+        <div class="gr-card">
+          <div class="gr-card-title">Sektörel Kuruluşlar</div>
+          <p style="margin-bottom:0;">Mobilya dernekleri, ticaret odaları, ihracatçı birlikleri ve uluslararası organizasyonlarla ortak projeler geliştirmeyi hedefliyoruz.</p>
+        </div>
+        <div class="gr-card">
+          <div class="gr-card-title">Teknoloji Ortakları</div>
+          <p style="margin-bottom:0;">Yapay zekâ, veri analitiği, haritalama, bulut teknolojileri ve yazılım çözümleri geliştiren şirketlerle iş birliklerine açığız.</p>
+        </div>
+        <div class="gr-card">
+          <div class="gr-card-title">Lojistik ve Ticaret Hizmetleri</div>
+          <p style="margin-bottom:0;">Nakliye, gümrükleme, dış ticaret danışmanlığı, finans ve sigorta alanlarında faaliyet gösteren kuruluşlarla stratejik ortaklıklar kuruyoruz.</p>
+        </div>
+      </div>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Neden Furniture Atlas?</h3>
+      <ul class="gr-list gr-list-wide">
+        <li>Küresel mobilya sektörüne odaklanan özel bir platform</li>
+        <li>Uluslararası görünürlük ve marka bilinirliği</li>
+        <li>Sürekli büyüyen profesyonel kullanıcı kitlesi</li>
+        <li>Ortak projeler ve içerik çalışmaları</li>
+        <li>Uzun vadeli stratejik iş birliği yaklaşımı</li>
+      </ul>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Birlikte Çalışalım</h3>
+      <p>Furniture Atlas ile iş birliği yapmak, veri sağlamak veya ortak projeler geliştirmek istiyorsanız bizimle iletişime geçebilirsiniz.</p>
+      <p style="margin-bottom:0;">E-posta: <a href="mailto:info@furnitureatlas.org" style="color:var(--teal);">info@furnitureatlas.org</a></p>
+
+      <div class="gr-closing">Geleceğin mobilya ticaret ekosistemini birlikte şekillendirelim.</div>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="contactModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>İletişim</div></div>
+      <button class="close-btn modal-close-btn" id="closeContact">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" style="max-width:760px; margin:0 auto;">
+      <p class="gr-lead">Size yardımcı olmaktan memnuniyet duyarız.</p>
+      <p>Furniture Atlas ile ilgili her türlü soru, öneri, iş birliği talebi veya teknik destek ihtiyacınız için bizimle iletişime geçebilirsiniz. Ekibimiz, mümkün olan en kısa sürede dönüş yapmayı hedeflemektedir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">Genel İletişim</h3>
+      <p style="margin-bottom:0;">E-posta: <a href="mailto:info@furnitureatlas.org" style="color:var(--teal);">info@furnitureatlas.org</a></p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">Destek</h3>
+      <p>Hesabınız, aboneliğiniz, platform kullanımı veya teknik bir sorunla ilgili destek almak için bize e-posta gönderebilir ya da Yardım Merkezi'ni ziyaret edebilirsiniz.</p>
+      <p style="margin-bottom:0;">Destek E-postası: <a href="mailto:info@furnitureatlas.org" style="color:var(--teal);">info@furnitureatlas.org</a></p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">İş Ortaklıkları</h3>
+      <p>Veri sağlayıcıları, sektör kuruluşları, yazılım şirketleri ve stratejik iş ortaklıkları için bizimle iletişime geçebilirsiniz.</p>
+      <p style="margin-bottom:0;">E-posta: <a href="mailto:info@furnitureatlas.org" style="color:var(--teal);">info@furnitureatlas.org</a></p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">Basın ve Medya</h3>
+      <p>Basın talepleri, röportajlar ve medya iş birlikleri için:</p>
+      <p style="margin-bottom:0;"><a href="mailto:info@furnitureatlas.org" style="color:var(--teal);">info@furnitureatlas.org</a></p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">Geri Bildirim</h3>
+      <p>Furniture Atlas'ı geliştirmemize yardımcı olmak ister misiniz?</p>
+      <p>Önerilerinizi, hata bildirimlerinizi ve yeni özellik taleplerinizi bizimle paylaşabilirsiniz. Kullanıcı geri bildirimleri, platformun gelişiminde önemli bir rol oynamaktadır.</p>
+
+      <h3 class="cp-section-title" style="margin-top:32px;">Yanıt Süresi</h3>
+      <ul class="gr-list gr-list-wide">
+        <li>Genel talepler: 1–2 iş günü</li>
+        <li>Teknik destek: 24–48 saat</li>
+        <li>İş ortaklığı başvuruları: 3–5 iş günü</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="aboutModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>Hakkımızda</div></div>
+      <button class="close-btn modal-close-btn" id="closeAbout">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" style="max-width:820px; margin:0 auto;">
+      <p class="gr-lead">Küresel mobilya ticaretini daha şeffaf ve erişilebilir hale getiriyoruz.</p>
+      <p>Furniture Atlas, mobilya üreticileri, ihracatçılar, ithalatçılar ve sektör profesyonelleri için geliştirilen küresel bir pazar istihbaratı platformudur.</p>
+      <p>Amacımız, uluslararası ticaret verilerini, pazar analizlerini ve yapay zekâ destekli içgörüleri tek bir platformda bir araya getirerek firmaların daha hızlı, daha doğru ve daha kârlı ihracat kararları almasını sağlamaktır.</p>
+      <p>Bugün birçok ihracatçı yeni pazarlara açılmak, güvenilir alıcılar bulmak veya rakiplerini analiz etmek için farklı kaynaklar arasında saatlerce araştırma yapmak zorunda kalıyor. Furniture Atlas bu süreci tek bir platform altında toplayarak zamandan tasarruf edilmesini ve daha bilinçli ticari kararlar alınmasını hedefler.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Neler Sunuyoruz?</h3>
+      <p>Furniture Atlas, mobilya sektörüne özel olarak tasarlanmış kapsamlı bir ticaret istihbaratı platformudur. Platformumuz üzerinden;</p>
+      <ul class="gr-list gr-list-wide" style="margin-top:10px;">
+        <li>Ülkelerin mobilya ithalat ve ihracat verilerini inceleyebilir</li>
+        <li>Pazar büyüklüklerini ve büyüme eğilimlerini analiz edebilir</li>
+        <li>Gümrük vergileri ve ticaret koşullarını görüntüleyebilir</li>
+        <li>Potansiyel hedef pazarları keşfedebilir</li>
+        <li>Rakip ülke ve şirket analizleri yapabilir</li>
+        <li>Yapay zekâ destekli pazar özetlerine erişebilirsiniz</li>
+      </ul>
+      <p style="margin-top:14px;">Sürekli güncellenen veriler sayesinde kullanıcılarımız değişen küresel ticaret dinamiklerini yakından takip edebilir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Vizyonumuz</h3>
+      <p>Mobilya sektörünün en güvenilir küresel ticaret istihbaratı platformu olmak ve ihracat yapan her firmanın uluslararası büyüme yolculuğunda ilk başvurduğu kaynak haline gelmek.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Misyonumuz</h3>
+      <p>Veriyi herkes için anlaşılır, erişilebilir ve uygulanabilir hale getirerek mobilya ihracatçılarının daha doğru pazarlara ulaşmasına, daha bilinçli kararlar almasına ve küresel pazarlarda sürdürülebilir büyüme elde etmesine katkı sağlamak.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Bağımsız ve Tarafsız</h3>
+      <p>Furniture Atlas bağımsız bir platformdur. Herhangi bir kamu kurumu, uluslararası kuruluş veya ticari organizasyona bağlı değildir.</p>
+      <p>Platformda sunulan analizler; kamuya açık ticaret verileri, güvenilir ticari veri kaynakları ve kendi geliştirdiğimiz analiz modelleri kullanılarak oluşturulmaktadır. Veriler düzenli olarak güncellenmekte ve mümkün olan en yüksek doğruluk standardı hedeflenmektedir.</p>
+
+      <h3 class="cp-section-title" style="margin-top:36px;">Sürekli Gelişiyoruz</h3>
+      <p>Furniture Atlas gelişimini kullanıcılarından aldığı geri bildirimlerle sürdürmektedir. Yeni veri kaynakları, yapay zekâ özellikleri ve analiz araçları düzenli olarak platforma eklenmektedir.</p>
+      <p>Hedefimiz yalnızca veri sunmak değil; ihracatçılara daha akıllı kararlar almalarını sağlayacak gerçek ticari içgörüler kazandırmaktır.</p>
+
+      <div class="gr-closing"><span lang="en">Furniture Atlas<br><span style="font-family:var(--mono); font-style:normal; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-2);">Global Furniture Trade Intelligence</span></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="mapsModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner" style="max-width:640px; margin:50px auto;">
+    <div class="modal-header" style="border-radius:16px 16px 0 0;">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:20px;" id="mapsModalTitle"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d="M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>İş Haritası</div></div>
+      <button class="close-btn modal-close-btn" id="closeMaps" aria-label="Kapat">✕</button>
+    </div>
+    <div class="compare-body" id="mapsModalBody" style="padding:24px 28px;"></div>
+  </div>
+</div>
+
+<div class="compare-modal" id="buyerListModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner" style="max-width:620px; margin:60px auto;">
+    <div class="modal-header" style="border-radius:16px 16px 0 0;">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:20px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg>Potansiyel Alıcı Veritabanı</div></div>
+      <button class="close-btn modal-close-btn" id="closeBuyerList" aria-label="Kapat">✕</button>
+    </div>
+    <div class="compare-body" id="buyerListBody" style="padding:36px 40px 32px;"></div>
+  </div>
+</div>
+
+<div class="compare-modal" id="profileModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner" style="max-width:400px; margin:80px auto;">
+    <div class="modal-header" style="border-radius:16px 16px 0 0;">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:18px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profilim</div></div>
+      <button class="close-btn modal-close-btn" id="closeProfile" aria-label="Kapat">✕</button>
+    </div>
+    <div class="compare-body" id="profileModalBody" style="padding:24px 28px;"></div>
+  </div>
+</div>
+
+<div class="compare-modal" id="loginModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner" style="max-width:460px; margin:40px auto;" id="authModalInner">
+    <div class="modal-header" style="border-radius:16px 16px 0 0;">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:18px; font-weight:400;" id="authModalTitle"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Giriş Yap</div></div>
+      <button class="close-btn modal-close-btn" id="closeLogin" aria-label="Kapat">✕</button>
+    </div>
+    <div class="compare-body" style="padding:32px 36px 36px;">
+
+      <div class="auth-header" id="authHeaderText" style="display:none;">
+        <h2 class="auth-heading">Furniture Atlas'a Katılın</h2>
+        <p class="auth-subheading">Küresel mobilya pazarlarını keşfedin, yeni ihracat fırsatları bulun ve tüm Premium özelliklere tek üyelikle erişin.</p>
+      </div>
+
+      <div class="auth-segmented" role="tablist">
+        <button class="auth-seg-btn active" id="authTabLogin" role="tab">Giriş Yap</button>
+        <button class="auth-seg-btn" id="authTabRegister" role="tab">Kayıt Ol</button>
+      </div>
+
+      <!-- GİRİŞ FORMU -->
+      <div id="loginFormWrap">
+        <label class="auth-field-label" for="loginEmailInput">E-posta *</label>
+        <input type="email" id="loginEmailInput" class="auth-input" aria-label="E-posta" placeholder="örn. mehmet@sirket.com">
+        <label class="auth-field-label" for="loginPasswordInput">Şifre *</label>
+        <input type="password" id="loginPasswordInput" class="auth-input" aria-label="Şifre" placeholder="••••••••" style="margin-bottom:16px;">
+        <div class="footnote" id="loginError" style="color:var(--red); margin-bottom:10px; display:none;"></div>
+        <button class="auth-cta-btn" id="loginSubmitBtn">Giriş Yap</button>
+      </div>
+
+      <!-- KAYIT FORMU -->
+      <div id="registerFormWrap" style="display:none;">
+        <div id="registerStep1">
+          <div class="plan-grid">
+            <button type="button" class="plan-card plan-card-free" id="registerPlanFree" data-plan="free">
+              <div class="plan-name">Keşif Üyeliği</div>
+              <div class="plan-price">Ücretsiz</div>
+              <p class="plan-desc">Furniture Atlas'ı keşfetmeye başlamak ve temel pazar verilerine erişmek için idealdir.</p>
+              <ul class="plan-features">
+                <li>Haftada 1 ülke için tam pazar raporu erişimi</li>
+                <li>Haftada 1 kez, 2 ülke karşılaştırma</li>
+                <li>177 ülkenin temel pazar bilgilerine erişim</li>
+                <li>Her ülkenin özet analizini görüntüleme</li>
+                <li>Gelişmiş filtreleme araçlarını kullanma</li>
+                <li>Ürün kategorileri arasında gezinme</li>
+                <li>Favori ülke ekleme</li>
+                <li>Pazar arama ve keşif araçlarını kullanma</li>
+              </ul>
+              <div class="plan-info-box">
+                <div class="plan-info-title">Ücretsiz Başlangıç</div>
+                <div class="plan-info-text">Furniture Atlas'ın temel özelliklerini keşfedin. Gelişmiş analizler ve premium araçlar için dilediğiniz zaman üyeliğinizi yükseltebilirsiniz.</div>
+              </div>
+            </button>
+            <button type="button" class="plan-card plan-card-founding active" id="registerPlanFounding" data-plan="founding">
+              <div class="plan-badge">İlk 100 Üyeye Özel</div>
+              <div class="plan-name">Kurucu Üye</div>
+              <div class="plan-price">$19,90<span>/yıl</span></div>
+              <div class="plan-price-monthly">yaklaşık $1,66/ay</div>
+              <div class="plan-price-note">Ömür boyu aynı yenileme fiyatı</div>
+              <p class="plan-desc">İlk 100 kullanıcı için sunulan özel üyelik. Üyeliğiniz aktif kaldığı sürece her yıl yalnızca 19,90 $ ödeyerek tüm Premium özelliklerden yararlanabilirsiniz.</p>
+              <ul class="plan-features">
+                <li>Tüm ülke analizlerine sınırsız erişim</li>
+                <li>Ülke karşılaştırmaları</li>
+                <li>Küresel Raporlar</li>
+                <li>AI destekli pazar analizleri</li>
+                <li>Gelişmiş filtreleme araçları</li>
+                <li>PDF rapor oluşturma</li>
+                <li>Gelecekte eklenecek Premium özelliklere erişim</li>
+                <li>Kurucu Üye rozeti</li>
+              </ul>
+              <div class="plan-info-box plan-info-box-gold">
+                <div class="plan-info-title">Kurucu Üye Avantajı</div>
+                <div class="plan-info-text">İlk 100 üyeye özel fiyat avantajından yararlanırsınız. Üyeliğiniz devam ettiği sürece yenileme ücretiniz ömür boyu 19,90 $/yıl olarak sabit kalır.</div>
+              </div>
+            </button>
+            <button type="button" class="plan-card plan-card-standard" id="registerPlanStandard" data-plan="standard">
+              <div class="plan-name">Standart Üye</div>
+              <div class="plan-price">$99,90<span>/yıl</span></div>
+              <div class="plan-price-monthly">yaklaşık $8,33/ay</div>
+              <p class="plan-desc">Furniture Atlas'ın tüm Premium özelliklerine tam erişim sağlar.</p>
+              <ul class="plan-features">
+                <li>Tüm ülke analizlerine sınırsız erişim</li>
+                <li>Ülke karşılaştırmaları</li>
+                <li>Küresel Raporlar</li>
+                <li>AI destekli pazar analizleri</li>
+                <li>Gelişmiş filtreleme araçları</li>
+                <li>PDF rapor oluşturma</li>
+                <li>Gelecekte eklenecek Premium özelliklere erişim</li>
+              </ul>
+              <div class="plan-info-box">
+                <div class="plan-info-title">Standart Fiyat</div>
+                <div class="plan-info-text">Kurucu Üyelik kontenjanı dolduktan sonra yeni üyelikler bu fiyat üzerinden devam edecektir.</div>
+              </div>
+            </button>
+          </div>
+          <button class="auth-cta-btn" id="registerContinueBtn">Devam Et</button>
+        </div>
+        <div id="registerStep2" style="display:none;">
+          <button type="button" class="auth-back-btn" id="registerBackBtn">← Paket Seçimine Dön</button>
+          <div class="register-step2-plan" id="registerStep2PlanLabel"></div>
+          <label class="auth-field-label" for="fullNameInput">İsim Soyisim *</label>
+          <input type="text" id="fullNameInput" class="auth-input" aria-label="İsim Soyisim" placeholder="örn. Mehmet Yılmaz">
+          <label class="auth-field-label" for="emailInput">E-posta *</label>
+          <input type="email" id="emailInput" class="auth-input" aria-label="E-posta" placeholder="örn. mehmet@sirket.com">
+          <label class="auth-field-label" for="passwordInput">Şifre *</label>
+          <input type="password" id="passwordInput" class="auth-input" aria-label="Şifre" placeholder="En az 6 karakter">
+          <label class="auth-field-label" for="companyInput">Şirket Adı</label>
+          <input type="text" id="companyInput" class="auth-input" aria-label="Şirket Adı (opsiyonel)" placeholder="örn. Yılmaz Mobilya A.Ş. (opsiyonel)">
+          <label class="auth-field-label" for="phoneInput">Telefon Numarası</label>
+          <input type="tel" id="phoneInput" class="auth-input" aria-label="Telefon Numarası (opsiyonel)" placeholder="örn. +90 5xx xxx xx xx (opsiyonel)" style="margin-bottom:16px;">
+          <div class="footnote" id="registerError" style="color:var(--red); margin-bottom:10px; display:none;"></div>
+          <button class="auth-cta-btn" id="registerSubmitBtn">Kurucu Üye Ol</button>
+          <div class="footnote" style="margin-top:14px; text-align:center;">Kayıt olduğunda e-posta adresine bir onay kodu göndereceğiz.</div>
+        </div>
+      </div>
+
+      <!-- OTP DOĞRULAMA -->
+      <div id="otpFormWrap" style="display:none;">
+        <div class="footnote" style="margin-bottom:16px; line-height:1.6;" id="otpSentNote"></div>
+        <label class="auth-field-label" for="otpInput">Onay Kodu *</label>
+        <input type="text" id="otpInput" class="auth-input" aria-label="Onay Kodu" placeholder="Onay kodu" maxlength="8" style="letter-spacing:4px; font-size:18px; text-align:center;">
+        <div class="footnote" id="otpError" style="color:var(--red); margin-bottom:10px; display:none;"></div>
+        <button class="auth-cta-btn" id="otpSubmitBtn">Onayla ve Giriş Yap</button>
+        <button class="auth-cta-btn-ghost" id="otpResendBtn" style="margin-top:10px;">Kodu Tekrar Gönder</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="premiumModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner" style="max-width:1040px; margin:50px auto;">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:18px; font-weight:400;">Üyeliğinizi Yükseltin</div></div>
+      <button class="close-btn modal-close-btn" id="closePremium" aria-label="Kapat">✕</button>
+    </div>
+    <div class="compare-body" style="padding:26px 32px 32px;">
+      <p style="font-family:var(--body); font-size:13.5px; color:var(--text-1); line-height:1.7; margin:0 0 24px; text-align:center; max-width:640px; margin-left:auto; margin-right:auto;">
+        Diğer ülkeleri incelemek, pazarları karşılaştırmak ve tüm ihracat analizlerine sınırsız erişmek için üyeliğinizi yükseltin.
+      </p>
+
+      <div class="plan-grid">
+        <div class="plan-card plan-card-free plan-card-current" id="premiumFreeCard">
+          <div class="plan-badge plan-badge-current" id="premiumFreeBadge">Şu Anki Planınız</div>
+          <div class="plan-name">Keşif Üyeliği</div>
+          <div class="plan-price">Ücretsiz</div>
+          <p class="plan-desc">Platformu keşfetmeye başlamak için idealdir.</p>
+          <ul class="plan-features">
+            <li>Haftada 1 ülke için tam pazar raporu</li>
+            <li>Haftada 1 kez, 2 ülke karşılaştırma</li>
+            <li>177 ülkenin temel pazar bilgilerine erişim</li>
+            <li>Gelişmiş filtreleme araçlarını kullanma</li>
+          </ul>
+          <div class="plan-info-box" id="premiumFreeInfoBox">
+            <div class="plan-info-title">Aktif Planınız</div>
+            <div class="plan-info-text">Şu anda bu plandasınız. Sınırsız erişim için sağdaki planlardan birini seçin.</div>
+          </div>
+        </div>
+
+        <div class="plan-card plan-card-founding active" id="foundingPlanCard">
+          <div class="plan-badge" id="foundingSlotsBadge">Kurucu Üye · Kalan Kontenjan: <span id="foundingSlotsLeft">…</span>/100</div>
+          <div class="plan-name">Kurucu Üye</div>
+          <div class="plan-price">$19,90<span>/yıl</span></div>
+          <div class="plan-price-monthly">yaklaşık $1,66/ay</div>
+          <div class="plan-price-note">Ömür boyu aynı yenileme fiyatı</div>
+          <ul class="plan-features">
+            <li>177 ülkenin tamamına sınırsız erişim</li>
+            <li>Ülkeleri detaylı karşılaştırma</li>
+            <li>Gelişmiş filtreleme araçları</li>
+            <li>PDF rapor oluşturma</li>
+            <li>Gelecekte eklenecek tüm Premium özelliklere ücretsiz erişim</li>
+            <li>Profilinizde Kurucu Üye rozeti</li>
+          </ul>
+          <div class="plan-info-box plan-info-box-gold">
+            <div class="plan-info-title">Kurucu Üye Avantajı</div>
+            <div class="plan-info-text">Yalnızca ilk 100 üyeye özeldir — fiyatınız ömür boyu sabit kalır. Sonrasında $99,90/yıl olacaktır.</div>
+          </div>
+          <div id="foundingBtnGroup" style="margin-top:14px;">
+            <button class="tray-btn tray-btn-primary" id="becomeFoundingBtn" style="width:100%; padding:13px; font-size:13px;">
+              Kurucu Üye Ol — $19,90 / yıl
+            </button>
+          </div>
+          <div id="foundingFullNote" class="footnote" style="display:none; text-align:center; margin-top:10px;">
+            Kurucu Üye kontenjanı doldu — sağdan Standart ile devam edebilirsiniz.
+          </div>
+        </div>
+
+        <div class="plan-card plan-card-standard" id="standardPlanCard">
+          <div class="plan-name">Standart</div>
+          <div class="plan-price">$99,90<span>/yıl</span></div>
+          <div class="plan-price-monthly">yaklaşık $8,33/ay</div>
+          <p class="plan-desc">Tüm Premium özelliklere sınırsız erişim.</p>
+          <ul class="plan-features">
+            <li>Tüm ülke raporları</li>
+            <li>Pazar karşılaştırmaları</li>
+            <li>Gelişmiş filtreler</li>
+            <li>Alıcı veri tabanı</li>
+            <li>Premium analizler</li>
+          </ul>
+          <div class="plan-info-box">
+            <div class="plan-info-title">Standart Plan</div>
+            <div class="plan-info-text">Kurucu Üye kontenjanı dolsa bile bu fiyattan hemen başlayabilirsiniz.</div>
+          </div>
+          <button class="tray-btn tray-btn-primary" id="becomeStandardBtn" style="width:100%; padding:13px; font-size:13px; margin-top:14px;">
+            Standart ile Devam Et — $99,90 / yıl
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal" id="targetsModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg>Hedef Ülkelerim</div></div>
+      <button class="close-btn modal-close-btn" id="closeTargets">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" id="targetsBody"></div>
+  </div>
+</div>
+
+<main id="mainContent">
+<div class="toolbar">
+  <div class="toolbar-inner">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <label for="searchInput" class="sr-only">Ülke ara</label>
+      <input type="text" id="searchInput" class="search-input" placeholder="Ülke ara... (örn. Almanya, Vietnam)" autocomplete="off" aria-label="Ülke ara">
+      <div class="search-results" id="searchResults"></div>
+    </div>
+    <div class="view-toggle" id="viewToggle">
+      <button class="view-btn active" data-view="globe"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 4 5.7 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.7-4-9s1.5-6.5 4-9z"/></svg>Harita</button>
+      <button class="view-btn" data-view="list"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Liste</button>
+      <button class="ticker-toggle-btn" id="atlas-ticker-toggle" type="button" aria-pressed="false"><span class="ticker-toggle-dot"></span><span id="atlas-ticker-toggle-label">Sektör Nabzı</span></button>
+      <span id="countryChipWrap"></span>
+    </div>
+    <div class="category-toggle" id="categoryToggle">
+      <span class="category-label">Ürün Kategorisi</span>
+      <button class="cat-btn active" data-cat="seating">Döşemeli Oturma Grubu<small>HS 9401.61</small></button>
+      <button class="cat-btn" data-cat="wood">Ahşap Mobilya<small>HS 9403.60</small></button>
+    </div>
+    <div class="filter-wrap">
+      <button class="filter-btn" id="filterToggleBtn"><span id="filterLockIcon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; margin-right:4px;"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Filtrele <span id="filterActiveCount"></span></button>
+      <div class="filter-panel" id="filterPanel">
+        <div id="filterUpsellBanner" class="filter-upsell-banner" style="display:none;">
+          <div class="filter-upsell-text">Gelişmiş filtreleme üyelere özeldir — hemen giriş yap.</div>
+          <button class="tray-btn tray-btn-primary" id="filterUpsellBtn" style="padding:8px 16px; font-size:11px;">Giriş Yap</button>
+        </div>
+        <div class="filter-passive-area">
+          <div id="filterSlidersWrap"></div>
+          <div class="filter-panel-actions">
+            <span class="footnote" id="filterResultCount" style="margin:0;"></span>
+            <div style="display:flex; gap:8px;">
+              <button class="tray-btn" id="filterResetBtn">Sıfırla</button>
+              <button class="tray-btn tray-btn-primary" id="filterApplyBtn">Onayla</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="hero" id="heroSection">
+  <div class="eyebrow" id="heroEyebrow">INTERACTIVE MARKET MAP</div>
+  <h1 class="hero-title" id="heroTitle">Bir sonraki ihracat pazarınızı <em>tek bakışta</em> keşfedin.</h1>
+  <p class="hero-sub" id="heroSub">Mobilya ithalat verileri, rakip analizleri, gümrük tarifeleri, lojistik maliyetleri ve pazar büyüklüklerini tek bir küre üzerinde birleştirdik. Bir ülkenin üzerine gelin ve o pazarın potansiyelini anında görün.</p>
+  <div class="hero-hint" id="heroHint">KÜREYİ ÇEVİR · DETAY İÇİN TIKLA · İHRACATA BAŞLA</div>
+
+  <div class="globe-stage" id="globeStage">
+    <svg id="globeSvg" viewBox="0 0 640 640"></svg>
+    <div class="zoom-controls">
+      <button id="zoomInBtn" aria-label="Yakınlaştır">+</button>
+      <button id="zoomOutBtn" aria-label="Uzaklaştır">−</button>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-card">
+      <div class="info-card-header"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="info-card-icon"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg><span class="info-card-title">Fırsat Skoru</span></div>
+      <div class="score-gauge-bar"></div>
+      <div class="score-gauge-legend">
+        <span><i style="background:#6b6f78"></i>&lt;55 · Değerlendirmede</span>
+        <span><i style="background:var(--amber)"></i>55–79 · Orta</span>
+        <span><i style="background:var(--teal)"></i>80+ · Yüksek</span>
+      </div>
+    </div>
+    <div class="info-divider"></div>
+    <div class="info-card">
+      <div class="info-card-header"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="info-card-icon"><path d="M12 3l8 3v6c0 4.5-3.2 8.3-8 9-4.8-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span class="info-card-title">Veri Güvenilirliği</span></div>
+      <div class="info-rows">
+        <div class="info-row"><span class="dq-badge dq-real">✓ GERÇEK</span>Resmi kaynaktan doğrulanmış veri</div>
+        <div class="info-row"><span class="dq-badge dq-estimated">~ TAHMİNİ</span>Modelle hesaplanmış tahmin</div>
+        <div class="info-row"><span class="dq-badge dq-unknown">? BİLİNMİYOR</span>Veri bulunamadı</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="list-view" id="listView">
+  <div class="list-view-inner">
+    <div class="list-view-head">
+      <div>
+        <h2 class="section-title" style="margin:0;">Tüm Pazarlar <span class="num" id="listCount"></span></h2>
+        <div class="list-view-legend">Sütun başlığına tıklayarak sırala · Kontrol/⌘ + tıkla ile hızlı karşılaştırmaya ekle</div>
+      </div>
+      <button class="tray-btn tray-btn-primary" id="topCompareBtn" disabled>Karşılaştır (0)</button>
+    </div>
+    <div class="continent-filter" id="continentFilter"></div>
+    <div class="table-scroll">
+      <table id="countryTable">
+        <thead id="countryTableHead"></thead>
+        <tbody id="countryTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="hover-card" id="hoverCard"></div>
+<div class="score-info-popover" id="scoreInfoPopover"></div>
+
+<div class="compare-tray" id="compareTray">
+  <div class="compare-tray-inner">
+    <span class="compare-tray-label">Karşılaştırmaya eklendi:</span>
+    <div class="compare-tray-chips" id="compareTrayChips"></div>
+    <button class="tray-btn tray-btn-primary" id="compareViewBtn">Karşılaştır →</button>
+    <button class="tray-btn" id="compareClearBtn">Temizle</button>
+  </div>
+</div>
+
+<div class="compare-modal" id="compareModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;">Pazar Karşılaştırması</div></div>
+      <button class="close-btn modal-close-btn" id="closeCompare">✕ KAPAT</button>
+    </div>
+    <div class="compare-body" id="compareBody"></div>
+  </div>
+</div>
+
+<div class="compare-modal" id="travelModal" role="dialog" aria-modal="true">
+  <div class="compare-modal-inner">
+    <div class="modal-header">
+      <div class="dash-title-wrap"><div class="dash-title" style="font-size:24px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Seyahat Planla</div></div>
+      <button class="close-btn modal-close-btn" id="closeTravel">✕ KAPAT</button>
+    </div>
+    <div class="compare-body">
+      <div class="card" style="max-width:520px; margin:0 auto 8px;">
+        <div class="card-label" style="margin-bottom:8px;">Gidilecek Ülke</div>
+        <select id="travelCountrySelect" class="search-input" aria-label="Gidilecek Ülke" style="padding:11px 16px; margin-bottom:16px; width:100%;"></select>
+        <div style="display:flex; gap:12px; margin-bottom:18px;">
+          <div style="flex:1;">
+            <div class="card-label" style="margin-bottom:8px;">Gidiş Tarihi</div>
+            <input type="date" id="travelStartInput" class="search-input" aria-label="Gidiş Tarihi" style="padding:11px 14px; width:100%;">
+          </div>
+          <div style="flex:1;">
+            <div class="card-label" style="margin-bottom:8px;">Dönüş Tarihi</div>
+            <input type="date" id="travelEndInput" class="search-input" aria-label="Dönüş Tarihi" style="padding:11px 14px; width:100%;">
+          </div>
+        </div>
+        <button class="tray-btn tray-btn-primary" id="travelSubmitBtn" style="width:100%; padding:12px;">Planı Oluştur</button>
+      </div>
+      <div id="travelResults" style="max-width:900px; margin:0 auto;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard" id="dashboard">
+ <div class="dashboard-inner">
+  <div class="dash-header">
+    <div class="dash-title-wrap">
+      <button class="fav-btn" id="favBtn" title="Hedef pazar olarak işaretle">☆</button>
+      <span class="dash-flag" id="dashFlag"></span>
+      <div>
+        <h2 class="dash-title" id="dashTitle" style="font-weight:400; margin:0;"></h2>
+        <div class="dash-subtitle" id="dashSubtitle"></div>
+      </div>
+    </div>
+    <div class="dash-actions">
+      <button class="close-btn" id="mapsSearchBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d='M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2-6-2z'/><path d='M9 4v14M15 6v14'/></svg>İş Haritası</button>
+      <button class="close-btn dash-action-featured" id="buyerListBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg>Alıcı Listesi Talebi</button>
+      <button class="close-btn" id="addCompareBtn">+ Karşılaştır</button>
+      <button class="close-btn" id="printBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; margin-right:4px;"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1"/><path d="M6 17v4h12v-4"/></svg>Yazdır / PDF</button>
+      <button class="close-btn" id="closeDash">← PAZARLARA DÖN</button>
+    </div>
+  </div>
+  <div class="dash-body" id="dashBody"></div>
+ </div>
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="brand-mark"><span class="brand-atlas">Furniture Atlas<span class="brand-dot">.</span></span></span>
+        <p class="footer-tagline">Türk mobilya ihracatçıları için mobilya ihracat pazar istihbarat platformu. Veriler ITC Trade Map, TÜİK, T.C. Ticaret Bakanlığı, TradingEconomics, X-Rates, TİM ve resmi kaynaklardan derlenir.</p>
+      </div>
+      <div class="footer-columns">
+        <nav class="footer-col" aria-label="Furniture Atlas">
+          <div class="footer-col-title" lang="en">Furniture Atlas</div>
+          <a href="#" class="footer-link" id="aboutLink">Hakkımızda</a>
+          <a href="#" class="footer-link" id="contactLink">İletişim</a>
+          <a href="#" class="footer-link" id="partnersLink">İş Ortakları</a>
+        </nav>
+        <nav class="footer-col" aria-label="Kaynaklar">
+          <div class="footer-col-title">Kaynaklar</div>
+          <a href="#" class="footer-link" id="helpCenterLink">Yardım Merkezi</a>
+          <a href="#" class="footer-link" id="privacyPolicyLink">Gizlilik Politikası</a>
+          <a href="#" class="footer-link" id="termsLink">Kullanım Şartları</a>
+          <a href="#" class="footer-link" id="cookiePolicyLink">Çerez Politikası</a>
+        </nav>
+        <nav class="footer-col" aria-label="Araştırma">
+          <div class="footer-col-title">Araştırma</div>
+          <a href="#" class="footer-link" id="atlasResearchLink">Atlas Research+</a>
+          <a href="#" class="footer-link">Şirket İstihbaratı</a>
+          <a href="#" class="footer-link" id="globalReportsLink">Küresel Raporlar</a>
+        </nav>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Furniture Atlas. Tüm hakları saklıdır.</span>
+      <span>Bağımsız bir mobilya ihracat pazar istihbarat platformu.</span>
+    </div>
+  </div>
+</footer>
+
+<div id="atlas-ticker-wrap" style="display:none;">
+  <div id="atlas-ticker">
+    <div class="label"><span class="dot"></span><span class="txt">Sektör&nbsp;Nabzı</span></div>
+    <div class="track-viewport">
+      <div class="track" id="atlas-ticker-track"></div>
+    </div>
+    <button class="close-btn" id="atlas-ticker-close" aria-label="Nabzı kapat" title="Kapat">✕</button>
+  </div>
+</div>
+
+
