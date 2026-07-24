@@ -468,32 +468,77 @@
     background:linear-gradient(135deg, rgba(201,169,97,0.06), rgba(63,208,192,0.04)); border:1px solid var(--border);
     border-radius:18px; padding:30px 32px; font-family:var(--display); font-style:italic; font-size:15.5px; line-height:1.85;
   }
-  /* Türkiye'ye uzaklık kartı — ülke sayfasına sıcak/kişisel bir dokunuş,
-     giriş yapmadan da herkese görünür (kilit yok). */
-  .distance-card{
-    display:flex; align-items:center; justify-content:center; gap:36px; flex-wrap:wrap;
-    margin:0 0 28px; padding:22px 28px; border-radius:16px;
-    background:linear-gradient(135deg, rgba(63,208,192,0.06), rgba(201,169,97,0.05));
+  /* Ülke sayfası "Market Overview" hero'su — sıcak, modern bir karşılama alanı.
+     Bölgeye göre renk teması (--hero-from/--hero-to) satır içi stille JS'ten geliyor. */
+  .country-hero{
+    position:relative; overflow:hidden; border-radius:22px; margin:0 0 28px;
+    padding:36px 38px 30px;
+    background:linear-gradient(150deg, var(--hero-from) 0%, var(--bg-1) 75%);
     border:1px solid var(--border-soft);
+    box-shadow:0 24px 60px rgba(0,0,0,0.32);
   }
-  .distance-flag-pair{ display:flex; align-items:center; gap:10px; }
-  .distance-flag{ font-size:30px; line-height:1; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3)); }
-  .distance-path{ display:flex; align-items:center; gap:4px; width:110px; }
-  .distance-dot{ width:6px; height:6px; border-radius:50%; background:var(--amber-bright); flex:0 0 auto; }
-  .distance-line{
-    flex:1; height:1px; background:repeating-linear-gradient(90deg, rgba(201,169,97,0.5) 0 6px, transparent 6px 11px);
+  .country-hero::after{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size:22px 22px; opacity:0.5;
+    -webkit-mask-image:linear-gradient(180deg, transparent, black 60%);
+    mask-image:linear-gradient(180deg, transparent, black 60%);
+  }
+  .country-hero-skyline{
+    position:absolute; top:-45%; right:-8%; width:380px; height:380px; border-radius:50%;
+    background:radial-gradient(circle, var(--hero-to) 0%, transparent 70%); opacity:0.22; pointer-events:none;
+  }
+  .country-hero-main{
+    position:relative; z-index:1; display:flex; align-items:center; gap:26px; flex-wrap:wrap;
+  }
+  .country-hero-flag{ font-size:64px; line-height:1; filter:drop-shadow(0 6px 16px rgba(0,0,0,0.4)); flex:0 0 auto; }
+  .country-hero-text{ flex:1 1 240px; min-width:200px; }
+  .country-hero-eyebrow{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:3px; color:var(--hero-to); font-weight:700; margin-bottom:8px;
+  }
+  .country-hero-title{
+    font-family:var(--display); font-style:italic; font-size:34px; color:var(--text-0); line-height:1.15; margin-bottom:12px;
+  }
+  .country-hero-capital{
+    display:inline-flex; align-items:center; gap:7px; font-family:var(--body); font-size:13px; color:var(--text-1);
+  }
+  .country-hero-capital svg{ color:var(--hero-to); flex:0 0 auto; }
+  .country-hero-capital b{ color:var(--text-0); font-weight:700; }
+  .country-hero-map{ flex:0 0 auto; position:relative; z-index:1; }
+  .hero-minimap{ width:130px; height:100px; }
+  .hero-minimap-shape{ fill:var(--hero-to); fill-opacity:0.28; stroke:var(--hero-to); stroke-width:1.4; }
+
+  .hero-route{
+    position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:30px; flex-wrap:wrap;
+    margin-top:26px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .hero-route-flags{ display:flex; align-items:center; gap:9px; }
+  .hero-route-flag{ font-size:26px; line-height:1; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3)); }
+  .hero-route-path{ display:flex; align-items:center; gap:4px; width:100px; }
+  .hero-route-dot{ width:6px; height:6px; border-radius:50%; background:var(--hero-to); flex:0 0 auto; }
+  .hero-route-line{
+    flex:1; height:1px; background:repeating-linear-gradient(90deg, rgba(255,255,255,0.35) 0 6px, transparent 6px 11px);
     display:flex; align-items:center; justify-content:center;
   }
-  .distance-plane{
-    font-size:13px; color:var(--amber-bright); background:var(--bg-1); padding:0 4px; line-height:1;
+  .hero-route-plane{
+    font-size:12px; color:var(--hero-to); background:var(--bg-1); padding:0 4px; line-height:1;
+    display:inline-block; animation:heroPlaneDrift 2.6s ease-in-out infinite;
   }
-  .distance-stats{ display:flex; gap:32px; flex-wrap:wrap; }
-  .distance-stat{ display:flex; flex-direction:column; gap:2px; }
-  .distance-stat-val{ font-family:var(--mono); font-size:19px; font-weight:700; color:var(--text-0); font-variant-numeric:tabular-nums; }
-  .distance-stat-label{ font-family:var(--body); font-size:11px; color:var(--text-2); }
-  @media(max-width:560px){
-    .distance-card{ flex-direction:column; gap:18px; padding:20px; }
-    .distance-stats{ justify-content:center; text-align:center; }
+  @keyframes heroPlaneDrift{
+    0%, 100%{ transform:translateX(-3px); }
+    50%{ transform:translateX(3px); }
+  }
+  .hero-route-stats{ display:flex; gap:28px; flex-wrap:wrap; }
+  .hero-route-stat{ display:flex; flex-direction:column; gap:2px; }
+  .hero-route-stat-val{ font-family:var(--mono); font-size:17px; font-weight:700; color:var(--text-0); font-variant-numeric:tabular-nums; }
+  .hero-route-stat-label{ font-family:var(--body); font-size:10.5px; color:var(--text-2); }
+  @media(max-width:640px){
+    .country-hero{ padding:26px 22px 22px; }
+    .country-hero-main{ flex-direction:column; text-align:center; }
+    .country-hero-flag{ font-size:52px; }
+    .country-hero-title{ font-size:26px; }
+    .country-hero-map{ margin:0 auto; }
+    .hero-route{ flex-direction:column; gap:16px; }
   }
   .tr-export-hero{
     position:relative; overflow:hidden; text-align:center; padding:40px 32px 36px; margin:0 0 32px; border-radius:22px;

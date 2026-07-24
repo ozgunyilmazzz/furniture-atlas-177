@@ -1166,3 +1166,79 @@ sorunsuz ilerledigini dogruladim.
 - Uretim sunucusunda yeni try/catch korumasi bundle'da mevcut
 - Mock tarayici ortaminda script artik onceki cokme noktasinin
   cok otesine kadar hatasiz ilerliyor
+
+## Faz 33 - Ulke sayfasi "Market Overview" hero bolumu (TAMAMLANDI)
+
+Ulke sayfalarinin en ustune, mevcut veri yapisini BOZMADAN yeni bir
+karsilama alani eklendi. Amac: sadece veri gostermek degil, hedef
+pazari "tanitmak" ve motivasyon olusturmak.
+
+**Neden gercek fotograf (Eyfel Kulesi, Tokyo skyline vb.) KULLANILMADI:**
+177 ulke icin telifsiz/lisansli gercek fotograf tedarik etmek hem
+olcek olarak imkansiza yakin hem de olasi telif hakki ihlali riski
+tasiyor (rastgele bir "Eyfel Kulesi" gorseline hotlink vermek, o
+gorselin haklarina sahip olmadan kullanmak anlamina gelebilir).
+Bunun yerine, sitenin zaten sahip oldugu GERCEK verilerle (koordinat,
+bolge siniflandirmasi, bayrak) tamamen ozgun, telif riski sifir,
+premium bir gorsel dil kuruldu.
+
+**Eklenenler:**
+
+1. **REAL_CAPITALS** - 177 ulkenin gercek baskent bilgisi (statik
+   cografi gercek, bayrak/koordinat gibi ayni kategoride - "uydurma
+   veri" degil).
+
+2. **Bolgeye gore hero teması** - mevcut `REGION_MAP` (zaten vardi)
+   kullanilarak her ulkeye kendi bolgesine (Avrupa, Ortadogu, Uzak
+   Dogu, Afrika vb.) ozgu bir gradyan renk teması atandi - 177 ulke
+   birbirinden gorsel olarak ayrisiyor.
+
+3. **Kucuk ulke haritasi** - WORLD_DATA'daki GERCEK sinir (rings)
+   koordinatlarindan (zaten kurenin kendisini cizmek icin kullanilan
+   ayni veri) kucuk bir SVG harita uretiliyor. Denizasiri topraklari
+   olan ulkelerde (ABD-Alaska, Fransa-Fransiz Guyanasi gibi) olcek
+   bozulmasin diye sadece en buyuk ana kara parcasi gosteriliyor.
+
+4. **Turkiye baglanti rotasi** - onceki fazda eklenen mesafe karti
+   buraya tasindi/birlestirildi: iki bayrak, kesikli animasyonlu
+   "ucus hatti", gercek km mesafe ve tahmini ucus suresi.
+
+5. **Baskent bilgisi** - REAL_CAPITALS'tan gosteriliyor.
+
+6. **Karsilama basligi** - "MARKET OVERVIEW" etiketi + buyuk ulke
+   adi + bayrak, sicak/modern bir karsilama hissi icin.
+
+Sayfanin geri kalani (Yonetici Ozeti, Pazar Genel Bakisi, Ticaret
+Ozeti vb.) HIC DEGISMEDI - hero sadece en basa eklendi.
+
+### Kritik hata sonrasi ekstra dogrulama adimlari
+Bir onceki mesajda yasanan "TDZ hatasi tum siteyi kilitledi" olayindan
+sonra, bu fazda EKSTRA dogrulama yapildi:
+- Node'da mock tarayici ortaminda TUM script calistirildi, hicbir
+  yeni hata bulunmadi (script eskisi gibi ayni (beklenen, zararsiz)
+  noktaya kadar sorunsuz ilerledi)
+- `renderCountryHero` fonksiyonu GERCEK COUNTRIES verisiyle DOGRUDAN
+  cagirilip HTML ciktisi dogrulandi (bayrak, baskent, minimap, route
+  hepsi doğru uretildi)
+- Ispanya, Japonya, ABD, Fransa, Nijerya icin mesafe hesaplari elle
+  kontrol edildi (ornegin Turkiye-Japonya ~8542 km, cografi olarak
+  dogru araliktadir)
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Node mock tarayici testinde script hatasiz calisti
+- `renderCountryHero` gercek veriyle dogrudan test edildi, dogru HTML
+  uretti
+- Uretim sunucusunda `country-hero`, `REAL_CAPITALS`,
+  `renderCountryMiniMap`, `hero-route` JS'te; `.country-hero{}`,
+  `.hero-minimap` CSS'te dogrulandi
+
+## Faz 34 - "Market Overview" -> "Ülke Profili" (TAMAMLANDI)
+
+Hero'daki ust etiket ingilizce "MARKET OVERVIEW" yerine "ÜLKE PROFİLİ"
+olarak degistirildi. Baska hicbir sey degismedi.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Uretim sunucusunda "ÜLKE PROFİLİ" metni bundle'da var, eski
+  "MARKET OVERVIEW" tamamen kalkti

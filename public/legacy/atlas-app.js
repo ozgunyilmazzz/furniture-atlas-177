@@ -263,6 +263,9 @@ const REAL_INFLATION = {"mexico":3.8,"usa":2.7,"germany":2.3,"france":0.9,"uk":3
 // Ülke telefon kodu (gerçek, ITU/E.164 standardı).
 const REAL_CALLING_CODE = {"fiji":679,"tanzania":255,"w-sahara":212,"canada":1,"usa":1,"kazakhstan":7,"uzbekistan":998,"papua-new-guinea":675,"indonesia":62,"argentina":54,"chile":56,"dem-rep-congo":243,"somalia":252,"kenya":254,"sudan":249,"chad":235,"haiti":509,"dominican-rep":1,"russia":7,"bahamas":1,"falkland-is":500,"norway":47,"greenland":299,"timor-leste":670,"southafrica":27,"lesotho":266,"mexico":52,"uruguay":598,"brazil":55,"bolivia":591,"peru":51,"colombia":57,"panama":507,"costa-rica":506,"nicaragua":505,"honduras":504,"el-salvador":503,"guatemala":502,"belize":501,"venezuela":58,"guyana":592,"suriname":597,"france":33,"ecuador":593,"puerto-rico":1,"jamaica":1,"cuba":53,"zimbabwe":263,"botswana":267,"namibia":264,"senegal":221,"mali":223,"mauritania":222,"benin":229,"niger":227,"nigeria":234,"cameroon":237,"togo":228,"ghana":233,"cote-d-ivoire":225,"guinea":224,"guinea-bissau":245,"liberia":231,"sierra-leone":232,"burkina-faso":226,"central-african-rep":236,"congo":242,"gabon":241,"eq-guinea":240,"zambia":260,"malawi":265,"mozambique":258,"eswatini":268,"angola":244,"burundi":257,"israel":972,"lebanon":961,"madagascar":261,"palestine":970,"gambia":220,"tunisia":216,"algeria":213,"jordan":962,"uae":971,"qatar":974,"kuwait":965,"iraq":964,"oman":968,"vanuatu":678,"cambodia":855,"thailand":66,"laos":856,"myanmar":95,"vietnam":84,"north-korea":850,"south-korea":82,"mongolia":976,"india":91,"bangladesh":880,"bhutan":975,"nepal":977,"pakistan":92,"afghanistan":93,"tajikistan":992,"kyrgyzstan":996,"turkmenistan":993,"iran":98,"syria":963,"armenia":374,"sweden":46,"belarus":375,"ukraine":380,"poland":48,"austria":43,"hungary":36,"moldova":373,"romania":40,"lithuania":370,"latvia":371,"estonia":372,"germany":49,"bulgaria":359,"greece":30,"turkey":90,"albania":355,"croatia":385,"switzerland":41,"luxembourg":352,"belgium":32,"netherlands":31,"portugal":351,"spain":34,"ireland":353,"new-caledonia":687,"solomon-is":677,"new-zealand":64,"australia":61,"sri-lanka":94,"china":86,"italy":39,"denmark":45,"uk":44,"iceland":354,"azerbaijan":994,"georgia":995,"philippines":63,"malaysia":60,"brunei":673,"slovenia":386,"finland":358,"slovakia":421,"czechia":420,"eritrea":291,"japan":81,"paraguay":595,"yemen":967,"saudi-arabia":966,"cyprus":357,"morocco":212,"egypt":20,"libya":218,"ethiopia":251,"djibouti":253,"uganda":256,"rwanda":250,"bosnia-and-herz":387,"north-macedonia":389,"serbia":381,"montenegro":382,"kosovo":383,"trinidad-and-tobago":1,"s-sudan":211,"taiwan":886};
 
+// Ülkelerin gerçek başkent bilgisi — statik/degismeyen cografi gercek, veri bozulmadan eklendi.
+const REAL_CAPITALS = {"chile": "Santiago", "germany": "Berlin", "usa": "Washington D.C.", "uk": "Londra", "france": "Paris", "poland": "Varşova", "netherlands": "Amsterdam", "uae": "Abu Dabi", "japan": "Tokyo", "southafrica": "Pretoria", "fiji": "Suva", "tanzania": "Dodoma", "w-sahara": "El Ayun", "canada": "Ottava", "kazakhstan": "Astana", "uzbekistan": "Taşkent", "papua-new-guinea": "Port Moresby", "indonesia": "Cakarta", "argentina": "Buenos Aires", "dem-rep-congo": "Kinşasa", "somalia": "Mogadişu", "kenya": "Nairobi", "sudan": "Hartum", "chad": "N'Djamena", "haiti": "Port-au-Prince", "dominican-rep": "Santo Domingo", "russia": "Moskova", "bahamas": "Nassau", "falkland-is": "Stanley", "norway": "Oslo", "greenland": "Nuuk", "fr-s-antarctic-lands": "Port-aux-Français", "timor-leste": "Dili", "lesotho": "Maseru", "mexico": "Meksiko City", "uruguay": "Montevideo", "brazil": "Brasília", "bolivia": "Sucre", "peru": "Lima", "colombia": "Bogota", "panama": "Panama City", "costa-rica": "San Jose", "nicaragua": "Managua", "honduras": "Tegucigalpa", "el-salvador": "San Salvador", "guatemala": "Guatemala City", "belize": "Belmopan", "venezuela": "Karakas", "guyana": "Georgetown", "suriname": "Paramaribo", "ecuador": "Quito", "puerto-rico": "San Juan", "jamaica": "Kingston", "cuba": "Havana", "zimbabwe": "Harare", "botswana": "Gaborone", "namibia": "Windhoek", "senegal": "Dakar", "mali": "Bamako", "mauritania": "Nuakşot", "benin": "Porto-Novo", "niger": "Niamey", "nigeria": "Abuja", "cameroon": "Yaounde", "togo": "Lome", "ghana": "Akra", "cote-d-ivoire": "Yamoussoukro", "guinea": "Konakri", "guinea-bissau": "Bissau", "liberia": "Monrovia", "sierra-leone": "Freetown", "burkina-faso": "Vagadugu", "central-african-rep": "Bangui", "congo": "Brazzaville", "gabon": "Libreville", "eq-guinea": "Malabo", "zambia": "Lusaka", "malawi": "Lilongwe", "mozambique": "Maputo", "eswatini": "Mbabane", "angola": "Luanda", "burundi": "Gitega", "israel": "Kudüs", "lebanon": "Beyrut", "madagascar": "Antananarivo", "palestine": "Ramallah", "gambia": "Banjul", "tunisia": "Tunus", "algeria": "Cezayir", "jordan": "Amman", "qatar": "Doha", "kuwait": "Kuveyt", "iraq": "Bağdat", "oman": "Maskat", "vanuatu": "Port Vila", "cambodia": "Phnom Penh", "thailand": "Bangkok", "laos": "Vientiane", "myanmar": "Naypyidaw", "vietnam": "Hanoi", "north-korea": "Pyongyang", "south-korea": "Seul", "mongolia": "Ulan Batur", "india": "Yeni Delhi", "bangladesh": "Dakka", "bhutan": "Thimphu", "nepal": "Katmandu", "pakistan": "İslamabad", "afghanistan": "Kabil", "tajikistan": "Duşanbe", "kyrgyzstan": "Bişkek", "turkmenistan": "Aşkabat", "iran": "Tahran", "syria": "Şam", "armenia": "Erivan", "sweden": "Stockholm", "belarus": "Minsk", "ukraine": "Kiev", "austria": "Viyana", "hungary": "Budapeşte", "moldova": "Kişinev", "romania": "Bükreş", "lithuania": "Vilnius", "latvia": "Riga", "estonia": "Tallinn", "bulgaria": "Sofya", "greece": "Atina", "albania": "Tiran", "croatia": "Zagreb", "switzerland": "Bern", "luxembourg": "Lüksemburg", "belgium": "Brüksel", "portugal": "Lizbon", "spain": "Madrid", "ireland": "Dublin", "new-caledonia": "Noumea", "solomon-is": "Honiara", "new-zealand": "Wellington", "australia": "Canberra", "sri-lanka": "Sri Jayawardenepura Kotte", "china": "Pekin", "taiwan": "Taipei", "italy": "Roma", "denmark": "Kopenhag", "iceland": "Reykjavik", "azerbaijan": "Bakü", "georgia": "Tiflis", "philippines": "Manila", "malaysia": "Kuala Lumpur", "brunei": "Bender Seri Begavan", "slovenia": "Ljubljana", "finland": "Helsinki", "slovakia": "Bratislava", "czechia": "Prag", "eritrea": "Asmara", "paraguay": "Asuncion", "yemen": "Sana", "saudi-arabia": "Riyad", "antarctica": "—", "cyprus": "Lefkoşa", "morocco": "Rabat", "egypt": "Kahire", "libya": "Trablus", "ethiopia": "Addis Ababa", "djibouti": "Cibuti", "uganda": "Kampala", "rwanda": "Kigali", "bosnia-and-herz": "Saraybosna", "north-macedonia": "Üsküp", "serbia": "Belgrad", "montenegro": "Podgorica", "kosovo": "Priştine", "trinidad-and-tobago": "Port of Spain", "s-sudan": "Cuba", "malta": "Valetta", "singapore": "Singapur", "bahrain": "Manama"};
+
 // Ülkelerin İngilizce adları — Google Maps aramalarında daha güvenilir sonuç için kullanılır.
 const ENGLISH_NAME = {"fiji":"Fiji","tanzania":"Tanzania","w-sahara":"Western Sahara","canada":"Canada","usa":"USA","kazakhstan":"Kazakhstan","uzbekistan":"Uzbekistan","papua-new-guinea":"Papua New Guinea","indonesia":"Indonesia","argentina":"Argentina","chile":"Chile","dem-rep-congo":"DR Congo","somalia":"Somalia","kenya":"Kenya","sudan":"Sudan","chad":"Chad","haiti":"Haiti","dominican-rep":"Dominican Republic","russia":"Russia","bahamas":"Bahamas","falkland-is":"Falkland Islands (Malvinas)","norway":"Norway","greenland":"Greenland","fr-s-antarctic-lands":"French Southern Territories","timor-leste":"Timor-Leste","southafrica":"South Africa","lesotho":"Lesotho","mexico":"Mexico","uruguay":"Uruguay","brazil":"Brazil","bolivia":"Bolivia","peru":"Peru","colombia":"Colombia","panama":"Panama","costa-rica":"Costa Rica","nicaragua":"Nicaragua","honduras":"Honduras","el-salvador":"El Salvador","guatemala":"Guatemala","belize":"Belize","venezuela":"Venezuela","guyana":"Guyana","suriname":"Suriname","france":"France","ecuador":"Ecuador","puerto-rico":"Puerto Rico","jamaica":"Jamaica","cuba":"Cuba","zimbabwe":"Zimbabwe","botswana":"Botswana","namibia":"Namibia","senegal":"Senegal","mali":"Mali","mauritania":"Mauritania","benin":"Benin","niger":"Niger","nigeria":"Nigeria","cameroon":"Cameroon","togo":"Togo","ghana":"Ghana","cote-d-ivoire":"Côte d'Ivoire","guinea":"Guinea","guinea-bissau":"Guinea-Bissau","liberia":"Liberia","sierra-leone":"Sierra Leone","burkina-faso":"Burkina Faso","central-african-rep":"Central African Republic","congo":"Congo","gabon":"Gabon","eq-guinea":"Equatorial Guinea","zambia":"Zambia","malawi":"Malawi","mozambique":"Mozambique","eswatini":"Eswatini","angola":"Angola","burundi":"Burundi","israel":"Israel","lebanon":"Lebanon","madagascar":"Madagascar","palestine":"Palestine, State of","gambia":"Gambia","tunisia":"Tunisia","algeria":"Algeria","jordan":"Jordan","uae":"UAE","qatar":"Qatar","kuwait":"Kuwait","iraq":"Iraq","oman":"Oman","vanuatu":"Vanuatu","cambodia":"Cambodia","thailand":"Thailand","laos":"Laos","myanmar":"Myanmar","vietnam":"Vietnam","north-korea":"North Korea","south-korea":"South Korea","mongolia":"Mongolia","india":"India","bangladesh":"Bangladesh","bhutan":"Bhutan","nepal":"Nepal","pakistan":"Pakistan","afghanistan":"Afghanistan","tajikistan":"Tajikistan","kyrgyzstan":"Kyrgyzstan","turkmenistan":"Turkmenistan","iran":"Iran","syria":"Syria","armenia":"Armenia","sweden":"Sweden","belarus":"Belarus","ukraine":"Ukraine","poland":"Poland","austria":"Austria","hungary":"Hungary","moldova":"Moldova","romania":"Romania","lithuania":"Lithuania","latvia":"Latvia","estonia":"Estonia","germany":"Germany","bulgaria":"Bulgaria","greece":"Greece","turkey":"Türkiye","albania":"Albania","croatia":"Croatia","switzerland":"Switzerland","luxembourg":"Luxembourg","belgium":"Belgium","netherlands":"Netherlands","portugal":"Portugal","spain":"Spain","ireland":"Ireland","new-caledonia":"New Caledonia","solomon-is":"Solomon Islands","new-zealand":"New Zealand","australia":"Australia","sri-lanka":"Sri Lanka","china":"China","taiwan":"Taiwan, Province of China","italy":"Italy","denmark":"Denmark","uk":"UK","iceland":"Iceland","azerbaijan":"Azerbaijan","georgia":"Georgia","philippines":"Philippines","malaysia":"Malaysia","brunei":"Brunei Darussalam","slovenia":"Slovenia","finland":"Finland","slovakia":"Slovakia","czechia":"Czech Republic","eritrea":"Eritrea","japan":"Japan","paraguay":"Paraguay","yemen":"Yemen","saudi-arabia":"Saudi Arabia","antarctica":"Antarctica","cyprus":"Cyprus","morocco":"Morocco","egypt":"Egypt","libya":"Libya","ethiopia":"Ethiopia","djibouti":"Djibouti","uganda":"Uganda","rwanda":"Rwanda","bosnia-and-herz":"Bosnia and Herzegovina","north-macedonia":"North Macedonia","serbia":"Serbia","montenegro":"Montenegro","trinidad-and-tobago":"Trinidad and Tobago","s-sudan":"South Sudan","kosovo":"Kosovo"};
 
@@ -1329,6 +1332,61 @@ const TRAVEL_OVERRIDES = {
 };
 
 function getRegion(country){ return REGION_MAP[country.iso] || 'other'; }
+// Bölgeye göre hero gradyanı — 177 ülkenin görsel olarak birbirinden
+// ayrışması için, mevcut REGION_MAP verisi kullanılarak sabit bir renk
+// teması atanır (uydurma veri değil, zaten var olan cografi siniflandirma).
+const REGION_HERO_THEME = {
+  europe:    ['#1b3a5c', '#3fd0c0'],
+  mideast:   ['#4a2f14', '#c9a961'],
+  cis:       ['#2b2e4a', '#7b8fd6'],
+  eastasia:  ['#4a1620', '#e0685a'],
+  seasia:    ['#0f3d2e', '#3fd0c0'],
+  southasia: ['#4a2a0a', '#e0a23f'],
+  africa:    ['#3d2410', '#c9a961'],
+  latam:     ['#0f3d3a', '#3fd0c0'],
+  namerica:  ['#152a4a', '#7b8fd6'],
+  oceania:   ['#0f3a4a', '#3fd0c0'],
+  asia_other:['#2a2a3d', '#a78fd6'],
+  other:     ['#242833', '#8891a3'],
+};
+function heroTheme(country){
+  return REGION_HERO_THEME[getRegion(country)] || REGION_HERO_THEME.other;
+}
+// Ülkenin küçük düz haritası — WORLD_DATA'daki GERÇEK sınır (rings)
+// koordinatlarından üretilir, uydurma bir görsel değildir. Basit bir
+// eşit-dikdörtgen projeksiyonla küçük bir SVG viewBox'a sığdırılır.
+function renderCountryMiniMap(countryId){
+  const feature = WORLD_DATA.find(f => f.id === countryId);
+  if(!feature) return '';
+  // Bazı ülkelerin (ör. ABD-Alaska, Fransa-Fransız Guyanası) uzak denizaşırı
+  // parçaları aynı feature içinde ayrı bir "ring" olarak geliyor — küçük
+  // haritada olcegi bozmasin diye sadece EN BUYUK (nokta sayısı en fazla)
+  // ring gösterilir; bu, ülkenin ana kara parçasıdır.
+  const mainRing = feature.rings.reduce((a, b) => (b.length > a.length ? b : a), feature.rings[0]);
+  let minLon = Infinity, maxLon = -Infinity, minLat = Infinity, maxLat = -Infinity;
+  mainRing.forEach(([lon, lat]) => {
+    if(lon < minLon) minLon = lon;
+    if(lon > maxLon) maxLon = lon;
+    if(lat < minLat) minLat = lat;
+    if(lat > maxLat) maxLat = lat;
+  });
+  const w = 168, h = 128, pad = 10;
+  const lonSpan = Math.max(maxLon - minLon, 0.01);
+  const latSpan = Math.max(maxLat - minLat, 0.01);
+  const scale = Math.min((w - pad*2) / lonSpan, (h - pad*2) / latSpan);
+  const offX = pad + ((w - pad*2) - lonSpan*scale) / 2;
+  const offY = pad + ((h - pad*2) - latSpan*scale) / 2;
+  const project = ([lon, lat]) => [
+    (offX + (lon - minLon) * scale).toFixed(1),
+    (offY + (maxLat - lat) * scale).toFixed(1), // lat ekseni ters çevrilir (kuzey yukarı)
+  ];
+  const pathD = 'M' + mainRing.map(p => project(p).join(',')).join('L') + 'Z';
+  return `
+    <svg class="hero-minimap" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <path d="${pathD}" class="hero-minimap-shape"/>
+    </svg>
+  `;
+}
 
 function getTravelInfo(country){
   const region = getRegion(country);
@@ -2844,32 +2902,58 @@ function haversineKm(lat1, lon1, lat2, lon2){
   const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
-function renderDistanceCard(c){
-  if(c.id === 'turkey' || typeof c.lat !== 'number' || typeof c.lon !== 'number') return '';
-  const km = haversineKm(TURKEY_COORDS.lat, TURKEY_COORDS.lon, c.lat, c.lon);
-  // Tahmini doğrudan uçuş süresi: ortalama ~850 km/sa yolcu uçağı seyir hızı +
-  // kalkış/iniş/taksi için sabit ~40 dk ek — kabaca bir tahmindir, gerçek uçuş
-  // rotaları rüzgar/aktarma nedeniyle farklılık gösterebilir.
-  const flightHoursRaw = km / 850 + 0.67;
-  const fH = Math.floor(flightHoursRaw);
-  const fM = Math.round((flightHoursRaw - fH) * 60);
-  const flightLabel = fH > 0 ? `~${fH} sa ${fM > 0 ? fM + ' dk' : ''}`.trim() : `~${fM} dk`;
-  const kmLabel = km >= 1000 ? Math.round(km).toLocaleString('tr-TR') : Math.round(km).toString();
+function renderCountryHero(baseCountry, c){
+  if(typeof baseCountry.lat !== 'number' || typeof baseCountry.lon !== 'number') return '';
+  const [gradFrom, gradTo] = heroTheme(baseCountry);
+  const capital = REAL_CAPITALS[baseCountry.id] || 'Bilinmiyor';
+  const miniMap = renderCountryMiniMap(baseCountry.id);
+
+  let routeHtml = '';
+  if(baseCountry.id !== 'turkey'){
+    const km = haversineKm(TURKEY_COORDS.lat, TURKEY_COORDS.lon, baseCountry.lat, baseCountry.lon);
+    // Tahmini doğrudan uçuş süresi: ortalama ~850 km/sa yolcu uçağı seyir hızı +
+    // kalkış/iniş/taksi için sabit ~40 dk ek — kabaca bir tahmindir, gerçek uçuş
+    // rotaları rüzgar/aktarma nedeniyle farklılık gösterebilir.
+    const flightHoursRaw = km / 850 + 0.67;
+    const fH = Math.floor(flightHoursRaw);
+    const fM = Math.round((flightHoursRaw - fH) * 60);
+    const flightLabel = fH > 0 ? `~${fH} sa ${fM > 0 ? fM + ' dk' : ''}`.trim() : `~${fM} dk`;
+    const kmLabel = km >= 1000 ? Math.round(km).toLocaleString('tr-TR') : Math.round(km).toString();
+    routeHtml = `
+      <div class="hero-route">
+        <div class="hero-route-flags">
+          <span class="hero-route-flag" title="Türkiye">🇹🇷</span>
+          <span class="hero-route-path">
+            <span class="hero-route-dot"></span>
+            <span class="hero-route-line"><span class="hero-route-plane">✈</span></span>
+            <span class="hero-route-dot"></span>
+          </span>
+          <span class="hero-route-flag" title="${c.name}">${c.flag}</span>
+        </div>
+        <div class="hero-route-stats">
+          <div class="hero-route-stat"><span class="hero-route-stat-val">${kmLabel} km</span><span class="hero-route-stat-label">Türkiye'ye kuş uçuşu mesafe</span></div>
+          <div class="hero-route-stat"><span class="hero-route-stat-val">${flightLabel}</span><span class="hero-route-stat-label">Tahmini doğrudan uçuş süresi</span></div>
+        </div>
+      </div>
+    `;
+  }
+
   return `
-    <div class="distance-card">
-      <div class="distance-flag-pair">
-        <span class="distance-flag" title="Türkiye">🇹🇷</span>
-        <span class="distance-path">
-          <span class="distance-dot"></span>
-          <span class="distance-line"><span class="distance-plane">✈</span></span>
-          <span class="distance-dot"></span>
-        </span>
-        <span class="distance-flag" title="${c.name}">${c.flag}</span>
+    <div class="country-hero" style="--hero-from:${gradFrom}; --hero-to:${gradTo};">
+      <div class="country-hero-skyline"></div>
+      <div class="country-hero-main">
+        <div class="country-hero-flag">${c.flag}</div>
+        <div class="country-hero-text">
+          <div class="country-hero-eyebrow">ÜLKE PROFİLİ</div>
+          <h2 class="country-hero-title">${c.name}</h2>
+          <div class="country-hero-capital">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            Başkent: <b>${capital}</b>
+          </div>
+        </div>
+        ${miniMap ? `<div class="country-hero-map">${miniMap}</div>` : ''}
       </div>
-      <div class="distance-stats">
-        <div class="distance-stat"><span class="distance-stat-val">${kmLabel} km</span><span class="distance-stat-label">Türkiye'ye kuş uçuşu mesafe</span></div>
-        <div class="distance-stat"><span class="distance-stat-val">${flightLabel}</span><span class="distance-stat-label">Tahmini doğrudan uçuş süresi</span></div>
-      </div>
+      ${routeHtml}
     </div>
   `;
 }
@@ -2950,6 +3034,7 @@ function renderCountryPage(baseCountry){
   const turkeyRank = [...c.suppliers].sort((a,b)=>b.v-a.v).findIndex(s=>s.c==='Türkiye') + 1;
 
   document.getElementById('dashBody').innerHTML = `
+    ${renderCountryHero(baseCountry, c)}
     <div class="tr-export-hero ${getTurkeyImportInfo(c).level}">
       <div class="tr-export-hero-label">🇹🇷 Türkiye'den ${catInfo.label} İhracatı ${dqBadge(getTurkeyImportInfo(c).level==='real'?'real':getTurkeyImportInfo(c).level==='estimated'?'estimated':'unknown')}</div>
       <div class="tr-export-hero-value">${getTurkeyImportInfo(c).display}</div>
@@ -3000,8 +3085,6 @@ function renderCountryPage(baseCountry){
         <div class="teaser-kpi-caption">Toplam ülke nüfusu</div>
       </div>
     </div>
-
-    ${renderDistanceCard(c)}
 
     <div class="dash-gated-wrap" id="dashGatedWrap">
     <div class="cp-section">
