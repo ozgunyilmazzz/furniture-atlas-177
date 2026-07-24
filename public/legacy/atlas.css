@@ -468,77 +468,102 @@
     background:linear-gradient(135deg, rgba(201,169,97,0.06), rgba(63,208,192,0.04)); border:1px solid var(--border);
     border-radius:18px; padding:30px 32px; font-family:var(--display); font-style:italic; font-size:15.5px; line-height:1.85;
   }
-  /* Ülke sayfası "Market Overview" hero'su — sıcak, modern bir karşılama alanı.
+  /* Ülke sayfası "Pazara İlk Bakış" hero'su — premium karşılama karti.
      Bölgeye göre renk teması (--hero-from/--hero-to) satır içi stille JS'ten geliyor. */
   .country-hero{
     position:relative; overflow:hidden; border-radius:22px; margin:0 0 28px;
-    padding:36px 38px 30px;
-    background:linear-gradient(150deg, var(--hero-from) 0%, var(--bg-1) 75%);
+    padding:34px 38px 26px;
+    background:linear-gradient(150deg, var(--hero-from) 0%, var(--bg-1) 72%);
     border:1px solid var(--border-soft);
     box-shadow:0 24px 60px rgba(0,0,0,0.32);
   }
+  /* İnce "harita/graticule" dokusu — çok hafif ızgara çizgileri, arka planı düz göstermesin diye */
   .country-hero::after{
-    content:''; position:absolute; inset:0; pointer-events:none;
-    background-image:radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size:22px 22px; opacity:0.5;
-    -webkit-mask-image:linear-gradient(180deg, transparent, black 60%);
-    mask-image:linear-gradient(180deg, transparent, black 60%);
+    content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 64px);
+    -webkit-mask-image:linear-gradient(180deg, black 0%, transparent 85%);
+    mask-image:linear-gradient(180deg, black 0%, transparent 85%);
   }
-  .country-hero-skyline{
-    position:absolute; top:-45%; right:-8%; width:380px; height:380px; border-radius:50%;
-    background:radial-gradient(circle, var(--hero-to) 0%, transparent 70%); opacity:0.22; pointer-events:none;
+  /* Sağ üstteki ülke haritası — artık büyük, düşük opaklıkta, dekoratif bir arka plan öğesi */
+  .country-hero-bgmap{
+    position:absolute; top:-6%; right:-4%; width:300px; height:300px; z-index:0; pointer-events:none;
+    opacity:0.18;
   }
-  .country-hero-main{
-    position:relative; z-index:1; display:flex; align-items:center; gap:26px; flex-wrap:wrap;
-  }
-  .country-hero-flag{ font-size:64px; line-height:1; filter:drop-shadow(0 6px 16px rgba(0,0,0,0.4)); flex:0 0 auto; }
-  .country-hero-text{ flex:1 1 240px; min-width:200px; }
+  .country-hero-bgmap-shape{ fill:var(--hero-to); fill-opacity:1; stroke:none; }
+
+  .country-hero-top{ position:relative; z-index:1; }
   .country-hero-eyebrow{
-    font-family:var(--mono); font-size:10.5px; letter-spacing:3px; color:var(--hero-to); font-weight:700; margin-bottom:8px;
+    font-family:var(--mono); font-size:10.5px; letter-spacing:3.5px; color:var(--hero-to); font-weight:700; margin-bottom:14px;
   }
+  .country-hero-identity{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .country-hero-flagwrap{ flex:0 0 auto; display:inline-flex; }
+  .country-hero-flagimg{
+    width:46px; height:auto; border-radius:5px; display:block;
+    box-shadow:0 3px 10px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.12);
+  }
+  .country-hero-flag-fallback{ font-size:40px; line-height:1; }
   .country-hero-title{
-    font-family:var(--display); font-style:italic; font-size:34px; color:var(--text-0); line-height:1.15; margin-bottom:12px;
+    font-family:var(--display); font-style:italic; font-size:44px; color:var(--text-0); line-height:1.08;
+    letter-spacing:-0.2px;
   }
-  .country-hero-capital{
-    display:inline-flex; align-items:center; gap:7px; font-family:var(--body); font-size:13px; color:var(--text-1);
-  }
-  .country-hero-capital svg{ color:var(--hero-to); flex:0 0 auto; }
-  .country-hero-capital b{ color:var(--text-0); font-weight:700; }
-  .country-hero-map{ flex:0 0 auto; position:relative; z-index:1; }
-  .hero-minimap{ width:130px; height:100px; }
-  .hero-minimap-shape{ fill:var(--hero-to); fill-opacity:0.28; stroke:var(--hero-to); stroke-width:1.4; }
 
   .hero-route{
-    position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:30px; flex-wrap:wrap;
-    margin-top:26px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.08);
+    position:relative; z-index:1; margin-top:28px; padding-top:22px; border-top:1px solid rgba(255,255,255,0.08);
   }
-  .hero-route-flags{ display:flex; align-items:center; gap:9px; }
-  .hero-route-flag{ font-size:26px; line-height:1; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3)); }
-  .hero-route-path{ display:flex; align-items:center; gap:4px; width:100px; }
-  .hero-route-dot{ width:6px; height:6px; border-radius:50%; background:var(--hero-to); flex:0 0 auto; }
+  .hero-route-visual{ display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+  .hero-route-endpoint{ display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 auto; }
+  .hero-route-endpoint-flag{ font-size:22px; line-height:1; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.3)); }
+  .hero-route-endpoint-label{ font-family:var(--mono); font-size:9px; letter-spacing:0.5px; color:var(--text-2); text-transform:uppercase; }
   .hero-route-line{
-    flex:1; height:1px; background:repeating-linear-gradient(90deg, rgba(255,255,255,0.35) 0 6px, transparent 6px 11px);
-    display:flex; align-items:center; justify-content:center;
+    flex:1; height:1px; background:linear-gradient(90deg, var(--hero-to), rgba(255,255,255,0.25) 92%);
+    display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:19px;
   }
+  .hero-route-line::before, .hero-route-line::after{
+    content:''; position:absolute; width:5px; height:5px; border-radius:50%; background:var(--hero-to); top:50%; transform:translateY(-50%);
+  }
+  .hero-route-line::before{ left:0; }
+  .hero-route-line::after{ right:0; background:rgba(255,255,255,0.4); }
   .hero-route-plane{
-    font-size:12px; color:var(--hero-to); background:var(--bg-1); padding:0 4px; line-height:1;
-    display:inline-block; animation:heroPlaneDrift 2.6s ease-in-out infinite;
+    font-size:13px; color:var(--hero-to); background:var(--bg-1); padding:0 5px; line-height:1;
+    display:inline-block; animation:heroPlaneDrift 2.6s ease-in-out infinite; position:relative; z-index:1;
   }
   @keyframes heroPlaneDrift{
-    0%, 100%{ transform:translateX(-3px); }
-    50%{ transform:translateX(3px); }
+    0%, 100%{ transform:translateX(-4px); }
+    50%{ transform:translateX(4px); }
   }
-  .hero-route-stats{ display:flex; gap:28px; flex-wrap:wrap; }
+  .hero-route-stats{ display:flex; align-items:center; gap:22px; }
   .hero-route-stat{ display:flex; flex-direction:column; gap:2px; }
-  .hero-route-stat-val{ font-family:var(--mono); font-size:17px; font-weight:700; color:var(--text-0); font-variant-numeric:tabular-nums; }
+  .hero-route-stat-val{
+    font-family:var(--mono); font-size:24px; font-weight:800; color:var(--text-0); font-variant-numeric:tabular-nums;
+    letter-spacing:-0.3px;
+  }
+  .hero-route-stat-unit{ font-size:13px; font-weight:500; color:var(--text-2); margin-left:3px; }
   .hero-route-stat-label{ font-family:var(--body); font-size:10.5px; color:var(--text-2); }
+  .hero-route-stat-divider{ width:1px; height:30px; background:rgba(255,255,255,0.1); }
+
+  .country-hero-facts{
+    position:relative; z-index:1; display:flex; flex-wrap:wrap; gap:8px 22px;
+    margin-top:24px; padding-top:18px; border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .country-hero-fact{
+    font-family:var(--body); font-size:12.5px; color:var(--text-1); display:flex; align-items:center; gap:6px;
+  }
+  .country-hero-fact-icon{ font-size:13px; line-height:1; }
+
+  .country-hero-tagline{
+    position:relative; z-index:1; margin-top:16px; text-align:right;
+    font-family:var(--display); font-style:italic; font-size:13.5px; color:var(--text-2); line-height:1.5;
+  }
+
   @media(max-width:640px){
-    .country-hero{ padding:26px 22px 22px; }
-    .country-hero-main{ flex-direction:column; text-align:center; }
-    .country-hero-flag{ font-size:52px; }
-    .country-hero-title{ font-size:26px; }
-    .country-hero-map{ margin:0 auto; }
-    .hero-route{ flex-direction:column; gap:16px; }
+    .country-hero{ padding:26px 22px 20px; }
+    .country-hero-bgmap{ width:220px; height:220px; opacity:0.14; }
+    .country-hero-title{ font-size:30px; }
+    .hero-route-stats{ justify-content:center; }
+    .country-hero-facts{ justify-content:center; text-align:center; }
+    .country-hero-tagline{ text-align:center; }
   }
   .tr-export-hero{
     position:relative; overflow:hidden; text-align:center; padding:40px 32px 36px; margin:0 0 32px; border-radius:22px;

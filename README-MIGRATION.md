@@ -1242,3 +1242,58 @@ olarak degistirildi. Baska hicbir sey degismedi.
 - `npm run build` hatasiz gecti
 - Uretim sunucusunda "ÜLKE PROFİLİ" metni bundle'da var, eski
   "MARKET OVERVIEW" tamamen kalkti
+
+## Faz 35 - "Pazara Ilk Bakis" karti premium yeniden tasarim (TAMAMLANDI)
+
+Karti tamamen yeniden tasarladim, yerlesimi (sayfanin en ustunde tek
+kart olarak durmasi) bozulmadi. Amac ayni bilgiyi daha lüks gostermek,
+yeni bilgi eklemek degildi (2 istisna: dil ve saat farki, asagida
+aciklandi).
+
+**Degisiklikler:**
+1. Baslik: "ÜLKE PROFİLİ" -> "PAZARA İLK BAKIŞ"
+2. **Bayrak - gercek hata duzeltildi:** Onceki emoji bayrak, bazi
+   sistemlerde (ozellikle Windows) dogru render olmuyor, iki harfli
+   ulke kodu ("SG" gibi) olarak gorunuyordu - bu emoji font
+   destegindeki bilinen bir sinirlamadir. Artik gercek bir bayrak
+   GORSELİ kullaniliyor (flagcdn.com - ucretsiz, API anahtari
+   gerektirmeyen, yaygin kullanilan bir bayrak CDN'i), kucuk ve
+   kaliteli (46px, yumusak golge). Gorsel yuklenemezse otomatik
+   olarak eski emoji'ye geri donuyor (onerror fallback).
+3. Ulke adi artik sayfanin odak noktasi: 34px -> 44px, serif/italik
+   font korundu.
+4. Ulke haritasi: kucuk yan panel yerine, sag ustte BUYUK (300px),
+   dusuk opakliktaki (%18) dekoratif arka plan katmani oldu.
+5. Kart arka planina ince "harita/graticule" izgara dokusu eklendi.
+6. Turkiye->hedef rota: uc noktalar (bayrak + ulke adi etiketi) net
+   sekilde ayristirildi, ince cizgi + kucuk animasyonlu ucak ikonu.
+7. Mesafe/ucus suresi: kutu/border kaldirildi, buyuk rakam + kucuk
+   etiket seklinde "modern istatistik" gorunumune gecti.
+8. **Kartin altina tek satir bilgi eklendi** (5 ikon): 🏛 Baskent,
+   👥 Nufus, 💵 Para Birimi, 🗣 Resmi Dil, 🕒 Saat Farki.
+   - Baskent, Nufus, Para Birimi zaten mevcut veriden geliyordu.
+   - **Resmi Dil ve Saat Farki icin YENI gercek veri eklendi**
+     (`REAL_LANGUAGES`, `REAL_UTC_OFFSET` - 177 ulkenin tamami icin,
+     statik/dogrulanabilir cografi gercekler, bayrak/baskent ile ayni
+     kategoride - uydurma is verisi degil).
+9. Sag alt kosede tek cumlelik premium aciklama - tamamen mevcut
+   Firsat Skoru etiketinden (`scoreLabel`) turetiliyor, ulkeye ozel
+   uydurma bir iddia icermiyor.
+
+### Kritik hata sonrasi standart dogrulama protokolu (yine uygulandi)
+- Node'da mock tarayici ortaminda TUM script calistirildi - sadece
+  beklenen (zararsiz, test harness kaynakli) hatanin ayni yerde
+  cikip cikmadigi kontrol edildi, yeni hata YOK
+- `renderCountryHero` fonksiyonu GERCEK Singapur verisiyle DOGRUDAN
+  cagirilip tam HTML ciktisi satir satir incelendi:
+  - Mesafe: 8.098 km (Turkiye-Singapur gercek mesafesiyle tutarli)
+  - Ucus suresi: ~10sa 12dk
+  - Saat farki: +5 saat (Singapur UTC+8, Turkiye UTC+3 - doğru)
+  - Bayrak: flagcdn.com/w80/sg.png (dogru ISO kodu)
+  - Baskent: Singapur (sehir-devlet oldugu icin dogru)
+  - Dil: "İngilizce/Çince/Malayca/Tamilce" (Singapur'un 4 resmi dili)
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde yeni regresyon yok
+- `renderCountryHero` ciktisi gercek veriyle elle dogrulandi
