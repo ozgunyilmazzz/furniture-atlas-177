@@ -163,6 +163,19 @@
   }
   .source-node .node-label{ opacity:0.95; font-weight:600; }
 
+  /* Hedef Ülkelerim pin'i — küre üzerinde dikkat çekici, altın renkli, hafif zıplayan işaretçi */
+  .node-pin{ display:none; pointer-events:none; }
+  .node.is-target .node-pin{ display:block; animation:targetPinBounce 1.8s ease-in-out infinite; }
+  .node-pin-shape{
+    fill:var(--amber-bright); stroke:#2a1d00; stroke-width:1.2;
+    filter:drop-shadow(0 2px 5px rgba(0,0,0,0.55));
+  }
+  .node-pin-hole{ fill:#2a1d00; }
+  @keyframes targetPinBounce{
+    0%, 100% { transform:translateY(0); }
+    50% { transform:translateY(-4px); }
+  }
+
   .country-shape{ transition: fill-opacity 0.15s ease, stroke-width 0.15s ease; }
   .country-target{ cursor:pointer; }
   .country-target.hovered{ fill-opacity:0.92 !important; stroke:#ffffff !important; stroke-width:1.6 !important; }
@@ -187,6 +200,13 @@
     box-shadow:0 20px 50px rgba(0,0,0,0.5);
   }
   .hover-card.show{ opacity:1; transform:translateY(0) scale(1); }
+  .hc-close-btn{
+    position:absolute; top:10px; right:10px; pointer-events:auto;
+    width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border-soft); color:var(--text-2);
+    font-size:11px; cursor:pointer; transition:all 0.15s ease;
+  }
+  .hc-close-btn:hover{ background:rgba(224,104,90,0.2); color:var(--red); border-color:transparent; }
   .hc-detail-btn{
     pointer-events:auto; width:100%; margin-top:10px; padding:9px;
     font-family:var(--mono); font-size:11px; letter-spacing:0.5px; font-weight:600;
@@ -293,20 +313,6 @@
     text-decoration:none; display:inline-block;
   }
   .close-btn:hover{ border-color:var(--amber); color:var(--amber); }
-  .dash-action-featured{
-    position:relative; border-color:rgba(230,197,128,0.45);
-    background:linear-gradient(120deg, rgba(201,169,97,0.14), rgba(201,169,97,0.04));
-    color:var(--amber-bright); font-weight:600;
-    animation:dashActionGlow 3s ease-in-out infinite;
-  }
-  .dash-action-featured:hover{
-    border-color:var(--amber-bright); color:var(--amber-bright);
-    background:linear-gradient(120deg, rgba(201,169,97,0.22), rgba(201,169,97,0.08));
-  }
-  @keyframes dashActionGlow{
-    0%, 100%{ box-shadow:0 0 0 1px rgba(201,169,97,0.06) inset, 0 0 0 rgba(201,169,97,0); }
-    50%{ box-shadow:0 0 0 1px rgba(201,169,97,0.1) inset, 0 0 12px rgba(201,169,97,0.22); }
-  }
   .modal-close-btn{
     background:rgba(255,255,255,0.05); border-color:var(--border); color:var(--text-0); font-weight:600;
   }
@@ -461,6 +467,33 @@
   .exec-box{
     background:linear-gradient(135deg, rgba(201,169,97,0.06), rgba(63,208,192,0.04)); border:1px solid var(--border);
     border-radius:18px; padding:30px 32px; font-family:var(--display); font-style:italic; font-size:15.5px; line-height:1.85;
+  }
+  /* Türkiye'ye uzaklık kartı — ülke sayfasına sıcak/kişisel bir dokunuş,
+     giriş yapmadan da herkese görünür (kilit yok). */
+  .distance-card{
+    display:flex; align-items:center; justify-content:center; gap:36px; flex-wrap:wrap;
+    margin:0 0 28px; padding:22px 28px; border-radius:16px;
+    background:linear-gradient(135deg, rgba(63,208,192,0.06), rgba(201,169,97,0.05));
+    border:1px solid var(--border-soft);
+  }
+  .distance-flag-pair{ display:flex; align-items:center; gap:10px; }
+  .distance-flag{ font-size:30px; line-height:1; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3)); }
+  .distance-path{ display:flex; align-items:center; gap:4px; width:110px; }
+  .distance-dot{ width:6px; height:6px; border-radius:50%; background:var(--amber-bright); flex:0 0 auto; }
+  .distance-line{
+    flex:1; height:1px; background:repeating-linear-gradient(90deg, rgba(201,169,97,0.5) 0 6px, transparent 6px 11px);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .distance-plane{
+    font-size:13px; color:var(--amber-bright); background:var(--bg-1); padding:0 4px; line-height:1;
+  }
+  .distance-stats{ display:flex; gap:32px; flex-wrap:wrap; }
+  .distance-stat{ display:flex; flex-direction:column; gap:2px; }
+  .distance-stat-val{ font-family:var(--mono); font-size:19px; font-weight:700; color:var(--text-0); font-variant-numeric:tabular-nums; }
+  .distance-stat-label{ font-family:var(--body); font-size:11px; color:var(--text-2); }
+  @media(max-width:560px){
+    .distance-card{ flex-direction:column; gap:18px; padding:20px; }
+    .distance-stats{ justify-content:center; text-align:center; }
   }
   .tr-export-hero{
     position:relative; overflow:hidden; text-align:center; padding:40px 32px 36px; margin:0 0 32px; border-radius:22px;
@@ -760,6 +793,18 @@
   .is-locked:hover::after, .is-locked:hover::before{ opacity:1; }
   .is-locked:hover::after{ transform:translateX(-50%) translateY(0); }
 
+  /* Alıcı Listesi Talebi — sade, öne çıkarılmamış bir link; sadece hover'da nereye gittiğini gösterir */
+  .gov-link{ position:relative; text-decoration:none; }
+  .gov-link::after{
+    content:attr(data-hint);
+    position:absolute; bottom:calc(100% + 9px); left:50%; transform:translateX(-50%) translateY(4px);
+    background:var(--bg-0); color:var(--amber-bright); border:1px solid var(--amber);
+    font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:1px;
+    padding:6px 12px; border-radius:6px; white-space:nowrap; box-shadow:0 6px 18px rgba(0,0,0,0.45);
+    opacity:0; pointer-events:none; transition:opacity 0.15s ease, transform 0.15s ease; z-index:90;
+  }
+  .gov-link:hover::after{ opacity:1; transform:translateX(-50%) translateY(0); }
+
   /* Kurucu Üye rozeti — ince, zarif, koleksiyon değeri hissettiren premium rozet */
   .membership-badge{
     display:inline-flex; align-items:center; gap:6px; align-self:center;
@@ -825,62 +870,6 @@
   .premium-plan-divider{
     text-align:center; font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase;
     color:var(--text-2); margin:6px 0 14px;
-  }
-
-  /* ---------- POTANSİYEL ALICI VERİTABANI (premium ürün kartı) ---------- */
-  .buyer-db-card{ max-width:520px; margin:0 auto; text-align:center; }
-  .buyer-db-badge{
-    display:inline-block; font-family:var(--mono); font-size:9.5px; letter-spacing:1.6px; text-transform:uppercase;
-    color:#241a02; background:linear-gradient(120deg,#f4dfa0,#c9a961); padding:5px 14px; border-radius:100px;
-    margin-bottom:18px; font-weight:700; box-shadow:0 4px 14px rgba(201,169,97,0.3);
-  }
-  .buyer-db-title{
-    font-family:var(--display); font-style:italic; font-size:26px; color:var(--text-0); margin-bottom:10px; line-height:1.25;
-  }
-  .buyer-db-subtitle{
-    font-family:var(--body); font-size:14px; color:var(--text-1); line-height:1.6; margin:0 auto 14px;
-    max-width:420px;
-  }
-  .buyer-db-desc{
-    font-family:var(--body); font-size:12.5px; color:var(--text-2); line-height:1.6; margin-bottom:26px;
-  }
-  .buyer-db-features{
-    display:grid; grid-template-columns:1fr 1fr; gap:11px 20px; text-align:left; margin:0 0 26px;
-    padding:22px 24px; background:rgba(255,255,255,0.025); border:1px solid var(--border-soft); border-radius:14px;
-  }
-  .buyer-db-feature{
-    font-family:var(--body); font-size:13px; color:var(--text-1); display:flex; align-items:center; gap:8px;
-  }
-  .buyer-db-feature-check{
-    display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%;
-    background:rgba(63,208,192,0.16); color:var(--teal); flex:0 0 auto;
-  }
-  .buyer-db-price-card{
-    border:1.5px solid rgba(230,197,128,0.5); background:linear-gradient(180deg, rgba(201,169,97,0.1), rgba(201,169,97,0.03));
-    box-shadow:0 0 30px rgba(201,169,97,0.14); border-radius:16px; padding:24px 22px 22px; margin-bottom:18px;
-  }
-  .buyer-db-price-label{
-    font-family:var(--mono); font-size:11px; letter-spacing:0.5px; text-transform:uppercase; color:var(--text-2); margin-bottom:10px;
-  }
-  .buyer-db-price-value{
-    font-family:var(--mono); font-size:38px; font-weight:800; color:var(--amber-bright); margin-bottom:6px; letter-spacing:0.2px;
-    font-variant-numeric:tabular-nums;
-  }
-  .buyer-db-price-value span{ font-size:13px; color:var(--text-2); font-weight:600; margin-left:4px; letter-spacing:0.5px; }
-  .buyer-db-price-note{ font-family:var(--body); font-size:12px; color:var(--text-2); font-style:italic; }
-  .buyer-db-cta{
-    width:100%; padding:17px; border-radius:12px; border:none; cursor:pointer;
-    font-family:var(--body); font-size:15px; font-weight:700; letter-spacing:0.2px;
-    background:linear-gradient(120deg, var(--amber-bright), var(--amber) 75%); color:#1a1206;
-    box-shadow:0 10px 26px rgba(201,169,97,0.3);
-    transition:transform 0.18s cubic-bezier(0.4,0,0.2,1), box-shadow 0.18s ease, filter 0.18s ease;
-    margin-bottom:14px;
-  }
-  .buyer-db-cta:hover{ transform:translateY(-1px); box-shadow:0 14px 32px rgba(201,169,97,0.4); filter:brightness(1.04); }
-  .buyer-db-cta:active{ transform:translateY(0); }
-  .buyer-db-footnote{ font-family:var(--body); font-size:11px; color:var(--text-2); line-height:1.5; }
-  @media(max-width:560px){
-    .buyer-db-features{ grid-template-columns:1fr; }
   }
 
   /* ---------- AUTH MODAL REDESIGN (Giriş / Kayıt) ---------- */
@@ -1091,16 +1080,24 @@
     font-family:var(--mono); font-size:11px; letter-spacing:0.5px; font-weight:600;
     color:#04211d; background:var(--teal); border:none; border-radius:100px;
     padding:9px 18px; cursor:pointer; transition:all 0.15s ease;
-    box-shadow:0 0 0 0 rgba(63,208,192,0.5);
-    animation:filterPulse 2.6s ease-in-out infinite;
   }
   .filter-btn:hover{ background:#5be0d1; transform:translateY(-1px); }
-  .filter-btn.has-active{ animation:none; background:var(--amber); color:#2a1d00; }
-  @keyframes filterPulse{
-    0%, 100% { box-shadow:0 0 0 0 rgba(63,208,192,0.45); }
-    50% { box-shadow:0 0 0 7px rgba(63,208,192,0); }
+  /* Filtre aktifken buton dikkat çekmeli — kullanıcı filtrenin açık kaldığını unutmasın diye */
+  .filter-btn.has-active{
+    background:var(--amber); color:#2a1d00;
+    box-shadow:0 0 0 0 rgba(201,169,97,0.55);
+    animation:filterActivePulse 2s ease-in-out infinite;
   }
-  #filterActiveCount{ color:var(--teal); font-family:var(--mono); }
+  @keyframes filterActivePulse{
+    0%, 100% { box-shadow:0 0 0 0 rgba(201,169,97,0.5); }
+    50% { box-shadow:0 0 0 8px rgba(201,169,97,0); }
+  }
+  #filterActiveCount:not(:empty){
+    display:inline-flex; align-items:center; justify-content:center; margin-left:5px;
+    min-width:16px; height:16px; padding:0 5px; border-radius:100px;
+    background:#2a1d00; color:var(--amber-bright); font-family:var(--mono); font-size:10px; font-weight:800;
+    vertical-align:1px;
+  }
   .filter-panel{
     display:none; position:absolute; top:calc(100% + 10px); right:0; z-index:60; width:340px;
     background:var(--panel-glass); backdrop-filter:blur(20px); border:1px solid var(--border);
@@ -1179,7 +1176,8 @@
   .row-open{ color:var(--text-2); font-size:11px; }
   #countryTable tbody tr:hover .row-open{ color:var(--amber); }
   .compare-check{ accent-color:var(--amber); cursor:pointer; width:18px; height:18px; }
-  .td-check{ cursor:pointer; padding:14px 16px !important; }
+  .td-check{ cursor:pointer; padding:0 !important; }
+  .td-check-label{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; padding:14px 16px; cursor:pointer; }
 
   /* ---------- COMPARE TRAY & MODAL ---------- */
   .compare-tray{

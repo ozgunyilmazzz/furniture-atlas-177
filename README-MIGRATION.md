@@ -943,3 +943,184 @@ butonunun kendi tiklama mantigi zaten tam calisir haldeydi
 - `npm run build` hatasiz gecti
 - Uretim sunucusunda hem zoom-controls touchstart korumasi hem
   `tryPreviewAtPoint` cagrisi bundle'da dogrulandi
+
+## Faz 29 - Veri yili notlari, Turkiye'ye uzaklik karti, Gelecek Kaynaklar kaldirildi,
+## Alici Listesi eski haline dondu, mobil kapat butonu, marka tablosu birlestirme (TAMAMLANDI)
+
+**1) Veri yili bilgisi eklendi**
+Ulke sayfasindaki Pazar Genel Bakisi (Nufus/GSYIH/Enflasyon) ve Ana
+Tedarikci Ulkeler bolumlerine, kodda zaten var olan ama ekranda hic
+gosterilmeyen gercek kaynak yillari (IMF WEO Nisan 2026, IMF WEO 2025,
+importDataSource alani) footnote olarak eklendi. Hicbir yil UYDURULMADI -
+hepsi mevcut veri/yorumlardan alindi.
+
+**2) Turkiye'ye Uzaklik karti eklendi**
+Her ulke sayfasina, ziyaretciye bile acik (kilitsiz) sicak bir kart
+eklendi: iki bayrak + ucus hatti gorseli + gercek koordinatlardan
+(zaten veride olan lat/lon) Haversine formuluyle hesaplanan km +
+tahmini dogrudan ucus suresi. `haversineKm()` ve `renderDistanceCard()`
+fonksiyonlari eklendi, matematik Node'da test edildi (Turkiye->Almanya
+~2337km, Turkiye->ABD ~10166km - gercekci degerler).
+
+**3) "Gelecek Kaynaklar" bolumu kaldirildi**
+Ulke sayfasindaki "12 Gelecek Kaynaklar" basligi ve altindaki "Yakinda
+eklenecek" placeholder kartlari tamamen kaldirildi.
+
+**4) Alicilar Listesi Talebi eski (basit) haline dondu**
+- Faz 16'da eklenen "$29 Potansiyel Alici Veritabani" urunu TAMAMEN
+  kaldirildi (modal, JS mantigi, CSS - hepsi silindi)
+- Buton artik dogrudan bir `<a>` linki: tiklaninca yeni sekmede
+  `https://musaviredanisin.ticaret.gov.tr/` aciyor
+- Altin "featured" vurgusu kaldirildi (`.dash-action-featured` CSS'i de
+  silindi)
+- Hover'da altin renkli "ticaret.gov.tr" ipucu cikiyor (yeni `.gov-link`
+  CSS sinifi)
+- /premium sayfasindaki "Alici veri tabani" ozellik maddesi kaldirildi
+- Site genelinde sirket/alici verisi paylasildigi izlenimi veren baska
+  metin bulunamadi
+
+**5) Mobil ozet kartina Kapat (X) butonu eklendi**
+`showHoverCard()` ve `showTurkeyCard()` fonksiyonlarinin ikisine de sag
+ust kosede kucuk bir kapat butonu eklendi (`hc-close-btn`). Kart
+`pointer-events:none` oldugu icin butona ozel olarak `pointer-events:auto`
+verildi (aksi halde tiklanamaz olurdu).
+
+**6) Marka tablosunda "Bilinmeyen" satirlar birlestirildi**
+"Premium Italyan Mobilya Markalari" tablosunda Natuzzi, BoConcept,
+Calligaris, Rimadesio icin her zaman 4 ayri "Bilinmiyor" satiri
+gosteriliyordu. Artik tek bir birlesik satirda: "Natuzzi Italia,
+BoConcept, Calligaris, Rimadesio | Ulke bazinda dogrulanmis veri yok"
+seklinde gosteriliyor (colspan ile).
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Uretim sunucusunda: Alici Listesi linkinin dogru URL'e gittigi,
+  "Gelecek Kaynaklar" basliginin JS'te artik gecmedigi, mesafe karti
+  fonksiyonlarinin (`renderDistanceCard`, `haversineKm`), kapat
+  butonunun (`hcCloseBtn`), birlesik marka satirinin (`noDataBrands`)
+  ve veri yili notlarinin bundle'da mevcut oldugu dogrulandi
+
+## Faz 29 - Veri yili, mesafe karti, Gelecek Kaynaklar kaldirma, Alici Listesi geri alma (TAMAMLANDI)
+
+**1) Veri yili bilgisi eklendi**
+Kodda zaten var olan ama hic ekranda gosterilmeyen kaynak/yil bilgileri
+artik ulke sayfasinda gorunuyor:
+- Pazar Genel Bakisi bolumune: "Nufus ve GSYIH 2026 tahminidir (IMF WEO,
+  Nisan 2026), Enflasyon 2025 (IMF WEO)" notu eklendi
+- Ana Tedarikci Ulkeler bolumune: mevcut ama kullanilmayan
+  `c.importDataSource` alani artik footnote olarak gosteriliyor
+  (orn. "2024, HS 9403, UN Comtrade (GTAIC)")
+- Hicbir yeni/uydurma yil eklenmedi - hepsi veride zaten mevcut olan
+  gercek kaynak bilgileri
+
+**2) Turkiye'ye Uzaklik karti eklendi (ulke sayfasi atmosferi)**
+Her ulke sayfasinin en ustune, ZIYARETCIYE BILE ACIK (kilitsiz) yeni
+bir kart eklendi: iki bayrak + kesik cizgili "ucus hatti" gorseli +
+gercek km mesafe + tahmini dogrudan ucus suresi. Mesafe, ulkelerin
+veride zaten var olan gercek lat/lon koordinatlarindan Haversine
+formuluyle hesaplaniyor (uydurma degil, gercek geometri). Ucus suresi
+acikca "tahmini" olarak etiketlendi (ortalama seyir hizi + sabit
+kalkis/inis suresi varsayimiyla).
+
+**3) "Gelecek Kaynaklar" bolumu kaldirildi**
+Ulke sayfasinin en altindaki, henuz doldurulmamis 6 veri seti icin
+"Yakinda eklenecek" placeholder karti gosteren bolum tamamen
+kaldirildi.
+
+**4) Alici Listesi Talebi eski (ucretsiz yonlendirme) haline
+DONDURULDU**
+Faz 16'da "Potansiyel Alici Veritabani" adiyla $29'a satilan urun
+kartina cevrilmisti - bu TAMAMEN GERI ALINDI:
+- Altin "featured" vurgusu kaldirildi (`dash-action-featured` sinifi
+  ve CSS'i tamamen silindi)
+- Buton artik JS ile acilan bir modal degil, DOGRUDAN dis linke giden
+  bir `<a>` etiketi: `https://musaviredanisin.ticaret.gov.tr/`,
+  `target="_blank"`
+- Uzerine gelince altin renkli "ticaret.gov.tr" ipucu cikiyor (yeni
+  `.gov-link` CSS sinifi, mevcut kilit-ipucu diliyle tutarli)
+- Eski urun karti modali (`buyerListModal`), onun JS mantigi
+  (`buyerListBtn` click handler, ~40 satir urun karti HTML'i) ve CSS'i
+  (`.buyer-db-*`, ~55 satir) TAMAMEN silindi
+
+**5) Sirket/alici verisi paylasimi izlenimi veren metin temizlendi**
+/premium sayfasinin Standart plan kartindaki "Alici veri tabani"
+ozellik maddesi kaldirildi. Baska bir yerde boyle bir ifade
+bulunamadi (arandi, dogrulandi).
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- JS bundle'inda: "Gelecek Kaynaklar" 0, "Veri yili" 2, mesafe karti
+  fonksiyonlari (renderDistanceCard/haversineKm/TURKEY_COORDS) 8,
+  eski urun karti kodu 0
+- Ana sayfa HTML'inde: musaviredanisin linki ve gov-link sinifi
+  dogrulandi, dash-action-featured tamamen kalkti
+- /premium sayfasinda "Alici veri tabani" ifadesi artik gecmiyor
+
+## Faz 30 - Filtre gostergesi, liste checkbox saglamlastirma, hedef ulke pini (TAMAMLANDI)
+
+**1) Filtre aktif gostergesi - KOK NEDEN DUZELTILDI**
+Bulunan gercek hata: buton varsayilan (filtre YOKKEN) durumda surekli
+titresiyordu (`filterPulse` animasyonu), filtre AKTIFKEN ise animasyon
+tamamen KAPANIYORDU (`animation:none`) - yani tam ters calisiyordu,
+kullanicinin filtrenin acik kaldigini unutmasinin sebebi buydu.
+Duzeltme: titresen animasyon artik SADECE filtre aktifken calisiyor
+(`filterActivePulse`, amber renkli genisleyen halka), bos durumda
+buton sakin duruyor. Aktif filtre sayisi da artik buton yaninda
+kontrast bir "rozet" (koyu zeminde altin sayi) olarak gösteriliyor,
+eskiden dusuk kontrastli duz metindi.
+
+**2) Liste sayfasi checkbox - daha saglam hale getirildi**
+Kod analizinde mevcut capture-phase korumasi yapisal olarak dogru
+gorundu (checkbox ayri bir <td>, digerleriyle onclick paylasmiyor);
+yine de riski sifirlamak icin checkbox artik bir `<label>` ile
+sarmalandi - TUM hucre artik checkbox'in native, tarayici-standardi
+tiklama alani (JS ile manuel toggle mantigi kaldirildi, cift
+tetiklenme riski de boylece ortadan kalkti). Hucrenin tamami artik
+tiklanabilir/secilebilir, ama satiri KESINLIKLE acamaz.
+
+**3) Hedef Ulkelerim icin kurede pin gosterimi eklendi**
+Kullanicinin "Hedef Ulkelerim"e ekledigi ulkeler artik ana sayfadaki
+kurede altin renkli, hafif ziplayan bir pin ile isaretleniyor - normal
+noktalardan acikca ayrisiyor, dikkat cekici. Giris/cikis ve hedef
+ekleme/cikarma anlarinda pin durumu otomatik guncelleniyor (performans
+icin bir cache mekanizmasi var, ilgili her yerde invalidate ediliyor).
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Uretim sunucusunda: `filterActivePulse` CSS'i, `td-check-label` hem
+  CSS hem JS'te, `node-pin` CSS'i ve `getTargetIdsCache`/
+  `invalidateTargetIdsCache`/`is-target` JS'te dogrulandi
+
+## Faz 31 - robots.txt ve sitemap.xml eklendi (TAMAMLANDI)
+
+Next.js App Router'in resmi Metadata API'si kullanildi - hicbir
+mevcut route/dosya degistirilmedi, sadece iki yeni dosya eklendi:
+
+- `app/robots.ts` -> `/robots.txt` otomatik uretiliyor:
+  ```
+  User-Agent: *
+  Allow: /
+
+  Sitemap: https://furnitureatlas.org/sitemap.xml
+  ```
+- `app/sitemap.ts` -> `/sitemap.xml` otomatik uretiliyor, toplam
+  **371 URL**:
+  - 17 statik sayfa (Ana Sayfa, Liste, Ahsap Mobilya varyantlari,
+    Premium, Haberler, Fuarlar, Seyahat Planla, Kuresel Raporlar,
+    Atlas Research+, Hakkimizda, Iletisim, Is Ortaklari, Yardim
+    Merkezi, Gizlilik Politikasi, Kullanim Sartlari, Cerez Politikasi)
+  - 177 ulke x 2 kategori (`/country/<slug>` ve
+    `/country/<slug>/ahsap-mobilya`) = 354 URL
+  - `lib/countries-data.js`'deki ayni `COUNTRIES` listesi kullanildi
+    (route'larin `generateStaticParams`'iyla birebir tutarli)
+- **Kasitli olarak DAHIL EDILMEYEN:** `/hedef-ulkelerim` - bu sayfa
+  zaten `noindex` (kisiye ozel/bos icerik), sitemap'e de girmiyor
+
+### Dogrulandi
+- `npm run build` hatasiz gecti, `/robots.txt` ve `/sitemap.xml`
+  route listesinde statik olarak goruldu
+- Uretim sunucusunda robots.txt icerigi istenen formatla dogrulandi
+- sitemap.xml gecerli XML, tam 371 URL iceriyor
+- `/hedef-ulkelerim` sitemap'te YOK (dogrulandi)
+- Ornek ulke sayfalari (`/country/spain`,
+  `/country/spain/ahsap-mobilya`) sitemap'te mevcut

@@ -556,7 +556,7 @@ const IMPORT_RESTRICTIONS = {
    "Exporters" (c.exporters) ve "Buyers" (c.buyers) zaten her ülke nesnesinde
    gerçek veriyle geliyor ve kendi bölümlerinde render ediliyor — burada
    tekrar edilmiyor. Aşağıdaki 6 veri seti henüz mevcut değil; her ülke
-   nesnesine boş dizi olarak ekleniyor ve "Gelecek Kaynaklar" bölümünde
+   nesnesine boş dizi olarak ekleniyor (şu an ekranda ayrı bir bölüm olarak
    otomatik olarak "Yakında eklenecek" kartı gösteriliyor.
 
    Gerçek veri geldiğinde TEK YAPMANIZ GEREKEN: ilgili ülke nesnesine
@@ -1014,17 +1014,13 @@ function buildPremiumBrandRows(country){
     rows.push(['Roche Bobois', 0, 0, '—', 'Yok', 'real']);
   }
 
-  // Natuzzi — sadece küresel/bölgesel veri var, ülke bazlı yok
-  rows.push(['Natuzzi Italia', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'unknown']);
-  // BoConcept — ülke bazlı resmi veri yok
-  rows.push(['BoConcept', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'unknown']);
-  // Calligaris, Rimadesio — henüz araştırılmadı
-  rows.push(['Calligaris', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'unknown']);
-  rows.push(['Rimadesio', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'unknown']);
+  // Natuzzi, BoConcept, Calligaris, Rimadesio — ülke bazlı doğrulanmış veri
+  // hiçbirinde yok; tek tek "Bilinmiyor" satırları yerine tek satırda birleştirilir.
+  const noDataBrands = ['Natuzzi Italia', 'BoConcept', 'Calligaris', 'Rimadesio'];
 
   return rows.map(([brand,mono,dealer,cities,strength,level])=>
     `<tr><td class="bright">${brand}</td><td>${mono}</td><td>${dealer}</td><td>${cities}</td><td>${strength} ${dqBadge(level)}</td></tr>`
-  ).join('');
+  ).join('') + `<tr><td class="bright">${noDataBrands.join(', ')}</td><td colspan="4" style="color:var(--text-2);">Ülke bazlı doğrulanmış veri yok ${dqBadge('unknown')}</td></tr>`;
 }
 function turkeyImportVolumeM(country){
   return Math.round(numFromMoney(country.annualImports) * numFromPercent(country.turkeyShare) / 100);
@@ -1958,6 +1954,17 @@ let markerEls = {};            // ülke id -> {g, ring, dot}
 let gridEllipseEls = [];       // enlem çizgileri
 let gridPolylineEls = [];      // boylam çizgileri
 let sphereCircleEl = null;
+// Hedef ülkeler (★ Hedef Ülkelerim) için küre üzerinde pin gösterimi —
+// her frame'de localStorage okumamak için sonuç cache'leniyor, giriş/çıkış
+// veya hedef ekleme/çıkarma anında invalidateTargetIdsCache() ile temizleniyor.
+let targetIdsCache = null;
+function getTargetIdsCache(){
+  if(targetIdsCache) return targetIdsCache;
+  const user = getCurrentUser();
+  targetIdsCache = new Set(user ? getTargets(user) : []);
+  return targetIdsCache;
+}
+function invalidateTargetIdsCache(){ targetIdsCache = null; needsRender = true; }
 
 function initSvgSkeleton(){
   svg.innerHTML = `<defs>
@@ -2006,7 +2013,7 @@ function initSvgSkeleton(){
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', 'node');
     g.setAttribute('data-id', c.id);
-    g.innerHTML = `<circle class="node-hit" r="11" fill="transparent"/><circle class="node-ring" r="11"/><circle class="node-dot" r="3.5"/><text class="node-label" x="9" y="3.5">${c.name.toUpperCase()}</text>`;
+    g.innerHTML = `<circle class="node-hit" r="11" fill="transparent"/><circle class="node-ring" r="11"/><circle class="node-dot" r="3.5"/><text class="node-label" x="9" y="3.5">${c.name.toUpperCase()}</text><g class="node-pin"><path class="node-pin-shape" d="M0,-26 C4.5,-26 8,-22.7 8,-18.3 C8,-12.5 0,-4 0,-4 C0,-4 -8,-12.5 -8,-18.3 C-8,-22.7 -4.5,-26 0,-26 Z"/><circle class="node-pin-hole" r="2.6" cy="-18.3"/></g>`;
     markersGroup.appendChild(g);
     markerEls[c.id] = { g, ring: g.querySelector('.node-ring'), dot: g.querySelector('.node-dot') };
   });
@@ -2109,6 +2116,7 @@ function getDisplayCache(){
 
 function updateMarkers(){
   const cache = getDisplayCache();
+  const targetIds = getTargetIdsCache();
   COUNTRIES.forEach(c=>{
     const p = toXY(c.lat, c.lon);
     const { passes, color } = cache[c.id];
@@ -2119,6 +2127,7 @@ function updateMarkers(){
     m.g.setAttribute('transform', `translate(${p.x.toFixed(1)},${p.y.toFixed(1)})`);
     m.ring.setAttribute('stroke', col);
     m.dot.setAttribute('fill', col);
+    m.g.classList.toggle('is-target', targetIds.has(c.id));
   });
   const t = toXY(38.96, 35.24);
   const tm = markerEls['turkey'];
@@ -2385,7 +2394,7 @@ filterSlidersWrap.innerHTML = FILTER_DEFS.map(def => `
 
 function updateFilterUI(){
   const activeCount = Object.values(activeFilters).filter(v=>v!==undefined && v!==null).length;
-  document.getElementById('filterActiveCount').textContent = activeCount ? `(${activeCount})` : '';
+  document.getElementById('filterActiveCount').textContent = activeCount ? `${activeCount}` : '';
   document.getElementById('filterToggleBtn').classList.toggle('has-active', activeCount > 0);
   const matching = COUNTRIES.filter(countryPassesFilters).length;
   document.getElementById('filterResultCount').textContent = hasActiveFilters() ? `${matching} pazar eşleşiyor` : `${COUNTRIES.length} pazar (filtre yok)`;
@@ -2582,7 +2591,7 @@ function renderListTable(){
     const dataCells = listColumnOrder.map(key => getColumnCellHtml(key, cd, xf).replace('<td', `<td ${openAttr}`)).join('');
     return `
     <tr data-id="${base.id}">
-      <td class="td-check"><input type="checkbox" class="compare-check" data-id="${base.id}" ${compareIds.includes(base.id)?'checked':''}></td>
+      <td class="td-check"><label class="td-check-label"><input type="checkbox" class="compare-check" data-id="${base.id}" ${compareIds.includes(base.id)?'checked':''}></label></td>
       ${dataCells}
       <td ${openAttr}><span class="row-open">Aç →</span></td>
     </tr>`;
@@ -2590,20 +2599,16 @@ function renderListTable(){
 }
 // Satır açma davranışı YALNIZCA checkbox DIŞINDAKİ her hücrenin kendi onclick
 // özniteliğine ayrı ayrı eklenir — <tr> üzerinde artık hiç onclick yok.
-// Ek olarak: checkbox hücresine yapılan HER tıklama, CAPTURE aşamasında
-// (satırın kendi onclick'i çalışmadan ÖNCE) durduruluyor — böylece hiçbir
-// koşulda checkbox'a tıklamak ülke sayfasını açamaz, sadece seçim yapar.
+// Checkbox artık bir <label> ile sarmalı: tüm hücreye tıklamak native olarak
+// checkbox'ı işaretler/kaldırır (ekstra JS toggle mantığı gerekmiyor — bu da
+// eski "iki kez tetiklenme" riskini ortadan kaldırıyor). Checkbox hücresine
+// yapılan HER tıklama, CAPTURE aşamasında durdurulur — böylece hiçbir koşulda
+// checkbox'a tıklamak ülke sayfasını açamaz.
 const countryTableBodyEl = document.getElementById('countryTableBody');
 if(countryTableBodyEl){
   countryTableBodyEl.addEventListener('click', (e)=>{
     if(e.target.closest('.td-check')) e.stopPropagation();
   }, true);
-  countryTableBodyEl.addEventListener('click', (e)=>{
-    const cell = e.target.closest('.td-check');
-    if(!cell || e.target.tagName === 'INPUT') return; // checkbox'ın kendi native davranışı zaten çalışır
-    const chk = cell.querySelector('input.compare-check');
-    if(chk){ chk.checked = !chk.checked; chk.dispatchEvent(new Event('change', { bubbles:true })); }
-  });
   countryTableBodyEl.addEventListener('change', (e)=>{
     const chk = e.target.closest('input.compare-check');
     if(chk) handleListCheckboxChange(chk);
@@ -2637,6 +2642,7 @@ hoverCard.addEventListener('click', (e)=>{
 function showTurkeyCard(e){
   const t = TURKEY_PROFILE;
   hoverCard.innerHTML = `
+    <button class="hc-close-btn" id="hcCloseBtn" aria-label="Kapat" onclick="event.stopPropagation(); hideHoverCard();">✕</button>
     <div class="hc-head">
       <div style="display:flex;align-items:center;gap:9px;">
         <span class="hc-flag">${t.flag}</span><span class="hc-country">${t.name}</span>
@@ -2725,6 +2731,7 @@ function showHoverCard(baseCountry, e){
   hoverCardCountry = baseCountry;
   const restriction = IMPORT_RESTRICTIONS[baseCountry.id];
   hoverCard.innerHTML = `
+    <button class="hc-close-btn" id="hcCloseBtn" aria-label="Kapat" onclick="event.stopPropagation(); hideHoverCard();">✕</button>
     ${restriction ? `<div class="hc-restriction ${restriction.level}">${restriction.level==='severe' ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg> İthalat fiilen mümkün değil' : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/></svg> Ciddi ithalat kısıtlaması'}</div>` : ''}
     <div class="hc-head">
       <div style="display:flex;align-items:center;gap:9px;">
@@ -2819,6 +2826,47 @@ function animateFillBars(){
       requestAnimationFrame(()=> requestAnimationFrame(()=>{ el.style.width = target; }));
     });
   });
+}
+// Türkiye'nin coğrafi merkezi (Yozgat/Sivas civarı, ~39.0°K 35.0°D) — kaynak: harita
+// verilerinde standart kabul edilen Türkiye merkez noktası.
+const TURKEY_COORDS = { lat: 39.0, lon: 35.0 };
+// Kuş uçuşu mesafe — Haversine formülü, ülkelerin zaten mevcut olan gerçek
+// enlem/boylam (lat/lon) verisinden hesaplanır. Uydurma bir rakam değildir.
+function haversineKm(lat1, lon1, lat2, lon2){
+  const R = 6371; // Dünya yarıçapı (km)
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function renderDistanceCard(c){
+  if(c.id === 'turkey' || typeof c.lat !== 'number' || typeof c.lon !== 'number') return '';
+  const km = haversineKm(TURKEY_COORDS.lat, TURKEY_COORDS.lon, c.lat, c.lon);
+  // Tahmini doğrudan uçuş süresi: ortalama ~850 km/sa yolcu uçağı seyir hızı +
+  // kalkış/iniş/taksi için sabit ~40 dk ek — kabaca bir tahmindir, gerçek uçuş
+  // rotaları rüzgar/aktarma nedeniyle farklılık gösterebilir.
+  const flightHoursRaw = km / 850 + 0.67;
+  const fH = Math.floor(flightHoursRaw);
+  const fM = Math.round((flightHoursRaw - fH) * 60);
+  const flightLabel = fH > 0 ? `~${fH} sa ${fM > 0 ? fM + ' dk' : ''}`.trim() : `~${fM} dk`;
+  const kmLabel = km >= 1000 ? Math.round(km).toLocaleString('tr-TR') : Math.round(km).toString();
+  return `
+    <div class="distance-card">
+      <div class="distance-flag-pair">
+        <span class="distance-flag" title="Türkiye">🇹🇷</span>
+        <span class="distance-path">
+          <span class="distance-dot"></span>
+          <span class="distance-line"><span class="distance-plane">✈</span></span>
+          <span class="distance-dot"></span>
+        </span>
+        <span class="distance-flag" title="${c.name}">${c.flag}</span>
+      </div>
+      <div class="distance-stats">
+        <div class="distance-stat"><span class="distance-stat-val">${kmLabel} km</span><span class="distance-stat-label">Türkiye'ye kuş uçuşu mesafe</span></div>
+        <div class="distance-stat"><span class="distance-stat-val">${flightLabel}</span><span class="distance-stat-label">Tahmini doğrudan uçuş süresi</span></div>
+      </div>
+    </div>
+  `;
 }
 function renderCountryPage(baseCountry){
   const c = withCategory(baseCountry);
@@ -2948,6 +2996,8 @@ function renderCountryPage(baseCountry){
       </div>
     </div>
 
+    ${renderDistanceCard(c)}
+
     <div class="dash-gated-wrap" id="dashGatedWrap">
     <div class="cp-section">
       <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12l2 2 4-4"/></svg><span class="num">01</span> Yönetici Özeti</h3>
@@ -2973,6 +3023,7 @@ function renderCountryPage(baseCountry){
         <div class="card ${dqCardClass(x.inflationVerified ? 'real' : 'estimated')}"><div class="card-label">Enflasyon${dqBadge(x.inflationVerified ? 'real' : 'estimated')}</div><div class="card-value">%${x.inflation}</div></div>
         <div class="card ${dqCardClass(REAL_CALLING_CODE[c.id] ? 'real' : 'unknown')}"><div class="card-label">Telefon Kodu${dqBadge(REAL_CALLING_CODE[c.id] ? 'real' : 'unknown')}</div><div class="card-value">${REAL_CALLING_CODE[c.id] ? '+'+REAL_CALLING_CODE[c.id] : 'Bilinmiyor'}</div></div>
       </div>
+      <div class="footnote" style="margin-top:10px;">Veri yılı: Nüfus ve GSYH 2026 tahminidir (IMF World Economic Outlook, Nisan 2026 / Worldometers.info). Enflasyon 2025 verisidir (IMF WEO).</div>
     </div>
 
     <div class="cp-section">
@@ -2993,6 +3044,7 @@ function renderCountryPage(baseCountry){
         <div>
           <div class="card-label" style="margin-bottom:12px;">Ana Tedarikçi Ülkeler${dqBadge(c.suppliersVerified ? 'real' : 'estimated')}</div>
           ${supplierBars}
+          ${c.importDataSource ? `<div class="footnote" style="margin-top:10px;">Veri yılı: ${c.importDataSource}.</div>` : ''}
         </div>
         <div class="card" style="align-self:start;">
           <div class="card-label">Türkiye'nin Konumu</div>
@@ -3092,8 +3144,6 @@ function renderCountryPage(baseCountry){
         </details>
       </div>
 
-      <h3 class="cp-section-title" style="margin-top:32px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="num">12</span> Gelecek Kaynaklar</h3>
-      ${renderFutureDataSection(c)}
     </div>
     </div>
   `;
@@ -3547,48 +3597,6 @@ document.getElementById('closeMaps').addEventListener('click', ()=>{
   document.getElementById('mapsModal').classList.remove('open');
 });
 
-document.getElementById('buyerListBtn').addEventListener('click', ()=>{
-  if(!currentBaseCountry) return;
-  if(isVisitor()){
-    openLoginModal();
-    showAuthTab('register');
-    return;
-  }
-  const c = currentBaseCountry;
-  const featureIcon = '<span class="buyer-db-feature-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>';
-  document.getElementById('buyerListBody').innerHTML = `
-    <div class="buyer-db-card">
-      <div class="buyer-db-badge">POTANSİYEL ALICI VERİTABANI</div>
-      <h3 class="buyer-db-title">Potansiyel Alıcı Veritabanı</h3>
-      <p class="buyer-db-subtitle">Seçtiğiniz ülke ve GTİP koduna göre doğrulanmış ithalatçı, distribütör, toptancı ve perakendeci firmalara erişin.</p>
-      <p class="buyer-db-desc">Her liste güncel ticari veriler kullanılarak hazırlanır ve ihracatçılar için zaman kazandırmayı amaçlar.</p>
-      <div class="buyer-db-features">
-        <div class="buyer-db-feature">${featureIcon}Firma adı</div>
-        <div class="buyer-db-feature">${featureIcon}Web sitesi</div>
-        <div class="buyer-db-feature">${featureIcon}Şehir / Ülke</div>
-        <div class="buyer-db-feature">${featureIcon}Faaliyet alanı</div>
-        <div class="buyer-db-feature">${featureIcon}İthalat profili</div>
-        <div class="buyer-db-feature">${featureIcon}İletişim bilgileri (varsa)</div>
-        <div class="buyer-db-feature">${featureIcon}Güncellenme tarihi</div>
-      </div>
-      <div class="buyer-db-price-card">
-        <div class="buyer-db-price-label">Tek Ülke (${c.name}) + 2 GTİP Kodu</div>
-        <div class="buyer-db-price-value">$29<span>USD</span></div>
-        <div class="buyer-db-price-note">Hazır veri dosyası</div>
-      </div>
-      <button class="buyer-db-cta" id="buyerDbBuyBtn">Satın Al ve İndir</button>
-      <div class="buyer-db-footnote">Ödeme tamamlandıktan sonra liste hesabınıza tanımlanır ve indirilebilir hale gelir.</div>
-    </div>
-  `;
-  document.getElementById('buyerListModal').classList.add('open');
-  document.getElementById('buyerDbBuyBtn').addEventListener('click', ()=>{
-    showToast('Ödeme altyapısı yakında aktif olacak — çok yakında satın alabileceksiniz.');
-  });
-});
-document.getElementById('closeBuyerList').addEventListener('click', ()=>{
-  document.getElementById('buyerListModal').classList.remove('open');
-});
-
 function fillNotes(baseCountry){
   const body = document.getElementById('relatedNotesBody');
   if(!body) return;
@@ -3739,6 +3747,7 @@ document.getElementById('favBtn').addEventListener('click', ()=>{
   const nowTarget = toggleTarget(user, currentBaseCountry.id);
   btn.textContent = nowTarget ? '★' : '☆';
   refreshMyTargetsBadge();
+  invalidateTargetIdsCache();
 });
 
 /* =========================================================
@@ -3904,6 +3913,7 @@ function openProfileModal(){
     document.getElementById('profileModal').classList.remove('open');
     updateLoginUI();
     updatePremiumUI();
+    invalidateTargetIdsCache();
     if(dashboard.classList.contains('open')){ updateFavButton(); applyContentGate(); }
   });
 }
@@ -4222,6 +4232,7 @@ function renderTargetsPanel(){
       renderTargetsPanel();
       refreshMyTargetsBadge();
       if(dashboard.classList.contains('open')) updateFavButton();
+      invalidateTargetIdsCache();
     });
   });
 }
@@ -4260,6 +4271,7 @@ sb.auth.onAuthStateChange((event, session) => {
     syncMembershipFromServer();
   }
   updatePremiumUI();
+  invalidateTargetIdsCache();
 });
 
 /* =========================================================
