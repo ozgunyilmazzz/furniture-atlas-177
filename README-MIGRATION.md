@@ -1297,3 +1297,29 @@ aciklandi).
 - `npm run build` hatasiz gecti
 - Mock tarayici testinde yeni regresyon yok
 - `renderCountryHero` ciktisi gercek veriyle elle dogrulandi
+
+## Faz 36 - Emojiler premium SVG ikonlarla degistirildi (TAMAMLANDI)
+
+Hicbir yerlesim/icerik degismedi - sadece "Pazara Ilk Bakis" kartindaki
+emoji ikonlar (bayrak HARIC) ince-cizgili SVG ikonlarla degistirildi,
+uygulamanin geri kalaninda zaten kullanilan ayni gorsel dile
+(stroke="currentColor", stroke-width 2, yuvarlak uclar) uyumlu:
+
+- ✈ (ucak) -> "gonder/send" tarzi ince SVG ucak ikonu
+- 🏛 (Baskent) -> sutunlu bina/anit SVG ikonu
+- 👥 (Nufus) -> iki kisi SVG ikonu
+- 💵 (Para Birimi) -> daire icinde dolar isareti SVG ikonu
+- 🗣 (Resmi Dil) -> kuresel/meridyen cizgili globe SVG ikonu
+- 🕒 (Saat Farki) -> saat SVG ikonu
+
+Bayraklar (🇹🇷 ve hedef ulke bayragi rota bolumunde) kullanicinin
+istegi geregi DEGISTIRILMEDI - zaten ana bayrak da bir onceki fazda
+gercek gorsele (flagcdn.com) cevrilmisti.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde yeni regresyon yok (ayni beklenen/zararsiz
+  hataya kadar sorunsuz calisti)
+- `renderCountryHero` cikti uzerinde Python ile emoji taramasi yapildi:
+  bayrak DISINDA 0 emoji kaldigi dogrulandi, 7 SVG ikon uretildigi
+  ve flagcdn baglantisinin hala oldugu dogrulandi

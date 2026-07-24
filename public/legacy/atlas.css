@@ -526,8 +526,8 @@
   .hero-route-line::before{ left:0; }
   .hero-route-line::after{ right:0; background:rgba(255,255,255,0.4); }
   .hero-route-plane{
-    font-size:13px; color:var(--hero-to); background:var(--bg-1); padding:0 5px; line-height:1;
-    display:inline-block; animation:heroPlaneDrift 2.6s ease-in-out infinite; position:relative; z-index:1;
+    color:var(--hero-to); background:var(--bg-1); padding:0 5px; line-height:1;
+    display:inline-flex; align-items:center; animation:heroPlaneDrift 2.6s ease-in-out infinite; position:relative; z-index:1;
   }
   @keyframes heroPlaneDrift{
     0%, 100%{ transform:translateX(-4px); }
@@ -550,7 +550,7 @@
   .country-hero-fact{
     font-family:var(--body); font-size:12.5px; color:var(--text-1); display:flex; align-items:center; gap:6px;
   }
-  .country-hero-fact-icon{ font-size:13px; line-height:1; }
+  .country-hero-fact-icon{ display:inline-flex; align-items:center; color:var(--hero-to); flex:0 0 auto; }
 
   .country-hero-tagline{
     position:relative; z-index:1; margin-top:16px; text-align:right;

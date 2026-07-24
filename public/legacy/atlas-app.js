@@ -2955,7 +2955,7 @@ function renderCountryHero(baseCountry, c){
             <span class="hero-route-endpoint-flag">🇹🇷</span>
             <span class="hero-route-endpoint-label">Türkiye</span>
           </span>
-          <span class="hero-route-line"><span class="hero-route-plane">✈</span></span>
+          <span class="hero-route-line"><span class="hero-route-plane"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></span></span>
           <span class="hero-route-endpoint" title="${c.name}">
             <span class="hero-route-endpoint-flag">${c.flag}</span>
             <span class="hero-route-endpoint-label">${c.name}</span>
@@ -2982,11 +2982,11 @@ function renderCountryHero(baseCountry, c){
       </div>
       ${routeHtml}
       <div class="country-hero-facts">
-        <div class="country-hero-fact"><span class="country-hero-fact-icon">🏛</span>${capital}</div>
-        <div class="country-hero-fact"><span class="country-hero-fact-icon">👥</span>${c.population}</div>
-        <div class="country-hero-fact"><span class="country-hero-fact-icon">💵</span>${c.currency}</div>
-        <div class="country-hero-fact"><span class="country-hero-fact-icon">🗣</span>${language}</div>
-        <div class="country-hero-fact"><span class="country-hero-fact-icon">🕒</span>${timeDiff}</div>
+        <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h18"/><path d="M6 22V11M10 22V11M14 22V11M18 22V11"/><path d="M4 11l8-6 8 6"/></svg></span>${capital}</div>
+        <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2.5 20v-1a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1"/><circle cx="17.5" cy="8.5" r="2.3"/><path d="M15.8 9.7a4 4 0 0 1 5.7 3.6V15"/></svg></span>${c.population}</div>
+        <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 8.7c0-.9 1.1-1.5 3-1.5s3 .6 3 1.5-1.1 1.3-3 1.3-3 .6-3 1.5 1.1 1.5 3 1.5 3 .6 3 1.5-1.1 1.5-3 1.5"/><path d="M12 6v1.2M12 16.8V18"/></svg></span>${c.currency}</div>
+        <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.4 3.8 5.6 3.8 9s-1.4 6.6-3.8 9c-2.4-2.4-3.8-5.6-3.8-9s1.4-6.6 3.8-9z"/></svg></span>${language}</div>
+        <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>${timeDiff}</div>
       </div>
       <div class="country-hero-tagline">${heroTagline(baseCountry, c)}</div>
     </div>
