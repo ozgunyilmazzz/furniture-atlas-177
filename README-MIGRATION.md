@@ -1323,3 +1323,162 @@ gercek gorsele (flagcdn.com) cevrilmisti.
 - `renderCountryHero` cikti uzerinde Python ile emoji taramasi yapildi:
   bayrak DISINDA 0 emoji kaldigi dogrulandi, 7 SVG ikon uretildigi
   ve flagcdn baglantisinin hala oldugu dogrulandi
+
+## Faz 37 - Hero kart iyilestirmeleri: harita, AI ozeti, chip'ler, baslik (TAMAMLANDI)
+
+**1) Harita gorunmeme sorunu - gercek KOK NEDEN bulundu:**
+`renderCountryMiniMap` fonksiyonu, ic `<path>` elemanina HER ZAMAN
+sabit `class="hero-minimap-shape"` veriyordu - bu da kendi
+fill-opacity(0.28)/stroke degerlerini tasiyordu ve benim arka plan
+icin yazdigim `.country-hero-bgmap-shape` (svg sarmalayicisina
+uygulanan) kuralini gecersiz kiliyordu (CSS'te elemanin KENDI sinifi,
+miras alinan degerden her zaman kazanir). Ayrica pozisyon (`right:-4%`)
+ile birlesince harita buyuk olcude karti kesen `overflow:hidden`
+disinda kaliyordu. Cozum: path'in sinifi da artik parametrik
+(`pathClassName`), bgmap icin AYRI, kendi kurallariyla (`fill-opacity:1,
+stroke:none`) calisan bir sinif kullaniliyor. Pozisyon `top:-4%; right:-2%`
+olarak icerde tutuldu (kirpilmiyor).
+
+**2) Harita ~%20 buyudu, opakligi dustu:** 300px -> 360px konteyner
+(mobilde 220->260px), SVG viewBox 340->408, opaklik 0.18->0.14
+(mobilde 0.14->0.11).
+
+**3) Sag alttaki zayif metin -> veri temelli "AI Ozeti":**
+Eski: "{Ulke} pazari icin firsatlar veriler arttikca netlesecek."
+(genel, degersiz). Yeni: Uygulamanin kendi ZATEN VAR OLAN skor
+esikleriyle (digger yerlerde de kullanilan `potentialLabel()` ve
+competition esigi) birebir ayni mantikla, GERCEK skorlardan
+uretiliyor:
+- Genel skor >=80 ise: "Turkiye'nin en guclu ihracat potansiyeli
+  tasiyan pazarlardan biri."
+- Aksi halde: "Mobilya ithalati {orta/yuksek/dusuk}, rekabet
+  {orta/yuksek/dusuk} seviyede." (Meksika ornegiyle test edildi:
+  gercek skorlari market=51, competition=90 -> "Mobilya ithalati
+  orta, rekabet yuksek seviyede." - dogru ve anlamli)
+- Ustune kucuk "AI OZETI" etiketi eklendi
+
+**4) Alt bilgi satiri artik chip/kart gorunumunde:** Duz metin +
+ikon yerine, her biri kendi hafif arka plan/kenarlik/yuvarlak
+kosesi olan kucuk "pill" kartlar (hover'da hafif aydinlaniyor).
+
+**5) Ulke adi ~%15 kuculdu:** 44px -> 37px (mobilde 30px -> 25px,
+orantili).
+
+### Standart dogrulama protokolu (yine uygulandi)
+- Node mock tarayici testinde yeni regresyon yok
+- `renderCountryHero` Meksika verisiyle DOGRUDAN cagirilip: tagline
+  metni, AI OZETI etiketi, chip class'lari, bgmap viewBox boyutu
+  (408x408) tek tek dogrulandi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testi temiz
+- Gercek veriyle (Meksika) dogrudan fonksiyon cagrisi ile tum 4
+  degisiklik teyit edildi
+
+## Faz 38 - Hover kart kapatma tusu duzeltmesi + gercek enflasyon verisi (TAMAMLANDI)
+
+**1) Hover kart kapatma tusu / Firsat Skoru cakismasi**
+`.hc-close-btn` mutlak konumluydu (top:10px; right:10px), `.hc-head`
+(bayrak+isim+skor rozeti) sag kenara hicbir bosluk birakmadan
+yaslaniyordu - ikisi ayni kosede ust uste biniyordu. `.hc-head`'e
+`padding-right:28px` eklenerek skor rozetine kapatma tusunun alanina
+girmeyecek kadar sag bosluk birakildi.
+
+**2) Enflasyon verisi - GERCEK KAYNAKTAN GUNCELLENDI, UYDURMA
+FALLBACK KALDIRILDI**
+KOK SORUN bulundu: kod, `REAL_INFLATION` icinde verisi olmayan her
+ulke icin `r(1,45).toFixed(1)` ile RASTGELE bir sayi uretiyordu -
+tam olarak kullanicinin endiseledigi "uydurma veri" buydu.
+
+Cozum - tr.tradingeconomics.com'un 6 kita sayfasindan (Dunya, Avrupa,
+Amerika, Asya, Afrika, Okyanusya) gercek, guncel enflasyon oranlari
+tek tek cekildi ve 177 ulkenin ID'siyle eslestirildi:
+- **167 ulke** icin gercek veri bulundu ve REAL_INFLATION guncellendi
+  (ornekler: Rusya %5.3, Almanya %2.3, Iran %88.6, Venezuela %524 -
+  hiperenflasyon dahil gercek rakamlar oldugu gibi kullanildi)
+- **10 ulke** icin kaynakta hic veri yoktu (Antarktika, Kuzey Kore,
+  Myanmar, Sudan, Yemen, Bati Sahra, Gronland, Falkland Adalari,
+  Fransiz Guney ve Antarktika Topraklari, DR Kongo) - bunlar artik
+  REAL_INFLATION'da YOK
+- Rastgele sayi ureten fallback (`r(1,45)`) tamamen kaldirildi;
+  artik veri yoksa `inflation = null` donuyor
+- Tum goruntuleme yerleri (ana panel, liste gorunumu, karsilastirma)
+  `null` durumunda "%..." yerine **"Bilinmiyor"** gosterecek sekilde
+  guncellendi
+- Veri kalitesi rozeti de duzeltildi: eskiden "tahmini" (estimated)
+  gosteriliyordu, artik dogru sekilde "bilinmiyor" (unknown) rozeti
+  cikiyor
+
+### Standart dogrulama protokolu (yine uygulandi)
+- Node mock tarayici testinde yeni regresyon yok
+- REAL_INFLATION objesi dogrudan parse edilip 167 ulke sayisi,
+  ornek degerler (Rusya, Venezuela, Iran, Almanya) ve eksik
+  ulkelerin (Myanmar/Sudan/Kuzey Kore) GERCEKTEN yer almadigi
+  tek tek dogrulandi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- `.hc-head` CSS'inde padding-right:28px dogrulandi
+- REAL_INFLATION: 167 ulke, dogru degerler, 10 eksik ulke dogru
+  sekilde yok
+
+## Faz 39 - Platform gecici olarak tamamen ucretsiz (2027'ye kadar) (TAMAMLANDI)
+
+**Onemli mimari karar:** Kurucu Uye/Standart paket altyapisi (fiyatlandirma,
+uyelik sistemi, rozet, Supabase RPC'leri) HICBIR SEY SILINMEDI. Bunun
+yerine TEK bir anahtar eklendi:
+
+```js
+const MONETIZATION_ACTIVE = false;
+```
+
+`isPremiumUser()` fonksiyonu artik bu bayraga bakiyor: bayrak `false`
+oldugu surece, GIRIS YAPMIS HERKES (Kesif/ucretsiz uye dahil) premium
+kullanici gibi davraniliyor (`!isVisitor()`). Bu TEK degisiklik,
+sitede zaten kurulu olan TUM kisitlama mantigina otomatik yayiliyor
+(cunku hepsi `isPremiumUser()` kontroluyle basliyor):
+- Haftalik 1 ulke raporu limiti -> kalkti (giris yapan herkes sinirsiz)
+- Haftalik 1 karsilastirma limiti -> kalkti
+- Filtreleme kilidi -> zaten sadece ziyaretciye ozeldi, degismedi
+- PDF/Yazdir kilidi -> kalkti
+- Kuresel Raporlar / Atlas Research+ kilidi -> kalkti
+
+**2027'de eski sisteme donmek icin** tek yapilmasi gereken:
+`MONETIZATION_ACTIVE = true` yapmak. Bunun disinda hicbir kod
+degisikligi gerekmiyor - her sey zaten hazir ve dogru calisacak
+sekilde yerinde duruyor.
+
+**Kayit formu sadelesti:** Platform ucretsizken, kayit ekraninda artik
+Kurucu Uye/Standart plan secim ekrani (fiyatlar, "$19,90/yil" vb.)
+HIC GORUNMUYOR. Kullanici dogrudan tek adimlik ucretsiz kayit formuna
+yonleniyor ("Ucretsiz Kayit Ol" butonu).
+
+**"/premium" sayfasi ve modal'i degisti:** Fiyat kartlari yerine artik
+"Furniture Atlas su anda herkese tamamen ucretsiz" mesaji gosteriliyor
+- hicbir yil veya odeme referansi yok. Hem modal uzerinden hem
+`/premium` URL'sine dogrudan gelindiginde bu mesaj gorunuyor.
+
+**Guvenlik notu:** Onceki kritik TDZ hatasindan (Faz 32) ders alinarak,
+`isVisitor()` fonksiyonuna da ayni try/catch korumasi eklendi - artik
+`currentSupabaseSession` her nerede/ne zaman cagirilirsa cagirilsin
+script'i asla cokertmiyor.
+
+**Bekletilen konu:** Toplam Ihracat (ilk 30 uretici ulke, Excel
+verisinden) ve Pazar Buyuklugu kaldirma islemleri - kullanici Excel
+dosyasini tekrar gonderecek, o zaman islenecek.
+
+### Standart dogrulama protokolu (yine uygulandi)
+- Node mock tarayici testinde yeni regresyon yok
+- `isVisitor()`/`isPremiumUser()`/`isFreeMember()` fonksiyonlari GERCEK
+  KOD'dan cikarilip iki senaryoda (ziyaretci / giris yapmis kullanici)
+  dogrudan calistirildi - beklenen sonuclar (giris yapan herkes tam
+  erisimli) dogrulandi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde script hatasiz calisti
+- Ziyaretci/giris-yapmis-kullanici senaryolari gercek fonksiyonlarla
+  test edildi, dogru sonuc verdi
+- `MONETIZATION_ACTIVE`, ucretsiz mesaj metni, "Ucretsiz Kayit Ol"
+  butonu bundle'da dogrulandi

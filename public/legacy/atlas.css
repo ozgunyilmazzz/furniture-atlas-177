@@ -218,7 +218,7 @@
     margin-bottom:12px; background:rgba(224,104,90,0.15); color:var(--red); border:1px solid rgba(224,104,90,0.4);
   }
   .hc-restriction.significant{ background:rgba(201,169,97,0.15); color:var(--amber); border-color:rgba(201,169,97,0.4); }
-  .hc-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .hc-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding-right:28px; }
   .hc-country{ font-family:var(--display); font-style:italic; font-size:19px; }
   .hc-flag{ font-size:20px; }
   .hc-score-badge{
@@ -486,12 +486,13 @@
     -webkit-mask-image:linear-gradient(180deg, black 0%, transparent 85%);
     mask-image:linear-gradient(180deg, black 0%, transparent 85%);
   }
-  /* Sağ üstteki ülke haritası — artık büyük, düşük opaklıkta, dekoratif bir arka plan öğesi */
+  /* Sağ üstteki ülke haritası — büyük, düşük opaklıkta, dekoratif bir arka plan öğesi.
+     Kartın dışına taşıp kaybolmasın diye pozisyon içeride tutulur (overflow:hidden ile kırpılmasın). */
   .country-hero-bgmap{
-    position:absolute; top:-6%; right:-4%; width:300px; height:300px; z-index:0; pointer-events:none;
-    opacity:0.18;
+    position:absolute; top:-4%; right:-2%; width:360px; height:360px; z-index:0; pointer-events:none;
+    opacity:0.14;
   }
-  .country-hero-bgmap-shape{ fill:var(--hero-to); fill-opacity:1; stroke:none; }
+  .country-hero-bgmap-path{ fill:var(--hero-to); fill-opacity:1; stroke:none; }
 
   .country-hero-top{ position:relative; z-index:1; }
   .country-hero-eyebrow{
@@ -505,7 +506,7 @@
   }
   .country-hero-flag-fallback{ font-size:40px; line-height:1; }
   .country-hero-title{
-    font-family:var(--display); font-style:italic; font-size:44px; color:var(--text-0); line-height:1.08;
+    font-family:var(--display); font-style:italic; font-size:37px; color:var(--text-0); line-height:1.08;
     letter-spacing:-0.2px;
   }
 
@@ -543,24 +544,32 @@
   .hero-route-stat-label{ font-family:var(--body); font-size:10.5px; color:var(--text-2); }
   .hero-route-stat-divider{ width:1px; height:30px; background:rgba(255,255,255,0.1); }
 
+  /* Alt bilgi satırı — düz metin yerine küçük "chip" kartlar, daha lüks bir his için */
   .country-hero-facts{
-    position:relative; z-index:1; display:flex; flex-wrap:wrap; gap:8px 22px;
+    position:relative; z-index:1; display:flex; flex-wrap:wrap; gap:9px;
     margin-top:24px; padding-top:18px; border-top:1px solid rgba(255,255,255,0.08);
   }
   .country-hero-fact{
-    font-family:var(--body); font-size:12.5px; color:var(--text-1); display:flex; align-items:center; gap:6px;
+    font-family:var(--body); font-size:12px; color:var(--text-1); display:flex; align-items:center; gap:7px;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:100px;
+    padding:7px 14px 7px 11px; transition:border-color 0.2s ease, background 0.2s ease;
   }
+  .country-hero-fact:hover{ background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.16); }
   .country-hero-fact-icon{ display:inline-flex; align-items:center; color:var(--hero-to); flex:0 0 auto; }
 
   .country-hero-tagline{
-    position:relative; z-index:1; margin-top:16px; text-align:right;
-    font-family:var(--display); font-style:italic; font-size:13.5px; color:var(--text-2); line-height:1.5;
+    position:relative; z-index:1; margin-top:18px; text-align:right;
+    font-family:var(--display); font-style:italic; font-size:14px; color:var(--text-0); line-height:1.55;
+  }
+  .country-hero-tagline-label{
+    display:block; font-family:var(--mono); font-style:normal; font-size:9.5px; letter-spacing:2px;
+    color:var(--hero-to); font-weight:700; margin-bottom:5px;
   }
 
   @media(max-width:640px){
     .country-hero{ padding:26px 22px 20px; }
-    .country-hero-bgmap{ width:220px; height:220px; opacity:0.14; }
-    .country-hero-title{ font-size:30px; }
+    .country-hero-bgmap{ width:260px; height:260px; opacity:0.11; }
+    .country-hero-title{ font-size:25px; }
     .hero-route-stats{ justify-content:center; }
     .country-hero-facts{ justify-content:center; text-align:center; }
     .country-hero-tagline{ text-align:center; }

@@ -258,7 +258,7 @@ const TURKEY_TOTAL_EXPORT_2025 = {"iraq":609.299,"austria":57.886,"usa":243.984,
 
 
 // Gerçek enflasyon verisi (2025) — IMF World Economic Outlook API (PCPIPCH göstergesi, resmi imf.org veri servisi).
-const REAL_INFLATION = {"mexico":3.8,"usa":2.7,"germany":2.3,"france":0.9,"uk":3.4,"turkey":34.9,"china":0,"japan":3.2,"india":2.1,"brazil":5,"southafrica":3.2,"south-korea":2.1,"canada":2.1,"australia":2.9,"italy":1.6,"spain":2.7,"netherlands":3,"switzerland":0.2,"poland":3.6,"austria":3.6,"belgium":3,"sweden":2.6,"norway":3,"denmark":1.8,"finland":1.8,"ireland":2.1,"portugal":2.2,"greece":2.9,"czechia":2.5,"hungary":4.4,"romania":7.3,"bulgaria":3.5,"croatia":4.4,"slovakia":4.2,"slovenia":2.5,"lithuania":3.4,"latvia":3.8,"estonia":4.8,"cyprus":0.8,"luxembourg":2.5,"iceland":4.1,"russia":8.7,"ukraine":12.7,"belarus":6.6,"kazakhstan":11.4,"uzbekistan":8.8,"azerbaijan":5.6,"georgia":3.9,"armenia":3.3,"indonesia":1.9,"thailand":-0.1,"vietnam":3.3,"malaysia":1.4,"philippines":1.7,"bangladesh":10,"pakistan":4.5,"sri-lanka":1.2,"myanmar":22,"cambodia":2.5,"laos":7.7,"egypt":20.4,"morocco":0.8,"algeria":1.4,"tunisia":5.3,"nigeria":23,"kenya":4.1,"ethiopia":13.2,"ghana":14.2,"tanzania":3.3,"uganda":3.6,"zambia":13.9,"angola":20.2,"cote-d-ivoire":0.1,"senegal":1.4,"cameroon":3.4,"dem-rep-congo":7.4,"sudan":100.2,"iran":50.9,"iraq":0.3,"saudi-arabia":2,"uae":1.3,"qatar":0.6,"kuwait":2.4,"oman":1,"jordan":1.8,"lebanon":14.6,"israel":3,"yemen":21.4,"afghanistan":2.9,"argentina":41.9,"chile":4.2,"colombia":5.1,"peru":1.5,"venezuela":252,"ecuador":0.7,"bolivia":19.5,"paraguay":4.1,"uruguay":4.7,"guatemala":1.6,"honduras":4.6,"nicaragua":2.1,"costa-rica":-0.1,"panama":0,"dominican-rep":3.9,"jamaica":3.9,"trinidad-and-tobago":1,"new-zealand":2.8,"fiji":-1.4,"mongolia":8.6,"nepal":4.1,"bhutan":2.6,"mozambique":4.4,"zimbabwe":81.4,"lesotho":4.4,"namibia":3.5,"botswana":2.8,"congo":2.6,"gabon":2,"eq-guinea":2.8,"chad":-2.6,"niger":-4.6,"mali":2.3,"burkina-faso":-0.5,"togo":0.4,"benin":1.1,"guinea":3.1,"sierra-leone":7.6,"liberia":8.3,"gambia":7.9,"mauritania":1.6,"guinea-bissau":0.9,"djibouti":-0.3,"somalia":3.7,"rwanda":7,"burundi":34.2,"malawi":28.4,"madagascar":8,"eswatini":3.1,"central-african-rep":1,"bosnia-and-herz":4,"north-macedonia":4.1,"albania":2.2,"serbia":3.9,"montenegro":3.9,"moldova":7.8,"libya":1.8,"papua-new-guinea":4.4,"solomon-is":3.4,"vanuatu":1.7,"brunei":-0.3,"belize":1.1,"guyana":3.3,"suriname":9.2,"bahamas":0.6};
+const REAL_INFLATION = {"romania": 10.9, "ukraine": 8.2, "kosovo": 6.8, "moldova": 6.8, "bosnia-and-herz": 5.6, "bulgaria": 5.6, "lithuania": 5.5, "russia": 5.3, "greece": 5.2, "iceland": 5.2, "belarus": 4.8, "north-macedonia": 4.8, "croatia": 4.5, "slovakia": 3.8, "estonia": 3.7, "ireland": 3.6, "montenegro": 3.6, "slovenia": 3.6, "latvia": 3.5, "serbia": 3.5, "belgium": 3.4, "austria": 3.2, "portugal": 3.2, "spain": 3.2, "norway": 3.1, "cyprus": 3.06, "albania": 3, "italy": 3, "netherlands": 2.9, "uk": 2.8, "poland": 2.5, "germany": 2.3, "luxembourg": 2.28, "czechia": 2.1, "finland": 2.1, "malta": 2.1, "denmark": 1.9, "france": 1.8, "hungary": 1.8, "sweden": 0.8, "switzerland": 0.5, "venezuela": 524, "argentina": 33.6, "haiti": 20, "cuba": 15.89, "bolivia": 12.51, "suriname": 11.4, "honduras": 6.09, "colombia": 5.84, "jamaica": 5.4, "dominican-rep": 5.35, "brazil": 4.72, "puerto-rico": 4.6, "belize": 4.3, "uruguay": 4.25, "usa": 4.2, "peru": 4.01, "mexico": 3.94, "chile": 3.9, "nicaragua": 3.72, "guyana": 3.4, "canada": 3.2, "guatemala": 2.85, "bahamas": 2.7, "el-salvador": 2.53, "paraguay": 2.1, "ecuador": 0.92, "panama": 0.3, "trinidad-and-tobago": 0.3, "costa-rica": -0.97, "iran": 88.6, "syria": 27.5, "lebanon": 17.3, "mongolia": 12, "pakistan": 11.1, "kyrgyzstan": 11, "kazakhstan": 10.3, "bangladesh": 9.16, "afghanistan": 8, "bhutan": 7.72, "laos": 7.4, "sri-lanka": 6.8, "philippines": 6.4, "uzbekistan": 6.4, "azerbaijan": 5.8, "georgia": 5.8, "cambodia": 5.79, "turkmenistan": 5.5, "nepal": 5.22, "armenia": 5.1, "vietnam": 4.69, "india": 4.38, "tajikistan": 4.1, "indonesia": 3.34, "south-korea": 3.2, "iraq": 3, "oman": 2.8, "jordan": 2.79, "taiwan": 2.6, "thailand": 2.42, "bahrain": 2.3, "qatar": 2.2, "kuwait": 2.19, "uae": 2.04, "malaysia": 1.9, "singapore": 1.9, "saudi-arabia": 1.8, "japan": 1.7, "israel": 1.6, "china": 1, "timor-leste": 0.5, "brunei": 0.1, "palestine": -40.04, "s-sudan": 113, "malawi": 23.4, "nigeria": 15.93, "egypt": 14.6, "libya": 14, "ethiopia": 13.4, "sierra-leone": 12.69, "rwanda": 12.3, "burundi": 12.1, "angola": 10.88, "botswana": 10.7, "eritrea": 9, "mauritania": 8.7, "madagascar": 7.9, "somalia": 7.8, "gambia": 7.53, "mozambique": 7.22, "zambia": 6.5, "kenya": 6.4, "tunisia": 5.5, "guinea": 5.4, "ghana": 5.3, "liberia": 5.3, "algeria": 4.9, "zimbabwe": 4.7, "southafrica": 4.5, "tanzania": 4.2, "namibia": 4.1, "eq-guinea": 4, "uganda": 3.7, "lesotho": 3.5, "djibouti": 3, "congo": 2.9, "cameroon": 2.7, "eswatini": 2.7, "gabon": 2.1, "cote-d-ivoire": 1.4, "mali": 1.3, "senegal": 1.3, "morocco": 1.2, "central-african-rep": 0.4, "togo": 0.4, "burkina-faso": -0.4, "benin": -0.7, "guinea-bissau": -2.5, "chad": -2.8, "niger": -4.8, "fiji": 6.1, "solomon-is": 4.2, "new-zealand": 4.1, "papua-new-guinea": 4.1, "australia": 4, "vanuatu": 1, "new-caledonia": 0.9};
 
 // Ülke telefon kodu (gerçek, ITU/E.164 standardı).
 const REAL_CALLING_CODE = {"fiji":679,"tanzania":255,"w-sahara":212,"canada":1,"usa":1,"kazakhstan":7,"uzbekistan":998,"papua-new-guinea":675,"indonesia":62,"argentina":54,"chile":56,"dem-rep-congo":243,"somalia":252,"kenya":254,"sudan":249,"chad":235,"haiti":509,"dominican-rep":1,"russia":7,"bahamas":1,"falkland-is":500,"norway":47,"greenland":299,"timor-leste":670,"southafrica":27,"lesotho":266,"mexico":52,"uruguay":598,"brazil":55,"bolivia":591,"peru":51,"colombia":57,"panama":507,"costa-rica":506,"nicaragua":505,"honduras":504,"el-salvador":503,"guatemala":502,"belize":501,"venezuela":58,"guyana":592,"suriname":597,"france":33,"ecuador":593,"puerto-rico":1,"jamaica":1,"cuba":53,"zimbabwe":263,"botswana":267,"namibia":264,"senegal":221,"mali":223,"mauritania":222,"benin":229,"niger":227,"nigeria":234,"cameroon":237,"togo":228,"ghana":233,"cote-d-ivoire":225,"guinea":224,"guinea-bissau":245,"liberia":231,"sierra-leone":232,"burkina-faso":226,"central-african-rep":236,"congo":242,"gabon":241,"eq-guinea":240,"zambia":260,"malawi":265,"mozambique":258,"eswatini":268,"angola":244,"burundi":257,"israel":972,"lebanon":961,"madagascar":261,"palestine":970,"gambia":220,"tunisia":216,"algeria":213,"jordan":962,"uae":971,"qatar":974,"kuwait":965,"iraq":964,"oman":968,"vanuatu":678,"cambodia":855,"thailand":66,"laos":856,"myanmar":95,"vietnam":84,"north-korea":850,"south-korea":82,"mongolia":976,"india":91,"bangladesh":880,"bhutan":975,"nepal":977,"pakistan":92,"afghanistan":93,"tajikistan":992,"kyrgyzstan":996,"turkmenistan":993,"iran":98,"syria":963,"armenia":374,"sweden":46,"belarus":375,"ukraine":380,"poland":48,"austria":43,"hungary":36,"moldova":373,"romania":40,"lithuania":370,"latvia":371,"estonia":372,"germany":49,"bulgaria":359,"greece":30,"turkey":90,"albania":355,"croatia":385,"switzerland":41,"luxembourg":352,"belgium":32,"netherlands":31,"portugal":351,"spain":34,"ireland":353,"new-caledonia":687,"solomon-is":677,"new-zealand":64,"australia":61,"sri-lanka":94,"china":86,"italy":39,"denmark":45,"uk":44,"iceland":354,"azerbaijan":994,"georgia":995,"philippines":63,"malaysia":60,"brunei":673,"slovenia":386,"finland":358,"slovakia":421,"czechia":420,"eritrea":291,"japan":81,"paraguay":595,"yemen":967,"saudi-arabia":966,"cyprus":357,"morocco":212,"egypt":20,"libya":218,"ethiopia":251,"djibouti":253,"uganda":256,"rwanda":250,"bosnia-and-herz":387,"north-macedonia":389,"serbia":381,"montenegro":382,"kosovo":383,"trinidad-and-tobago":1,"s-sudan":211,"taiwan":886};
@@ -1386,9 +1386,10 @@ function renderCountryMiniMap(countryId, opts){
   ];
   const pathD = 'M' + mainRing.map(p => project(p).join(',')).join('L') + 'Z';
   const cls = (opts && opts.className) || 'hero-minimap';
+  const pathCls = (opts && opts.pathClassName) || 'hero-minimap-shape';
   return `
     <svg class="${cls}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-      <path d="${pathD}" class="hero-minimap-shape"/>
+      <path d="${pathD}" class="${pathCls}"/>
     </svg>
   `;
 }
@@ -1660,9 +1661,8 @@ function generateExtraFields(country){
   const r=(a,b)=>a+rnd()*(b-a);
   const realInflation = REAL_INFLATION[country.id];
   const hasRealInflation = realInflation !== undefined && realInflation !== null;
-  const inflation = hasRealInflation ? realInflation.toFixed(1) : r(1,45).toFixed(1);
+  const inflation = hasRealInflation ? realInflation.toFixed(1) : null;
   const inflationVerified = hasRealInflation;
-  const internetPen = Math.round(r(40,98));
   const tzOffset = Math.round(country.lon/15);
   const totalExports = Math.round(numFromMoney(country.marketSize) * r(0.15,0.6));
   // İtalyan premium/high-end mobilya markalarının (Poltrona Frau, Cassina, B&B Italia, Natuzzi vb.)
@@ -1686,7 +1686,7 @@ function generateExtraFields(country){
     {label:'Çin Rekabeti', score: (country.suppliers.find(s=>s.c==='Çin')||{v:30}).v + 15, note:'Çin menşeli düşük maliyetli ürünlerin pazar baskısı.'},
     {label:'İthalat Kısıtlamaları', score: Math.round(r(10,55)), note: country.fta.includes('yok')?'Serbest ticaret anlaşması yok, tarife riski mevcut.':'Ticaret anlaşması avantajı mevcut.'}
   ];
-  return { inflation, inflationVerified, internetPen, tzOffset, totalExports, italianPremiumBrands, gdpGrowth, holidays, risks,
+  return { inflation, inflationVerified, tzOffset, totalExports, italianPremiumBrands, gdpGrowth, holidays, risks,
     language: LANGUAGES[country.id] || 'Yerel dil',
     negStyle: NEG_STYLES[Math.floor(r(0,NEG_STYLES.length))],
     meeting: MEETING_CULTURES[Math.floor(r(0,MEETING_CULTURES.length))],
@@ -1833,11 +1833,10 @@ function generateReportHTML(baseCountry){
         <div class="card"><div class="card-label">Kişi Başı GSYH</div><div class="card-val">${c.gdpPerCapita}</div></div>
         <div class="card"><div class="card-label">Para Birimi</div><div class="card-val">${c.currency}</div></div>
         <div class="card"><div class="card-label">Döviz Kuru</div><div class="card-val" style="font-size:13px">${c.exchangeRate}</div></div>
-        <div class="card"><div class="card-label">Enflasyon</div><div class="card-val">%${x.inflation}</div></div>
+        <div class="card"><div class="card-label">Enflasyon</div><div class="card-val">${x.inflation ? '%' + x.inflation : 'Bilinmiyor'}</div></div>
         <div class="card"><div class="card-label">Faiz Oranı</div><div class="card-val">%${x.interestRate}</div></div>
         <div class="card"><div class="card-label">İş Yapma Kolaylığı</div><div class="card-val">${c.eodb}</div></div>
         <div class="card"><div class="card-label">Kentsel Nüfus</div><div class="card-val">%${x.urbanPop}</div></div>
-        <div class="card"><div class="card-label">İnternet Penetrasyonu</div><div class="card-val">%${x.internetPen}</div></div>
         <div class="card"><div class="card-label">Dil</div><div class="card-val" style="font-size:14px">${x.language}</div></div>
         <div class="card"><div class="card-label">Saat Dilimi</div><div class="card-val">UTC${x.tzOffset>=0?'+':''}${x.tzOffset}</div></div>
       </div>
@@ -2571,7 +2570,7 @@ function getColumnCellHtml(key, cd, xf){
     case 'importTax': return `<td>${cd.importTax}</td>`;
     case 'logisticsCost': return `<td>${cd.logisticsCost}</td>`;
     case 'gdpPerCapita': return `<td>${cd.gdpPerCapita}</td>`;
-    case 'inflation': return `<td>%${xf.inflation}</td>`;
+    case 'inflation': return `<td>${xf.inflation ? '%' + xf.inflation : 'Bilinmiyor'}</td>`;
     case 'population': return `<td>${cd.population}</td>`;
     case 'isManufacturer': return `<td>${manufacturerTierLabel(cd.iso) ? 'Evet — ' + manufacturerTierLabel(cd.iso) : 'Hayır'}</td>`;
     default: return '<td></td>';
@@ -2919,14 +2918,16 @@ function formatTimeDiff(countryId){
   const val = Number.isInteger(diff) ? diff : diff.toFixed(2).replace(/0$/, '').replace(/\.$/, '');
   return `${sign}${val} saat`;
 }
-// Tek cümlelik, tamamen mevcut/gerçek verilerden (hesaplanmış Fırsat Skoru
-// etiketi) türetilen kısa bir karşılama notu — ülkeye özel uydurma bir iddia
-// içermez, sadece zaten var olan skor kategorisini ifade eder.
+// Tek cümlelik "AI Özeti" — tamamen mevcut/gerçek verilerden (Pazar ve
+// Rekabet skorları, zaten uygulamanın başka yerlerinde de kullanılan aynı
+// eşik değerleriyle) türetilir; ülkeye özel uydurma bir iddia içermez.
 function heroTagline(baseCountry, c){
-  const label = scoreLabel(c.scores.overall);
-  if(label === 'Yüksek Fırsat') return `${baseCountry.name}, ihracatçılar için yüksek potansiyelli bir pazar olarak öne çıkıyor.`;
-  if(label === 'Orta Fırsat') return `${baseCountry.name}, dikkatle değerlendirilmeye değer, dengeli bir pazar sunuyor.`;
-  return `${baseCountry.name} pazarı için fırsatlar veriler arttıkça netleşecek.`;
+  if(c.scores.overall >= 80){
+    return `Türkiye'nin en güçlü ihracat potansiyeli taşıyan pazarlardan biri.`;
+  }
+  const potential = potentialLabel(c.scores.market);
+  const competitionLabel = c.scores.competition >= 65 ? 'Yüksek' : c.scores.competition >= 40 ? 'Orta' : 'Düşük';
+  return `Mobilya ithalatı ${potential.toLowerCase()}, rekabet ${competitionLabel.toLowerCase()} seviyede.`;
 }
 function renderCountryHero(baseCountry, c){
   if(typeof baseCountry.lat !== 'number' || typeof baseCountry.lon !== 'number') return '';
@@ -2934,7 +2935,7 @@ function renderCountryHero(baseCountry, c){
   const capital = REAL_CAPITALS[baseCountry.id] || 'Bilinmiyor';
   const language = REAL_LANGUAGES[baseCountry.id] || 'Bilinmiyor';
   const timeDiff = formatTimeDiff(baseCountry.id);
-  const bgMap = renderCountryMiniMap(baseCountry.id, { w:340, h:340, pad:14, className:'country-hero-bgmap-shape' });
+  const bgMap = renderCountryMiniMap(baseCountry.id, { w:408, h:408, pad:16, className:'country-hero-bgmap-shape', pathClassName:'country-hero-bgmap-path' });
   const flagImg = `<img class="country-hero-flagimg" src="https://flagcdn.com/w80/${baseCountry.iso.toLowerCase()}.png" alt="${c.name} bayrağı" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span class="country-hero-flag-fallback" style="display:none;">${c.flag}</span>`;
 
   let routeHtml = '';
@@ -2988,7 +2989,7 @@ function renderCountryHero(baseCountry, c){
         <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.4 3.8 5.6 3.8 9s-1.4 6.6-3.8 9c-2.4-2.4-3.8-5.6-3.8-9s1.4-6.6 3.8-9z"/></svg></span>${language}</div>
         <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>${timeDiff}</div>
       </div>
-      <div class="country-hero-tagline">${heroTagline(baseCountry, c)}</div>
+      <div class="country-hero-tagline"><span class="country-hero-tagline-label">AI ÖZETİ</span>${heroTagline(baseCountry, c)}</div>
     </div>
   `;
 }
@@ -3143,7 +3144,7 @@ function renderCountryPage(baseCountry){
         <div class="card ${dqCardClass(c.dq.gdp)}"><div class="card-label">Kişi Başı GSYH${dqBadge(c.dq.gdp)}</div><div class="card-value">${c.gdpPerCapita}</div></div>
         <div class="card"><div class="card-label">Para Birimi</div><div class="card-value">${c.currency}</div></div>
         <div class="card ${dqCardClass('estimated')}"><div class="card-label">Ekonomik Büyüme${dqBadge('estimated')}</div><div class="card-value">${x.gdpGrowth}%</div></div>
-        <div class="card ${dqCardClass(x.inflationVerified ? 'real' : 'estimated')}"><div class="card-label">Enflasyon${dqBadge(x.inflationVerified ? 'real' : 'estimated')}</div><div class="card-value">%${x.inflation}</div></div>
+        <div class="card ${dqCardClass(x.inflationVerified ? 'real' : 'unknown')}"><div class="card-label">Enflasyon${dqBadge(x.inflationVerified ? 'real' : 'unknown')}</div><div class="card-value">${x.inflation ? '%' + x.inflation : 'Bilinmiyor'}</div></div>
         <div class="card ${dqCardClass(REAL_CALLING_CODE[c.id] ? 'real' : 'unknown')}"><div class="card-label">Telefon Kodu${dqBadge(REAL_CALLING_CODE[c.id] ? 'real' : 'unknown')}</div><div class="card-value">${REAL_CALLING_CODE[c.id] ? '+'+REAL_CALLING_CODE[c.id] : 'Bilinmiyor'}</div></div>
       </div>
       <div class="footnote" style="margin-top:10px;">Veri yılı: Nüfus ve GSYH 2026 tahminidir (IMF World Economic Outlook, Nisan 2026 / Worldometers.info). Enflasyon 2025 verisidir (IMF WEO).</div>
@@ -3352,14 +3353,24 @@ function setMembershipCache(tier, founderNumber){
   updatePremiumUI();
   if(dashboard.classList.contains('open')) applyContentGate();
 }
+// ===========================================================
+// FAZ 39 — PLATFORM ŞU ANDA TAMAMEN ÜCRETSİZ.
+// Kurucu Üye / Standart paket mantığı (fiyatlandırma, haftalık limitler,
+// PDF/filtre kısıtlamaları) SİLİNMEDİ — sadece bu bayrakla devre dışı
+// bırakıldı. 2027'de tekrar aktif etmek için tek yapılması gereken bu
+// değeri `true` yapmak; altındaki tüm kod (canOpenCountryFree,
+// canCompareFree, filtre/PDF kilidi, rozet sistemi, /premium sayfası vb.)
+// zaten hazır ve değişmeden çalışmaya devam edecek.
+const MONETIZATION_ACTIVE = false;
 function isPremiumUser(){
+  if(!MONETIZATION_ACTIVE) return !isVisitor(); // ücretsiz dönemde: giriş yapan herkes tam erişimli
   const t = getMembershipTier();
   return t === 'founding' || t === 'standard';
 }
 // Ziyaretçi: hiç oturum açmamış. Başlangıç (ücretsiz) üye: oturum açmış ama
 // Kurucu/Standart değil. Kullanıcı yolculuğundaki üç seviye bu ikisi + premium.
 function isVisitor(){
-  return !currentSupabaseSession;
+  try{ return !currentSupabaseSession; }catch(e){ return true; } // henüz tanımlanmadıysa (TDZ) güvenli varsayım: ziyaretçi
 }
 function isFreeMember(){
   return !!currentSupabaseSession && !isPremiumUser();
@@ -3465,6 +3476,18 @@ function showToast(message){
 function showPremiumModal(){
   document.getElementById('premiumModal').classList.add('open');
   pushHistoryState();
+  const pricingSection = document.getElementById('premiumPricingSection');
+  const freeMessage = document.getElementById('premiumFreeMessage');
+  const titleEl = document.getElementById('premiumModal').querySelector('.dash-title');
+  if(!MONETIZATION_ACTIVE){
+    if(pricingSection) pricingSection.style.display = 'none';
+    if(freeMessage) freeMessage.style.display = 'block';
+    if(titleEl) titleEl.textContent = 'Furniture Atlas';
+    return;
+  }
+  if(pricingSection) pricingSection.style.display = '';
+  if(freeMessage) freeMessage.style.display = 'none';
+  if(titleEl) titleEl.textContent = 'Üyeliğinizi Yükseltin';
   refreshFoundingSlotsUI();
   updatePremiumFreeCard();
 }
@@ -4067,9 +4090,21 @@ function showAuthTab(tab){
   document.getElementById('registerFormWrap').style.display = isLogin ? 'none' : 'block';
   document.getElementById('otpFormWrap').style.display = 'none';
   document.getElementById('authHeaderText').style.display = isLogin ? 'none' : 'block';
-  document.getElementById('registerStep1').style.display = 'block';
-  document.getElementById('registerStep2').style.display = 'none';
-  document.getElementById('authModalInner').style.maxWidth = isLogin ? '460px' : '1040px';
+  if(!isLogin && !MONETIZATION_ACTIVE){
+    // Platform şu an tamamen ücretsiz — plan seçimi ekranı hiç gösterilmiyor,
+    // doğrudan tek adımlı ücretsiz kayıt formuna geçiliyor.
+    selectedRegisterPlan = 'free';
+    document.getElementById('registerStep1').style.display = 'none';
+    document.getElementById('registerStep2').style.display = 'block';
+    document.getElementById('registerStep2PlanLabel').style.display = 'none';
+    document.getElementById('registerSubmitBtn').textContent = 'Ücretsiz Kayıt Ol';
+    document.getElementById('authModalInner').style.maxWidth = '460px';
+  } else {
+    document.getElementById('registerStep1').style.display = 'block';
+    document.getElementById('registerStep2').style.display = 'none';
+    document.getElementById('registerStep2PlanLabel').style.display = '';
+    document.getElementById('authModalInner').style.maxWidth = isLogin ? '460px' : '1040px';
+  }
   const authIcon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>';
   document.getElementById('authModalTitle').innerHTML = authIcon + (isLogin ? 'Giriş Yap' : 'Kayıt Ol');
 }
@@ -5037,7 +5072,19 @@ function applyHistoryState(state){
         if(modalName === 'news') renderNews();
         else if(modalName === 'fairs') renderFairs();
         else if(modalName === 'targets') renderTargetsPanel();
-        else if(modalName === 'premium'){ refreshFoundingSlotsUI(); updatePremiumFreeCard(); }
+        else if(modalName === 'premium'){
+          const pricingSection = document.getElementById('premiumPricingSection');
+          const freeMessage = document.getElementById('premiumFreeMessage');
+          if(!MONETIZATION_ACTIVE){
+            if(pricingSection) pricingSection.style.display = 'none';
+            if(freeMessage) freeMessage.style.display = 'block';
+          } else {
+            if(pricingSection) pricingSection.style.display = '';
+            if(freeMessage) freeMessage.style.display = 'none';
+            refreshFoundingSlotsUI();
+            updatePremiumFreeCard();
+          }
+        }
         el.classList.add('open');
       }
     }
