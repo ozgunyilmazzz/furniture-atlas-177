@@ -3995,7 +3995,7 @@ function updateLoginUI(){
   const eyebrowEl = document.getElementById('heroEyebrow');
   const titleEl = document.getElementById('heroTitle');
   const subEl = document.getElementById('heroSub');
-  const hintEl = document.getElementById('heroHint');
+  const popularMarketsEl = document.getElementById('popularMarkets');
   if(user){
     const profile = getCurrentUserProfile();
     let displayName = profile.full_name || user;
@@ -4004,8 +4004,8 @@ function updateLoginUI(){
     gatedBtns.forEach(b=> b.style.display = '');
     eyebrowEl.style.display = 'none';
     titleEl.innerHTML = `Hoşgeldin, <em>${displayName}</em>.`;
-    subEl.textContent = 'Bugün hangi ülkeyi analiz etmek istersin? Güncel ticaret verileriyle yeni ihracat fırsatlarını keşfet.';
-    hintEl.textContent = 'KÜREYİ ÇEVİR · DETAY İÇİN TIKLA · İHRACATA BAŞLA';
+    subEl.textContent = '177 ülke seni bekliyor. Küreyi sürükle ve yeni ihracat pazarlarını keşfet.';
+    if(popularMarketsEl) popularMarketsEl.style.display = '';
   } else {
     loginBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Giriş Yap';
     targetsBtn.style.display = 'none';
@@ -4014,7 +4014,7 @@ function updateLoginUI(){
     eyebrowEl.textContent = 'INTERACTIVE MARKET MAP';
     titleEl.innerHTML = 'Bir sonraki ihracat pazarınızı <em>tek bakışta</em> keşfedin.';
     subEl.textContent = 'Mobilya ithalat verileri, rakip analizleri, gümrük tarifeleri, lojistik maliyetleri ve pazar büyüklüklerini tek bir küre üzerinde birleştirdik. Bir ülkenin üzerine gelin ve o pazarın potansiyelini anında görün.';
-    hintEl.textContent = 'KÜREYİ ÇEVİR · DETAY İÇİN TIKLA · İHRACATA BAŞLA';
+    if(popularMarketsEl) popularMarketsEl.style.display = 'none';
   }
   refreshMyTargetsBadge();
 }

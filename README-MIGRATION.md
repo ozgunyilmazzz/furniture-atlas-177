@@ -1603,3 +1603,41 @@ kullanildi, ayri bir UI olarak insa edilmedi.
 - Uretim sunucusunda `globeHintLeft`/`globeHintRight`/
   `popularMarketsChips` HTML'de, `.globe-hint`/`.popular-market-chip`
   CSS'te, `initGlobeHints`/`renderPopularMarkets` JS'te dogrulandi
+
+## Faz 43 - Hero metinleri sadelesti, Populer Pazarlar sadece uyeye ozel (TAMAMLANDI)
+
+**1) Kure ipuclari zaten ziyaretciye de acikti**
+`initGlobeHints()` hicbir zaman giris kontrolu yapmiyordu. Onceki
+raporun sebebi muhtemelen tarayicinin "bunu zaten gordum" bilgisini
+(localStorage) hatirlamasi - gizli sekmede/localStorage temizlenince
+tekrar gorunur.
+
+**2) Basliklar - punto kucultuldu**
+`h1.hero-title` font-size: `clamp(32px,5vw,58px)` -> `clamp(28px,4.3vw,50px)`.
+Hem "Hosgeldin, [Isim]." hem "Bir sonraki ihracat pazarinizi..."
+basliklari ayni sinifi paylastigi icin ikisi de kucudu.
+
+**3) Giris yapmis kullanici alt metni degisti**
+Eski: "Bugun hangi ulkeyi analiz etmek istersin? Guncel ticaret
+verileriyle yeni ihracat firsatlarini kesfet."
+Yeni: "177 ulke seni bekliyor. Kureyi surukle ve yeni ihracat
+pazarlarini kesfet."
+
+**4) Ziyaretci alt metni AYNEN korundu** (degisiklik yapilmadi)
+
+**5) "KÜREYİ ÇEVİR · DETAY İÇİN TIKLA · İHRACATA BAŞLA" tamamen
+kaldirildi** - hem giris yapmis hem ziyaretci durumunda. Element
+HTML'den SILINMEDI (JS'te `document.getElementById('heroHint')`
+cagrilarina bagli bir null-reference riski olusturmamak icin), sadece
+CSS ile (`display:none`) kalici olarak gizlendi ve JS'teki
+icerik-atama satirlari da kaldirildi.
+
+**6) Populer Pazarlar cipleri artik SADECE giris yapmis kullaniciya
+gorunuyor** - HTML'de varsayilan `display:none` ile basliyor (flash
+onlemek icin), `updateLoginUI()` giris durumuna gore acip kapatiyor.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde regresyon yok
+- Yeni alt metin bundle'da dogrulandi, eski "KÜREYİ ÇEVİR" metni
+  tamamen kalkti
