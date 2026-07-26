@@ -1641,3 +1641,85 @@ onlemek icin), `updateLoginUI()` giris durumuna gore acip kapatiyor.
 - Mock tarayici testinde regresyon yok
 - Yeni alt metin bundle'da dogrulandi, eski "KÜREYİ ÇEVİR" metni
   tamamen kalkti
+
+## Faz 44 - Yardim butonu +/- ile ayni sutunda + Pazara Ilk Bakis daha dolu (TAMAMLANDI)
+
+**1) "?" yardim butonu artik +/- ile ayni sutunda**
+Onceden kurenin sol alt kosesinde ayri, bagimsiz konumlanan bir
+elementti - simdi `.zoom-controls` sutununun icine tasindi (+/-
+butonlarinin hemen altina). Boylece daha gorunur, ayni gruba ait
+hissediyor. Ayni glass-panel stilini otomatik olarak miras aliyor,
+sadece yuvarlak sekli koruyor.
+
+**2) Ulke sayfasi "Pazara Ilk Bakis" karti - AI Ozeti kaldirildi,
+chip'ler yukari tasindi**
+- "AI ÖZETİ" etiketi + altindaki cumle (sag altta duran) tamamen
+  kaldirildi (hem JS ciktisindan hem CSS'ten)
+- Ikonlu chip'ler (Baskent/Nufus/Para Birimi/Dil/Saat Farki) artik
+  bayrak+ulke-adi bloğunun HEMEN ALTINDA, ayni "ust" bolumun parcasi -
+  eskiden rota (Turkiye mesafe) bilgisinden SONRA, ayri bir alt satir
+  olarak duruyorlardi
+- Yeni siralama: [Bayrak + Isim] -> [Chip'ler] -> [Turkiye Rotasi]
+- Sonuc: kart artik en ustte daha dolu gorunuyor, AI Ozeti'nin
+  kapladigi alt bosluk kalktigi icin toplam yukseklik azaldi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde regresyon yok, "AI ÖZETİ" metni bundle'da
+  hic gecmiyor
+- `renderCountryHero` Meksika verisiyle DOGRUDAN cagirilip tam HTML
+  ciktisi incelendi: chip'lerin identity bloğu icinde (rota
+  bolumunden ONCE) oldugu, tagline'in hic olmadigi dogrulandi
+
+## Faz 45 - Kure gorsel kalitesi yukseltildi (model/performans/etkilesim AYNI) (TAMAMLANDI)
+
+Kurenin kendisi (SVG projeksiyon, ulke poligonlari, donme/zoom mantigi,
+tiklama/surukleme etkilesimi) HIC DEGISTIRILMEDI. Sadece gorsel katmanlar
+eklendi, hepsi ya statik (bir kez cizilip performans maliyeti sifir)
+ya da zaten var olan per-frame guncellemelere "biniyor" (ek maliyet
+neredeyse sifir).
+
+1. **Turkuaz atmosfer glow** - kurenin arkasinda, STATIK, bulanik
+   (SVG feGaussianBlur) buyuk bir daire (`#atmosphereGlow` gradyani).
+   Tek seferlik render, per-frame maliyeti yok.
+2. **Gece sehir isiklari** - her ulke marker'inin ICINE, deterministik
+   (hash tabanli, rastgele degil - reload'da ayni gorunur) 2-3 kucuk
+   isik noktasi eklendi. Bu noktalar zaten HER FRAME guncellenen
+   marker grubunun transform'una "biniyor" - EK per-frame maliyeti
+   SIFIR (177 ulke x birkac ekstra <circle> elemani, sadece init'te
+   bir kez olusturuluyor).
+3. **Ince enlem/boylam grid cizgileri** - zaten vardi, opakligi
+   %8-10 hedefine getirildi (grid grubu opacity 0.5->0.7, cizgi
+   stroke-opacity ayarlandi).
+4. **Sag ustten yumusak rim light** - STATIK bir overlay daire,
+   `mix-blend-mode:screen` ile, odagi sag-ust (`cx:72% cy:24%`)
+   olan yeni bir radyal gradyan (`#rimLight`). Tek seferlik render.
+5. **Cok hafif yildiz alani (%5 opacity)** - TAMAMEN CSS (`::before`
+   pseudo-element, radial-gradient nokta deseni), hicbir JS/SVG
+   maliyeti yok.
+6. **Ulke hover gecisi yumusatildi** - 150ms -> 260ms ease.
+7. **Seyrek "Turkiye -> rastgele ulke" isik rotasi** - ~18-34 saniyede
+   bir, rastgele bir ulkeye 3 saniyelik ince, kesikli, teal renkli bir
+   cizgi beliriyor (CSS opacity transition ile yumusak fade). Cizginin
+   iki ucu, zaten her frame hesaplanan Turkiye pozisyonuna ve SADECE
+   pulse aktifken hesaplanan hedef ulke pozisyonuna dayaniyor - yani
+   ek maliyet sadece pulse gosterilirken (nadir) ve minimal (1 ekstra
+   toXY() cagrisi).
+
+Tum yeni katmanlarda `pointer-events:none` var - hicbiri fare/dokunma
+etkilesimini engellemiyor, kurenin surukleme/tiklama davranisi
+degismedi.
+
+### Standart dogrulama protokolu (yine uygulandi)
+- Node mock tarayici testinde script hatasiz calisti (yeni regresyon
+  yok, ayni beklenen/zararsiz noktaya kadar ilerledi)
+- Uretim sunucusunda tum yeni CSS siniflari (`.globe-atmosphere`,
+  `.globe-rimlight`, `.node-citylight`, `.route-pulse-line`,
+  `.globe-stage::before`) ve JS parcalari (`atmosphereGlow`,
+  `rimLight`, `node-citylight`, `route-pulse-line`, `routePulseGroup`,
+  `scheduleRoutePulses`) dogrulandi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testi temiz
+- Tum yeni CSS/JS parcalari uretim sunucusunda dogrulandi

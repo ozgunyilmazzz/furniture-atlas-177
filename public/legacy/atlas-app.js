@@ -2016,6 +2016,10 @@ let markerEls = {};            // ülke id -> {g, ring, dot}
 let gridEllipseEls = [];       // enlem çizgileri
 let gridPolylineEls = [];      // boylam çizgileri
 let sphereCircleEl = null;
+// Seyrek "Türkiye'den seçili ülkeye ışık rotası" animasyonu — çok nadiren
+// tetiklenir, aktif değilken render maliyeti sıfırdır.
+let activeRoutePulseId = null;
+let routePulseLineEl = null;
 // Hedef ülkeler (★ Hedef Ülkelerim) için küre üzerinde pin gösterimi —
 // her frame'de localStorage okumamak için sonuç cache'leniyor, giriş/çıkış
 // veya hedef ekleme/çıkarma anında invalidateTargetIdsCache() ile temizleniyor.
@@ -2044,12 +2048,28 @@ function initSvgSkeleton(){
       <stop offset="86%" stop-color="rgba(201,169,97,0)"/>
       <stop offset="100%" stop-color="rgba(201,169,97,0.25)"/>
     </radialGradient>
+    <radialGradient id="atmosphereGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(63,208,192,0)"/>
+      <stop offset="80%" stop-color="rgba(63,208,192,0)"/>
+      <stop offset="100%" stop-color="rgba(63,208,192,0.16)"/>
+    </radialGradient>
+    <radialGradient id="rimLight" cx="72%" cy="24%" r="60%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.28)"/>
+      <stop offset="35%" stop-color="rgba(255,255,255,0.06)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
     <clipPath id="sphereClip"><circle cx="${CX}" cy="${CY}" r="${R}"/></clipPath>
+    <filter id="softBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="10"/></filter>
   </defs>
+  <circle class="globe-atmosphere" cx="${CX}" cy="${CY}" r="${R * 1.14}" fill="url(#atmosphereGlow)" filter="url(#softBlur)"/>
   <circle class="globe-sphere" cx="${CX}" cy="${CY}" r="${R}" fill="url(#sphereGrad)" stroke="rgba(201,169,97,0.2)" stroke-width="1"/>
-  <g id="gridGroup" clip-path="url(#sphereClip)" opacity="0.5"></g>
+  <g id="gridGroup" clip-path="url(#sphereClip)" opacity="0.7"></g>
   <g id="shapesGroup" clip-path="url(#sphereClip)"></g>
+  <g id="routePulseGroup" clip-path="url(#sphereClip)"><line class="route-pulse-line" x1="0" y1="0" x2="0" y2="0"/></g>
+  <circle class="globe-rimlight" cx="${CX}" cy="${CY}" r="${R}" fill="url(#rimLight)" clip-path="url(#sphereClip)"/>
   <g id="markersGroup"></g>`;
+
+  routePulseLineEl = svg.querySelector('.route-pulse-line');
 
   sphereCircleEl = svg.querySelector('.globe-sphere');
   const gridGroup = svg.querySelector('#gridGroup');
@@ -2076,11 +2096,30 @@ function initSvgSkeleton(){
   });
 
   const markersGroup = svg.querySelector('#markersGroup');
+  // Basit, deterministik hash — "gece şehir ışıkları" noktalarının konumunu
+  // her ülke için sabit (ama farklı) tutmak için. Sadece init'te bir kez
+  // çalışır, per-frame maliyeti yoktur.
+  function cheapHash(str){
+    let h = 0;
+    for(let i = 0; i < str.length; i++){ h = (h * 31 + str.charCodeAt(i)) | 0; }
+    return h;
+  }
   COUNTRIES.forEach(c=>{
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', 'node');
     g.setAttribute('data-id', c.id);
-    g.innerHTML = `<circle class="node-hit" r="11" fill="transparent"/><circle class="node-ring" r="11"/><circle class="node-dot" r="3.5"/><text class="node-label" x="9" y="3.5">${c.name.toUpperCase()}</text><g class="node-pin"><path class="node-pin-shape" d="M0,-26 C4.5,-26 8,-22.7 8,-18.3 C8,-12.5 0,-4 0,-4 C0,-4 -8,-12.5 -8,-18.3 C-8,-22.7 -4.5,-26 0,-26 Z"/><circle class="node-pin-hole" r="2.6" cy="-18.3"/></g>`;
+    // "Gece şehir ışıkları" — marker grubunun zaten her frame'de güncellenen
+    // transform'una biniyor, bu yüzden ekstra per-frame maliyeti yok.
+    const seed = cheapHash(c.id);
+    const cityLights = [0, 1, 2].map(i=>{
+      const a = ((seed >> (i * 6)) & 63) / 63 * Math.PI * 2;
+      const dist = 3 + ((seed >> (i * 4 + 3)) & 7);
+      const cx = (Math.cos(a) * dist).toFixed(1);
+      const cy = (Math.sin(a) * dist).toFixed(1);
+      const r = (0.5 + ((seed >> (i * 5)) & 3) * 0.15).toFixed(2);
+      return `<circle class="node-citylight" cx="${cx}" cy="${cy}" r="${r}"/>`;
+    }).join('');
+    g.innerHTML = `<circle class="node-hit" r="11" fill="transparent"/><circle class="node-ring" r="11"/>${cityLights}<circle class="node-dot" r="3.5"/><text class="node-label" x="9" y="3.5">${c.name.toUpperCase()}</text><g class="node-pin"><path class="node-pin-shape" d="M0,-26 C4.5,-26 8,-22.7 8,-18.3 C8,-12.5 0,-4 0,-4 C0,-4 -8,-12.5 -8,-18.3 C-8,-22.7 -4.5,-26 0,-26 Z"/><circle class="node-pin-hole" r="2.6" cy="-18.3"/></g>`;
     markersGroup.appendChild(g);
     markerEls[c.id] = { g, ring: g.querySelector('.node-ring'), dot: g.querySelector('.node-dot') };
   });
@@ -2200,6 +2239,20 @@ function updateMarkers(){
   const tm = markerEls['turkey'];
   tm.g.setAttribute('style', `opacity:${t.visible?1:0}`);
   tm.g.setAttribute('transform', `translate(${t.x.toFixed(1)},${t.y.toFixed(1)})`);
+
+  // Seyrek "ışık rotası" — sadece bir pulse aktifken (birkaç saniyede bir,
+  // nadiren) çalışır; aktif değilken hiçbir ek maliyeti yoktur.
+  if(activeRoutePulseId && routePulseLineEl){
+    const target = COUNTRIES.find(x=> x.id === activeRoutePulseId);
+    if(target){
+      const tp = toXY(target.lat, target.lon);
+      routePulseLineEl.setAttribute('x1', t.x.toFixed(1));
+      routePulseLineEl.setAttribute('y1', t.y.toFixed(1));
+      routePulseLineEl.setAttribute('x2', tp.x.toFixed(1));
+      routePulseLineEl.setAttribute('y2', tp.y.toFixed(1));
+      routePulseLineEl.style.opacity = (t.visible && tp.visible) ? '' : '0';
+    }
+  }
 }
 
 function render(){
@@ -2980,16 +3033,15 @@ function renderCountryHero(baseCountry, c){
           <span class="country-hero-flagwrap">${flagImg}</span>
           <h2 class="country-hero-title">${c.name}</h2>
         </div>
+        <div class="country-hero-facts">
+          <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h18"/><path d="M6 22V11M10 22V11M14 22V11M18 22V11"/><path d="M4 11l8-6 8 6"/></svg></span>${capital}</div>
+          <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2.5 20v-1a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1"/><circle cx="17.5" cy="8.5" r="2.3"/><path d="M15.8 9.7a4 4 0 0 1 5.7 3.6V15"/></svg></span>${c.population}</div>
+          <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 8.7c0-.9 1.1-1.5 3-1.5s3 .6 3 1.5-1.1 1.3-3 1.3-3 .6-3 1.5 1.1 1.5 3 1.5 3 .6 3 1.5-1.1 1.5-3 1.5"/><path d="M12 6v1.2M12 16.8V18"/></svg></span>${c.currency}</div>
+          <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.4 3.8 5.6 3.8 9s-1.4 6.6-3.8 9c-2.4-2.4-3.8-5.6-3.8-9s1.4-6.6 3.8-9z"/></svg></span>${language}</div>
+          <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>${timeDiff}</div>
+        </div>
       </div>
       ${routeHtml}
-      <div class="country-hero-facts">
-        <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h18"/><path d="M6 22V11M10 22V11M14 22V11M18 22V11"/><path d="M4 11l8-6 8 6"/></svg></span>${capital}</div>
-        <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2.5 20v-1a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1"/><circle cx="17.5" cy="8.5" r="2.3"/><path d="M15.8 9.7a4 4 0 0 1 5.7 3.6V15"/></svg></span>${c.population}</div>
-        <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 8.7c0-.9 1.1-1.5 3-1.5s3 .6 3 1.5-1.1 1.3-3 1.3-3 .6-3 1.5 1.1 1.5 3 1.5 3 .6 3 1.5-1.1 1.5-3 1.5"/><path d="M12 6v1.2M12 16.8V18"/></svg></span>${c.currency}</div>
-        <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.4 3.8 5.6 3.8 9s-1.4 6.6-3.8 9c-2.4-2.4-3.8-5.6-3.8-9s1.4-6.6 3.8-9z"/></svg></span>${language}</div>
-        <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>${timeDiff}</div>
-      </div>
-      <div class="country-hero-tagline"><span class="country-hero-tagline-label">AI ÖZETİ</span>${heroTagline(baseCountry, c)}</div>
     </div>
   `;
 }
@@ -4867,6 +4919,31 @@ document.getElementById('mkt-count').textContent = COUNTRIES.length;
   } else {
     helpBtn.style.display = '';
   }
+})();
+
+// ---------- SEYREK IŞIK ROTASI: Türkiye'den rastgele bir ülkeye, aralıklarla ----------
+(function scheduleRoutePulses(){
+  function pickTarget(){
+    const candidates = COUNTRIES.filter(c => c.id !== 'turkey');
+    if(!candidates.length) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+  function firePulse(){
+    if(routePulseLineEl){
+      const target = pickTarget();
+      if(target){
+        activeRoutePulseId = target.id;
+        needsRender = true;
+        routePulseLineEl.classList.add('show');
+        setTimeout(()=>{
+          routePulseLineEl.classList.remove('show');
+          setTimeout(()=>{ activeRoutePulseId = null; }, 1300);
+        }, 3000);
+      }
+    }
+    setTimeout(firePulse, 18000 + Math.random() * 16000); // ~18–34 sn arayla, seyrek
+  }
+  setTimeout(firePulse, 9000 + Math.random() * 6000); // ilk gösterim biraz gecikmeli
 })();
 
 // ---------- POPÜLER PAZARLAR: hızlı erişim çipleri ----------
