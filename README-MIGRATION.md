@@ -1482,3 +1482,124 @@ dosyasini tekrar gonderecek, o zaman islenecek.
   test edildi, dogru sonuc verdi
 - `MONETIZATION_ACTIVE`, ucretsiz mesaj metni, "Ucretsiz Kayit Ol"
   butonu bundle'da dogrulandi
+
+## Faz 40 - Rota ikonu/uzunlugu + kayit ekrani "Paket Secimine Don" gizleme (TAMAMLANDI)
+
+**1) Hero'daki ucak ikonu ve rota cizgisi**
+- Eski genel "gonder/dart" tarzi ikon -> gercek, taninabilir bir ucak
+  siluetine (Material Design "flight" glyph) cevrildi, altin renkte,
+  45 derece egik, hafif golgeli - daha premium.
+- `.hero-route-visual` artik `max-width:230px` ile sinirlandirildi
+  (eskiden `flex:1` ile karti tam genisligine kadar geriliyordu) -
+  Turkiye ile hedef ulke arasindaki cizgi kisaldi, ulke adi artik
+  kartin cok daha soluna, kompakt bir sekilde oturuyor.
+
+**2) Kayit ekrani "Paket Secimine Don" metni gizlendi**
+Platform ucretsizken (MONETIZATION_ACTIVE=false) kayit akisi zaten
+tek adimli (plan secim ekrani hic gosterilmiyor) - bu buton donulecek
+bir plan secim ekrani olmadigi icin anlamsizdi, artik `showAuthTab()`
+icinde bu durumda gizleniyor. Odeme aktif oldugunda (MONETIZATION_ACTIVE
+=true) buton otomatik geri geliyor (kod degismedi, sadece kosullu
+gizleme eklendi).
+
+### Standart dogrulama protokolu (yine uygulandi)
+- Node mock tarayici testinde yeni regresyon yok
+- Uretim sunucusunda: yeni ucak SVG path'i, `max-width:230px` CSS
+  kurali, ve `registerBackBtn` gizleme kodu bundle'da dogrulandi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testi temiz
+- Tum 3 degisiklik (ikon, kisaltilmis rota, gizlenen buton) uretim
+  ciktisinda teyit edildi
+
+## Faz 40 - Pazara Ilk Bakis rota gorseli: premium ucak ikonu + kisaltilmis hat (TAMAMLANDI)
+
+- Ucak ikonu, ince/stroke tabanli, uygulamanin geri kalaninda zaten
+  kullanilan ayni gorsel dile uygun premium bir ikonla degistirildi
+  (eskiden dolgu/blok stil bir ikon + garip bir 45 derece donmе vardi)
+- Turkiye <-> hedef ulke arasindaki cizgi kisaltildi (`max-width:230px`
+  -> `175px`, cizginin minimum genisligi `60px` -> `36px`) - hedef
+  ulke bayragi/etiketi artik daha sola, Turkiye'ye daha yakin duruyor
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde regresyon yok
+- Yeni ikon ve `max-width:175px` kurali uretim sunucusunda dogrulandi
+
+## Faz 41 - PDF/Yazdirma hatasi: tum modaller sayfaya siziyordu (TAMAMLANDI)
+
+**1) Kayit formu "Paket Secimine Don" - zaten Faz 39'da cozulmustu**
+Kod kontrol edildi: `MONETIZATION_ACTIVE=false` oldugunda
+`registerBackBtn` zaten gizleniyor (showAuthTab icinde). Kullanicinin
+hala gormesi, muhtemelen son zip'i (Faz 39/40) henuz siteye
+yuklememis olmasindan kaynaklaniyor - koda ek degisiklik gerekmedi.
+
+**2) PDF/Yazdir - KOK NEDEN BULUNDU: tum modaller sayfaya siziyordu**
+Sitede 20 farkli modal (Seyahat Planla, Haberler, Fuarlar, Giris,
+Kayit, Hedef Ulkelerim, Premium vb.) HEPSI ayni `.compare-modal`
+sinifini paylasiyor ve normalde `position:fixed` + ekran disina
+tasima (transform) ile gizleniyor. `@media print` kurali bu sinifi
+HIC haric tutmuyordu - tarayicilar yazdirirken `position:fixed`
+elemanlari normal belge akisina "duzlestiriyor", bu da TUM 20
+modalin dashboard'dan sonra ayri sayfalar olarak yazdirilmasina
+neden oluyordu. Kullanici hangi modalin son acik/DOM'da erisilebilir
+oldugunu gorduyse o goruniyordu (Seyahat Planla).
+
+**Cozum:** `@media print` kuraline `.compare-modal` (ve guvenlik icin
+`.score-info-popover`, `.atlas-toast`, `#atlas-ticker-wrap`,
+`.filter-panel`) eklendi - hepsi artik yazdirirken tamamen
+gizleniyor. Asil yazdirilmasi gereken ulke raporu (`#dashboard`,
+class="dashboard") FARKLI bir sinif kullandigi icin bu degisiklikten
+ETKILENMEDI, dogrulandi.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Uretim sunucusunde yeni `@media print` kurali (`.compare-modal` dahil)
+  ve `.dashboard{position:static}` kuralinin hala orada oldugu
+  (yani asil rapor icerigi gizlenmiyor) dogrulandi
+
+## Faz 42 - Anasayfa: kure ipuclari + Populer Pazarlar cipleri (TAMAMLANDI)
+
+**Onemli tespit:** Gonderilen tasarim mockup'inin COGU zaten kodda
+mevcuttu ve calisiyordu, sadece giris yapilmadan gorunmuyordu:
+- "Hosgeldin, [Isim]." kisisellestirilmis karsilama -> ZATEN VARDI
+  (`updateLoginUI()`, `titleEl.innerHTML`)
+- "★ Kurucu Uye" rozeti -> ZATEN VARDI (Faz 15)
+- "Hata Bildir" butonu + modal -> ZATEN VARDI, sadece giris yapinca
+  gorunur hale geliyordu (`display:none` -> giris yapinca acik)
+- Haberler/Fuarlar/Hedef Ulkelerim/Seyahat Planla menu -> ZATEN VARDI
+
+**Gercekten eksik olan ve bu fazda eklenen iki ozellik:**
+
+1. **Kure ipuclari (onboarding):** Kurenin sol ve saginda, ilk
+   ziyarette 0.6 sn sonra beliren, "Kureyi surukleyerek ulkeleri
+   kesfet" / "Yakinlasmak icin dondur, cift tikla" kartlari. 5 saniye
+   sonra otomatik kayboluyorlar (`setTimeout` + CSS opacity/transform
+   gecisi). localStorage ile "bir kez gosterildi" takibi yapiliyor.
+   Kurenin sol alt kosesine, ipuclarini tekrar gormek icin kucuk bir
+   "?" yardim butonu eklendi (mockup'in onerdigi gibi).
+   - **Responsive:** Masaustu (≥1200px) - kurenin iki yaninda tam
+     boy kartlar. Tablet (768-1199px) - kartlar daralip kureye
+     yaklasiyor. Mobil (≤767px) - iki yan kart gizlenip TEK bir kart
+     kurenin altinda gosteriliyor, kure genisligi ~78vw'ye cikiyor.
+   - **Basitlestirme notu:** Mockup'taki kavisli/kesikli oklar (kart
+     ile kure arasindaki baglanti cizgileri) eklenmedi - salt dekoratif
+     oldugu ve zaman/karmasiklik dengesi nedeniyle atlandi, karti
+     kendisi zaten yonu/anlami acikca anlatiyor.
+
+2. **Populer Pazarlar cipleri:** Kurenin altinda, Almanya/ABD/
+   Fransa/Irak/Suudi Arabistan icin bayrak+isim cipleri - tiklaninca
+   dogrudan o ulkenin sayfasini aciyor.
+
+**Not:** Mockup'in sag tarafindaki "ANIMASYON & DAVRANIS" /
+"RESPONSIVE DAVRANIS" paneli gercek site arayuzu degil, benim icin
+yazilmis tasarim notlariydi - o notlar bu fazin planlanmasinda
+kullanildi, ayri bir UI olarak insa edilmedi.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde regresyon yok
+- Uretim sunucusunda `globeHintLeft`/`globeHintRight`/
+  `popularMarketsChips` HTML'de, `.globe-hint`/`.popular-market-chip`
+  CSS'te, `initGlobeHints`/`renderPopularMarkets` JS'te dogrulandi

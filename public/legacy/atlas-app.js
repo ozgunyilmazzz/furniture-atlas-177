@@ -2956,7 +2956,7 @@ function renderCountryHero(baseCountry, c){
             <span class="hero-route-endpoint-flag">🇹🇷</span>
             <span class="hero-route-endpoint-label">Türkiye</span>
           </span>
-          <span class="hero-route-line"><span class="hero-route-plane"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></span></span>
+          <span class="hero-route-line"><span class="hero-route-plane"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.5l-.4.5c-.4.4-.2 1.1.3 1.3L9 11l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.5.9.7 1.4.4l.6-.4c.4-.3.6-.8.5-1.3Z"/></svg></span></span>
           <span class="hero-route-endpoint" title="${c.name}">
             <span class="hero-route-endpoint-flag">${c.flag}</span>
             <span class="hero-route-endpoint-label">${c.name}</span>
@@ -4097,12 +4097,14 @@ function showAuthTab(tab){
     document.getElementById('registerStep1').style.display = 'none';
     document.getElementById('registerStep2').style.display = 'block';
     document.getElementById('registerStep2PlanLabel').style.display = 'none';
+    document.getElementById('registerBackBtn').style.display = 'none';
     document.getElementById('registerSubmitBtn').textContent = 'Ücretsiz Kayıt Ol';
     document.getElementById('authModalInner').style.maxWidth = '460px';
   } else {
     document.getElementById('registerStep1').style.display = 'block';
     document.getElementById('registerStep2').style.display = 'none';
     document.getElementById('registerStep2PlanLabel').style.display = '';
+    document.getElementById('registerBackBtn').style.display = '';
     document.getElementById('authModalInner').style.maxWidth = isLogin ? '460px' : '1040px';
   }
   const authIcon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>';
@@ -4836,6 +4838,55 @@ if(window.ResizeObserver){
 [100, 350, 800, 1500].forEach(t=> setTimeout(syncChromeOffsets, t));
 
 document.getElementById('mkt-count').textContent = COUNTRIES.length;
+
+// ---------- KÜRE İPUÇLARI: ilk ziyarette bir kez, 5 sn sonra otomatik kaybolur ----------
+(function initGlobeHints(){
+  const HINTS_SEEN_KEY = 'fa_globe_hints_seen';
+  const left = document.getElementById('globeHintLeft');
+  const right = document.getElementById('globeHintRight');
+  const mobileHint = document.getElementById('globeHintMobile');
+  const helpBtn = document.getElementById('globeHelpBtn');
+  if(!left || !right || !mobileHint || !helpBtn) return;
+  let hideTimer = null;
+  function showHints(){
+    [left, right, mobileHint].forEach(el => el.classList.add('show'));
+    helpBtn.style.display = 'none';
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(hideHints, 5000);
+  }
+  function hideHints(){
+    [left, right, mobileHint].forEach(el => el.classList.remove('show'));
+    helpBtn.style.display = '';
+  }
+  helpBtn.addEventListener('click', showHints);
+  let seen = false;
+  try{ seen = localStorage.getItem(HINTS_SEEN_KEY) === '1'; }catch(e){}
+  if(!seen){
+    setTimeout(showHints, 600);
+    try{ localStorage.setItem(HINTS_SEEN_KEY, '1'); }catch(e){}
+  } else {
+    helpBtn.style.display = '';
+  }
+})();
+
+// ---------- POPÜLER PAZARLAR: hızlı erişim çipleri ----------
+const POPULAR_MARKET_IDS = ['germany', 'usa', 'france', 'iraq', 'saudi-arabia'];
+(function renderPopularMarkets(){
+  const wrap = document.getElementById('popularMarketsChips');
+  if(!wrap) return;
+  wrap.innerHTML = POPULAR_MARKET_IDS.map(id=>{
+    const c = COUNTRIES.find(x=> x.id === id);
+    if(!c) return '';
+    return `<button type="button" class="popular-market-chip" data-id="${c.id}">${c.flag} ${c.name}</button>`;
+  }).join('');
+  wrap.querySelectorAll('.popular-market-chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const c = COUNTRIES.find(x=> x.id === btn.getAttribute('data-id'));
+      if(c) openCountry(c);
+    });
+  });
+})();
+
 updatePremiumUI();
 // Footer bağlantıları henüz gerçek sayfalara bağlı değil (placeholder) — tıklanınca sayfa kaymasın.
 document.querySelectorAll('.footer-link').forEach(a=>{
