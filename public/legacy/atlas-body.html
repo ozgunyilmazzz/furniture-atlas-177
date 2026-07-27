@@ -4,7 +4,8 @@
     <span class="brand-mark"><span class="brand-atlas">Atlas<span class="brand-dot">.</span></span></span>
     <span class="brand-sub" lang="en">Furniture Export Intelligence</span>
   </div>
-  <div class="header-actions">
+  <div class="header-actions-wrap" id="headerActionsWrap">
+  <div class="header-actions" id="headerActions">
     <div class="header-right">
       <span class="header-stat">İZLENEN PAZAR <b id="mkt-count">10</b></span>
       <span class="header-stat">SON GÜNCELLEME <b>10 TEM 2026</b></span>
@@ -17,6 +18,8 @@
     <button class="travel-btn" id="loginBtn" style="background:transparent; border:1px solid var(--border-soft); color:var(--text-1);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Giriş Yap</button>
     <span id="membershipBadge" class="membership-badge" style="display:none;"></span>
     <button class="travel-btn" id="reportIssueBtn" style="background:transparent; border:1px solid var(--red); color:var(--red); display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/></svg>Hata Bildir</button>
+  </div>
+  <div class="header-scroll-hint" id="headerScrollHint" aria-hidden="true"><span class="header-scroll-hint-arrow">›</span></div>
   </div>
 </header>
 
@@ -54,7 +57,15 @@
       <button class="close-btn modal-close-btn" id="closeFieldNotesModal" aria-label="Kapat">✕</button>
     </div>
     <div class="compare-body" style="padding:24px 28px; max-width:760px; margin:0 auto;">
-      <div class="footnote" style="margin-bottom:18px;" id="fieldNotesModalIntro">Furniture Atlas üyelerinin bu ülkeyle ilgili gerçek ticari ve seyahat deneyimleri. Her paylaşım yayına alınmadan önce incelenir.</div>
+      <div class="fn-prompt-box" id="fieldNotesModalIntro">
+        <div class="fn-prompt-title">Sahadan bir şey mi öğrendin? Meslektaşlarınla paylaş.</div>
+        <div class="fn-prompt-questions">
+          <span class="fn-prompt-q">💳 Ödeme süreci nasıl geçti?</span>
+          <span class="fn-prompt-q">📦 Gümrükte sürpriz bir şey oldu mu?</span>
+          <span class="fn-prompt-q">🏛️ Hangi fuara gitmeye değer?</span>
+          <span class="fn-prompt-q">🤝 Yerel alıcılarla iş yapma kültürü nasıl?</span>
+        </div>
+      </div>
       <div class="fn-head-row">
         <span class="fn-count-pill" id="fnCountPill">Yükleniyor…</span>
         <div class="fn-actions">
@@ -1424,7 +1435,7 @@
     </div>
     <div class="dash-actions">
       <button class="close-btn" id="mapsSearchBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d='M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2-6-2z'/><path d='M9 4v14M15 6v14'/></svg>İş Haritası</button>
-      <button class="close-btn" id="fieldNotesBtn" style="display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Saha Notları</button>
+      <button class="close-btn fn-nav-btn" id="fieldNotesBtn" style="display:none;"><span class="fn-pulse-dot"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Saha Notları</button>
       <button class="close-btn" id="addCompareBtn">+ Karşılaştır</button>
       <button class="close-btn" id="printBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; margin-right:4px;"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1"/><path d="M6 17v4h12v-4"/></svg>Yazdır / PDF</button>
       <button class="close-btn" id="closeDash">← PAZARLARA DÖN</button>

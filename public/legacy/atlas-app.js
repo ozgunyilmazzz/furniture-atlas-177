@@ -2415,22 +2415,51 @@ stage.addEventListener('mouseenter', ()=>{ mouseOverStage = true; if(!dragging &
 stage.addEventListener('mouseleave', ()=>{ mouseOverStage = false; if(!dragging) autoRotate = true; });
 
 let touchActiveOnStage = false;
+let pinching = false;
+let pinchStartDist = 0;
+let pinchStartZoom = 1;
+function touchDist(t0, t1){
+  const dx = t0.clientX - t1.clientX, dy = t0.clientY - t1.clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
 stage.addEventListener('touchstart', e=>{
   // +/- yakınlaştırma butonlarına dokunuşu küre-sürükleme mantığı yutmasın —
   // aksi halde preventDefault() tarayıcının "tıklama" olayını hiç oluşturmuyordu.
   if(e.target.closest('.zoom-controls')) return;
+  if(e.touches.length === 2){
+    // İki parmakla pinch-zoom: tek parmak sürükleme/döndürme mantığını devre dışı bırak.
+    pinching = true;
+    touchActiveOnStage = false;
+    dragging = false;
+    pinchStartDist = touchDist(e.touches[0], e.touches[1]);
+    pinchStartZoom = zoomLevel;
+    if(e.cancelable) e.preventDefault();
+    return;
+  }
   touchActiveOnStage = true;
   if(e.cancelable) e.preventDefault();
   startDrag(e.touches[0].clientX, e.touches[0].clientY);
 }, {passive:false});
 stage.addEventListener('contextmenu', e=> e.preventDefault());
 window.addEventListener('touchmove', e=>{
+  if(pinching && e.touches.length === 2){
+    if(e.cancelable) e.preventDefault();
+    const dist = touchDist(e.touches[0], e.touches[1]);
+    const scale = dist / (pinchStartDist || dist);
+    zoomLevel = Math.max(0.6, Math.min(3.2, pinchStartZoom * scale));
+    applyZoom();
+    return;
+  }
   if(!touchActiveOnStage) return;
   // Küreyi parmakla döndürürken sayfanın kaymasını engelle — mobildeki "bozuk dönüş" hissinin nedeni buydu.
   if(e.cancelable) e.preventDefault();
   moveDrag(e.touches[0].clientX, e.touches[0].clientY);
 }, {passive:false});
 window.addEventListener('touchend', e=>{
+  if(pinching){
+    if(e.touches.length < 2) pinching = false;
+    return;
+  }
   if(!touchActiveOnStage) return;
   touchActiveOnStage = false;
   const t = e.changedTouches && e.changedTouches[0];
@@ -3235,7 +3264,6 @@ function renderCountryPage(baseCountry){
     ['Kimi hedeflemeli?', gdpPC>=15000 ? 'Otel, kurumsal proje ve üst-orta gelir grubu tüketiciler.' : 'Fiyata duyarlı orta segment perakende ve toptan alıcılar.'],
     ['Hangi şehirlerle başlanmalı?', 'Ana liman/lojistik merkezine yakın büyük şehirler ilk etapta önceliklendirilmeli.'],
     ['Distribütör mü perakendeci mi?', c.scores.difficulty>=50 ? 'Yerel mevzuat ve gümrük karmaşıklığı nedeniyle deneyimli bir distribütör önerilir.' : 'Doğrudan perakende ortaklıkları da değerlendirilebilir.'],
-    ['İlk üç adım', '1) Küçük hacimli test siparişiyle pazara giriş, 2) yerel sertifikasyon/gümrük süreçlerini tamamlama, 3) 2-3 potansiyel distribütör/alıcı ile görüşme.'],
   ];
 
   const suppliersUnknown = !c.suppliers || turkeyShareTier(c) === 'unknown';
@@ -5087,6 +5115,23 @@ updateLoginUI();
     setTimeout(()=> el.scrollTo({ left: 0, behavior: 'smooth' }), 900);
   }
   setTimeout(tryHint, 1400);
+})();
+
+// Sağ kenardaki soluk gradient + titreşen ok — şerit sonuna kadar kaydırılınca kaybolur,
+// başa dönülünce tekrar belirir. İçerik zaten sığıyorsa (taşma yoksa) hiç gösterilmez.
+(function headerScrollHintController(){
+  const el = document.getElementById('headerActions');
+  const hint = document.getElementById('headerScrollHint');
+  if(!el || !hint) return;
+  function update(){
+    const hasOverflow = el.scrollWidth > el.clientWidth + 4;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    hint.classList.toggle('is-hidden', !hasOverflow || atEnd);
+  }
+  el.addEventListener('scroll', update, { passive:true });
+  window.addEventListener('resize', update);
+  setTimeout(update, 100);
+  setTimeout(update, 1600); // "hintHeaderActionsScroll" nudge'ından sonra da doğru durumda kalsın
 })();
 
 // Supabase oturumunu sayfa yüklendiğinde geri yükle, ve her değişiklikte senkron önbelleği güncelle.

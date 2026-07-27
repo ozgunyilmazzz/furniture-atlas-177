@@ -31,7 +31,17 @@
     {t:"Gürcistan'da Türkiye oturma grubu pazarının önemli kısmına sahip", v:"%41 pay", dir:"up"},
     {t:"Romanya, Türk mobilya ihracatında 5. büyük pazar", v:"219 milyon $", dir:"flat"},
     {t:"Meksika'nın oturma grubu ithalatı hafif geriledi", v:"-%1,7 · 190 milyon $", dir:"down"},
-    {t:"Yeni Zelanda'nın oturma grubu ithalatı düştü", v:"-%4,4 · 93 milyon $", dir:"down"}
+    {t:"Yeni Zelanda'nın oturma grubu ithalatı düştü", v:"-%4,4 · 93 milyon $", dir:"down"},
+    {t:"Hollanda'nın mobilya ithalatı 2025'te güçlü büyüdü", v:"+%8,8 · 593 milyon $", dir:"up"},
+    {t:"Güney Afrika'nın mobilya ithalatı hız kazandı", v:"+%12,1 · 41 milyon $", dir:"up"},
+    {t:"BAE'de Türk mobilyasına talep hızla artıyor", v:"+%21,3 Türkiye büyümesi · pazar 244 milyon $", dir:"up"},
+    {t:"İsviçre'de Türk mobilya ihracatı sıçradı", v:"+%18,5 · pazar 422 milyon $", dir:"up"},
+    {t:"Azerbaycan'da Türkiye mobilya pazarının neredeyse yarısına sahip", v:"%46 pay · +%19,3 büyüme", dir:"up"},
+    {t:"Özbekistan'da Türk mobilyasının payı hızla büyüyor", v:"%36 pay · +%18,3 büyüme", dir:"up"},
+    {t:"Kazakistan'ın mobilya ithalatı 2025'te sert daraldı", v:"-%20,5 · 31 milyon $", dir:"down"},
+    {t:"Kenya'da mobilya ithalatının büyük kısmı Çin'den geliyor", v:"%82 Çin payı", dir:"flat"},
+    {t:"Tayland'da da Çin mobilya ithalatına hakim", v:"%82 Çin payı", dir:"flat"},
+    {t:"Gana'da Türkiye mobilya pazarının çeyreğine sahip", v:"%24 pay · +%19,9 büyüme", dir:"up"}
   ];
 
   function arrow(dir){
