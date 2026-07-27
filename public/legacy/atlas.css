@@ -1603,17 +1603,104 @@
     padding:9px 12px; color:var(--text-0); font-family:var(--mono); font-size:11.5px; margin-bottom:10px;
   }
 
+  #printReportRoot{ display:none; }
+
+  /* ============================================================
+     PDF / YAZDIRMA RAPORU — bağımsız şablon (web arayüzünden ayrı)
+     Web sayfasının ekran görüntüsü DEĞİL; McKinsey/Deloitte/Statista
+     tarzı kurumsal bir pazar araştırma raporu üretir. #printReportRoot
+     içeriği çalışma zamanında buildPrintReportHTML() ile doldurulur.
+     ============================================================ */
   @media print{
-    header, .toolbar, .hero, .list-view, .zoom-controls, .compare-tray, .hover-card,
-    .tabs, .dash-actions #closeDash, .dash-actions #addCompareBtn, .dash-actions #printBtn, .dash-actions #openNewTab, .link-popover,
-    .compare-modal, .score-info-popover, .atlas-toast, #atlas-ticker-wrap, .filter-panel { display:none !important; }
-    body{ background:#fff !important; color:#000 !important; }
-    .dashboard{ position:static !important; transform:none !important; background:#fff !important; color:#000 !important; }
-    .dash-header{ position:static !important; background:#fff !important; }
-    .dash-title, .dash-subtitle{ color:#000 !important; }
-    .tab-panel{ display:block !important; page-break-inside:avoid; margin-bottom:24px; }
-    .card, .chart-card, .ai-box, .score-item, .buyer-card, .note-card{ border:1px solid #ccc !important; background:#fafafa !important; color:#000 !important; }
-    .card-value, .card-label, .footnote, table, th, td{ color:#000 !important; }
+    @page{ size: A4; margin: 24mm 16mm 20mm 16mm; }
+    html, body{ background:#fff !important; }
+    /* #legacy-root'un printReportRoot DIŞINDAKİ her doğrudan kardeşi gizlenir —
+       header, küre, liste, ülke sayfası modalı, tüm diğer modaller, ticker vb. */
+    #legacy-root > *:not(#printReportRoot){ display:none !important; }
+    #printReportRoot{
+      display:block !important; position:static !important; inset:auto !important;
+      color:#1a2033; font-family:Georgia,'Iowan Old Style',ui-serif,serif;
+    }
+    #printReportRoot *{ box-shadow:none !important; filter:none !important; backdrop-filter:none !important; text-shadow:none !important; }
+
+    .pr-page{ page-break-after:always; }
+    .pr-page:last-child{ page-break-after:auto; }
+    .pr-section{ page-break-before:always; }
+    .pr-avoid-break{ page-break-inside:avoid; break-inside:avoid; }
+
+    /* Her sayfada tekrar eden üstbilgi/altbilgi — Chrome/Edge yazdırmada
+       position:fixed elemanlar her fiziksel sayfada tekrarlanır. */
+    .pr-header{
+      position:fixed; top:-16mm; left:0; right:0; height:10mm;
+      display:flex; align-items:center; justify-content:space-between;
+      font-family:'Helvetica Neue',Arial,sans-serif; font-size:9px; letter-spacing:0.4px;
+      color:#6b7280; border-bottom:0.75pt solid #d1d5db; padding-bottom:4mm;
+      text-transform:uppercase;
+    }
+    .pr-footer{
+      position:fixed; bottom:-15mm; left:0; right:0; height:10mm;
+      display:flex; align-items:center; justify-content:space-between;
+      font-family:'Helvetica Neue',Arial,sans-serif; font-size:8.5px; color:#9ca3af;
+      border-top:0.75pt solid #d1d5db; padding-top:3mm;
+    }
+    .pr-footer .pr-pageno{ font-variant-numeric:tabular-nums; }
+
+    .pr-cover{ page-break-after:always; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:245mm; text-align:center; }
+    .pr-cover-logo{ font-family:'Helvetica Neue',Arial,sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; color:#1a2033; margin-bottom:38mm; }
+    .pr-cover-logo b{ color:#8a6d1f; }
+    .pr-cover-flag{ width:64px; height:auto; border:0.75pt solid #e5e7eb; margin-bottom:18px; }
+    .pr-cover-country{ font-size:34px; font-weight:400; color:#1a2033; margin-bottom:6px; }
+    .pr-cover-sub{ font-family:'Helvetica Neue',Arial,sans-serif; font-size:13px; letter-spacing:2px; text-transform:uppercase; color:#8a6d1f; margin-bottom:60mm; }
+    .pr-cover-url{ font-family:'Helvetica Neue',Arial,sans-serif; font-size:10.5px; color:#9ca3af; letter-spacing:0.5px; }
+    .pr-cover-infobox{ margin-top:14mm; border:0.75pt solid #e5e7eb; border-radius:2px; padding:16px 28px; display:flex; gap:34px; font-family:'Helvetica Neue',Arial,sans-serif; }
+    .pr-cover-infobox div{ text-align:left; }
+    .pr-cover-infobox .pr-ib-label{ font-size:8.5px; text-transform:uppercase; letter-spacing:0.8px; color:#9ca3af; margin-bottom:3px; }
+    .pr-cover-infobox .pr-ib-val{ font-size:12px; color:#1a2033; }
+
+    .pr-h1{ font-family:'Helvetica Neue',Arial,sans-serif; font-size:17px; font-weight:700; color:#1a2033; margin:0 0 3mm; padding-bottom:2mm; border-bottom:1.5pt solid #1a2033; }
+    .pr-h1 .pr-num{ color:#8a6d1f; margin-right:8px; }
+    .pr-h2{ font-family:'Helvetica Neue',Arial,sans-serif; font-size:11.5px; font-weight:700; color:#1a2033; margin:6mm 0 3mm; text-transform:uppercase; letter-spacing:0.4px; }
+    .pr-lede{ font-size:12.5px; line-height:1.75; color:#374151; margin-bottom:5mm; }
+    .pr-divider{ border:none; border-top:0.75pt solid #e5e7eb; margin:6mm 0; }
+
+    .pr-firstlook-grid{ display:flex; gap:14mm; align-items:center; margin:8mm 0 10mm; }
+    .pr-firstlook-map{ width:58mm; height:44mm; flex-shrink:0; }
+    .pr-firstlook-map svg path{ fill:#e7e9ee; stroke:#1a2033; stroke-width:1; }
+    .pr-firstlook-facts{ flex:1; display:grid; grid-template-columns:1fr 1fr; gap:5mm 10mm; font-family:'Helvetica Neue',Arial,sans-serif; }
+    .pr-fact-label{ font-size:8.5px; text-transform:uppercase; letter-spacing:0.5px; color:#9ca3af; margin-bottom:2px; }
+    .pr-fact-val{ font-size:12.5px; color:#1a2033; font-family:Georgia,serif; }
+
+    .pr-ibox-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:5mm 0; }
+    .pr-ibox{ border:0.75pt solid #e5e7eb; border-radius:2px; padding:9px 12px; font-family:'Helvetica Neue',Arial,sans-serif; }
+    .pr-ibox-label{ font-size:8px; text-transform:uppercase; letter-spacing:0.5px; color:#9ca3af; margin-bottom:4px; }
+    .pr-ibox-val{ font-size:14px; color:#1a2033; font-family:Georgia,serif; }
+    .pr-ibox-note{ font-size:8px; color:#b45309; margin-top:3px; }
+
+    .pr-table{ width:100%; border-collapse:collapse; font-size:10.5px; margin:4mm 0; }
+    .pr-table th{ font-family:'Helvetica Neue',Arial,sans-serif; font-size:8.5px; text-transform:uppercase; letter-spacing:0.4px; color:#6b7280; text-align:left; padding:6px 8px; border-bottom:1pt solid #1a2033; }
+    .pr-table td{ padding:7px 8px; border-bottom:0.5pt solid #e5e7eb; color:#374151; }
+    .pr-table tr:last-child td{ border-bottom:1pt solid #1a2033; }
+
+    .pr-bar-row{ display:flex; align-items:center; gap:8px; margin-bottom:4mm; font-family:'Helvetica Neue',Arial,sans-serif; font-size:10px; }
+    .pr-bar-label{ width:32mm; flex-shrink:0; color:#374151; }
+    .pr-bar-track{ flex:1; height:5mm; background:#f3f4f6; border-radius:1px; overflow:hidden; }
+    .pr-bar-fill{ height:100%; }
+    .pr-bar-val{ width:14mm; text-align:right; flex-shrink:0; color:#1a2033; font-weight:700; }
+
+    .pr-gauge-row{ display:flex; gap:14mm; margin:6mm 0; }
+    .pr-gauge-box{ text-align:center; font-family:'Helvetica Neue',Arial,sans-serif; }
+    .pr-gauge-num{ font-size:12px; color:#1a2033; margin-top:2mm; }
+    .pr-gauge-label{ font-size:8.5px; text-transform:uppercase; letter-spacing:0.4px; color:#9ca3af; }
+
+    .pr-bullets{ margin:0; padding:0; list-style:none; }
+    .pr-bullets li{ position:relative; padding-left:14px; margin-bottom:3mm; font-size:11px; line-height:1.6; color:#374151; }
+    .pr-bullets li::before{ content:'—'; position:absolute; left:0; color:#8a6d1f; }
+    .pr-bullets b{ color:#1a2033; }
+
+    .pr-final-infobox{ margin-top:14mm; width:100%; background:#f3f4f6; border-radius:2px; padding:16px 20px; }
+    .pr-final-infobox h4{ font-family:'Helvetica Neue',Arial,sans-serif; font-size:11px; color:#1a2033; margin:0 0 6px; }
+    .pr-final-infobox p{ font-size:9.5px; line-height:1.7; color:#4b5563; margin:0; }
+    .pr-final-copyright{ margin-top:6mm; font-family:'Helvetica Neue',Arial,sans-serif; font-size:8.5px; color:#9ca3af; text-align:center; }
   }
 
   @media(max-width:640px){

@@ -1,4 +1,4 @@
-const BUILD_TAG = 'checkbox-fix-v8-delegated';
+const BUILD_TAG = 'print-report-v9';
 console.log('%cFurniture Atlas build: ' + BUILD_TAG, 'color:#c9a961; font-weight:bold;');
 // Yayındaki sürümü konsol açmadan doğrulayabilmek için footer'a küçük bir sürüm
 // etiketi basılır — "deploy gerçekten yayında mı?" sorusunu kökten çözer.
@@ -3903,7 +3903,261 @@ document.getElementById('addCompareBtn').addEventListener('click', ()=>{
     showToast(`${added.flag} ${added.name} karşılaştırmaya eklendi — karşılaştırılacak ülkeyi soldaki kutucuktan işaretleyin.`);
   }
 });
-document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+/* ============================================================
+   PDF / YAZDIRMA RAPORU ÜRETİCİSİ
+   Ekrandaki dashboard'un görüntüsünü almaz — sıfırdan, kurumsal bir rapor
+   şablonu inşa eder (bkz. atlas.css @media print .pr-* kuralları). Tüm
+   sayılar mevcut veri katmanından (withCategory/generateExtraFields/
+   getTurkeyImportInfo) okunur; hiçbir yeni sentetik değer üretilmez —
+   veri yoksa dürüstçe "Bilinmiyor" yazılır.
+   ============================================================ */
+function prBadge(tier){
+  // Web'deki dqBadge ikonlu HTML rozeti yerine, yazdırmada sade metin etiketi.
+  if(tier === 'real') return ' <span style="color:#1f7a5c; font-size:8px; font-family:\'Helvetica Neue\',Arial,sans-serif; text-transform:uppercase; letter-spacing:0.3px;">✓ doğrulanmış</span>';
+  if(tier === 'estimated') return ' <span style="color:#b45309; font-size:8px; font-family:\'Helvetica Neue\',Arial,sans-serif; text-transform:uppercase; letter-spacing:0.3px;">~ tahmini</span>';
+  return ' <span style="color:#9ca3af; font-size:8px; font-family:\'Helvetica Neue\',Arial,sans-serif; text-transform:uppercase; letter-spacing:0.3px;">bilinmiyor</span>';
+}
+function prGauge(score, label, size){
+  const s = size || 84;
+  const r = s/2 - 8, cx = s/2, cy = s/2, circ = 2*Math.PI*r;
+  const col = score>=80 ? '#1f7a5c' : score>=55 ? '#b8862f' : '#6b7280';
+  return `<div class="pr-gauge-box">
+    <svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#e5e7eb" stroke-width="7"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="7"
+        stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${(circ*(1-score/100)).toFixed(1)}"
+        stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
+      <text x="${cx}" y="${cy+5}" text-anchor="middle" font-family="Georgia,serif" font-size="17" fill="#1a2033">${score}</text>
+    </svg>
+    <div class="pr-gauge-num">/100</div>
+    <div class="pr-gauge-label">${label}</div>
+  </div>`;
+}
+function buildPrintReportHTML(baseCountry){
+  const c = withCategory(baseCountry);
+  const x = generateExtraFields(c);
+  const catInfo = CATEGORIES[activeCategory];
+  const tInfo = getTurkeyImportInfo(c);
+  const today = new Date().toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const capital = REAL_CAPITALS[c.id] || 'Bilinmiyor';
+  const language = REAL_LANGUAGES[c.id] || 'Bilinmiyor';
+  const timeDiff = formatTimeDiff(c.id);
+  const flagImgUrl = `https://flagcdn.com/w160/${c.iso.toLowerCase()}.png`;
+  const mapSvg = renderCountryMiniMap(c.id, { w:220, h:170, pad:14, className:'', pathClassName:'' });
+
+  let distanceFact = 'Bilinmiyor', flightFact = 'Bilinmiyor';
+  if(c.id !== 'turkey' && typeof baseCountry.lat === 'number' && typeof baseCountry.lon === 'number'){
+    const km = haversineKm(TURKEY_COORDS.lat, TURKEY_COORDS.lon, baseCountry.lat, baseCountry.lon);
+    const flightHoursRaw = km / 850 + 0.67;
+    const fH = Math.floor(flightHoursRaw), fM = Math.round((flightHoursRaw - fH) * 60);
+    distanceFact = `~${Math.round(km).toLocaleString('tr-TR')} km`;
+    flightFact = fH > 0 ? `~${fH} sa ${fM > 0 ? fM + ' dk' : ''}`.trim() : `~${fM} dk`;
+  }
+
+  const suppliersUnknown = !c.suppliers || turkeyShareTier(c) === 'unknown';
+  const turkeyRank = suppliersUnknown ? null : [...c.suppliers].sort((a,b)=>b.v-a.v).findIndex(s=>s.c==='Türkiye') + 1;
+  const mfrTier = manufacturerTierLabel(c.iso);
+  const potential = potentialLabel(c.scores.market);
+  const competitionLabel = c.scores.competition>=65?'Yüksek':c.scores.competition>=40?'Orta':'Düşük';
+
+  const risks = [
+    { label:'Kur Riski', score: x.risks[1].score, note: x.risks[1].note },
+    { label:'Ödeme Riski', score: x.risks[2].score, note: x.risks[2].note },
+    { label:'Rekabet Riski', score: Math.round((x.risks[5].score + x.risks[6].score)/2), note:'Yerel ve Çin menşeli rakiplerin fiyat/hacim baskısı.' },
+  ];
+  const riskColorPr = s => s>=60 ? '#b3392c' : s>=35 ? '#b8862f' : '#1f7a5c';
+
+  const HEADER = `<div class="pr-header"><span>Furniture Atlas</span><span>${catInfo.label} Pazarı — Mobilya Pazarı Raporu</span></div>`;
+  // Sayfa numarası: tarayıcıların "Sayfa X / Y" için gerçek desteği yok (counter(pages)
+  // sadece @page kenar kutularında deneyseldir) — bu yüzden dürüstçe sabit bir alt bilgi
+  // kullanılır. Kesin "X / Y" gerekiyorsa yazdırma diyaloğunda tarayıcının kendi
+  // "Üstbilgi ve altbilgiler" seçeneği açılabilir (o zaman URL/tarih de eklenir).
+  const FOOTER = `<div class="pr-footer"><span>furnitureatlas.org</span><span>Hazırlanma: ${today} · Veri Dönemi: 2025</span><span class="pr-pageno">${c.flag} ${c.name}</span></div>`;
+
+  return `
+  <style>
+    /* Bu <style> bloğu YALNIZCA @media print altında etkilidir (bkz. atlas.css) —
+       normal tarayışta #printReportRoot zaten display:none. */
+  </style>
+
+  <!-- KAPAK SAYFASI -->
+  <div class="pr-page pr-cover">
+    ${HEADER}${FOOTER}
+    <div class="pr-cover-logo">Furniture<b>Atlas</b></div>
+    <img class="pr-cover-flag" src="${flagImgUrl}" alt="${c.name} bayrağı">
+    <div class="pr-cover-country">${c.name}</div>
+    <div class="pr-cover-sub">Mobilya Pazarı Raporu</div>
+    <div class="pr-cover-url">furnitureatlas.org</div>
+    <div class="pr-cover-infobox">
+      <div><div class="pr-ib-label">Hazırlanma Tarihi</div><div class="pr-ib-val">${today}</div></div>
+      <div><div class="pr-ib-label">Veri Dönemi</div><div class="pr-ib-val">2025</div></div>
+      <div><div class="pr-ib-label">Kaynak</div><div class="pr-ib-val">Furniture Atlas</div></div>
+    </div>
+  </div>
+
+  <!-- PAZARA İLK BAKIŞ -->
+  <div class="pr-page">
+    ${HEADER}${FOOTER}
+    <div class="pr-h1">Pazara İlk Bakış</div>
+    <div class="pr-firstlook-grid">
+      <div class="pr-firstlook-map">${mapSvg}</div>
+      <div class="pr-firstlook-facts">
+        <div><div class="pr-fact-label">Bayrak</div><div class="pr-fact-val">${c.flag} ${c.name}</div></div>
+        <div><div class="pr-fact-label">Başkent</div><div class="pr-fact-val">${capital}</div></div>
+        <div><div class="pr-fact-label">Nüfus</div><div class="pr-fact-val">${c.population}</div></div>
+        <div><div class="pr-fact-label">Para Birimi</div><div class="pr-fact-val">${c.currency}</div></div>
+        <div><div class="pr-fact-label">Resmi Dil</div><div class="pr-fact-val">${language}</div></div>
+        <div><div class="pr-fact-label">Saat Farkı (TR'ye göre)</div><div class="pr-fact-val">${timeDiff}</div></div>
+        <div><div class="pr-fact-label">Türkiye'ye Uzaklık</div><div class="pr-fact-val">${distanceFact}</div></div>
+        <div><div class="pr-fact-label">Ort. Uçuş Süresi</div><div class="pr-fact-val">${flightFact}</div></div>
+      </div>
+    </div>
+    <hr class="pr-divider">
+    <div class="pr-lede">${c.name}'nin nüfusu ${c.population}, kişi başı GSYH'si ${c.gdpPerCapita}${prBadge(c.dq.gdp)}. ${mfrTier ? `${c.name}, mobilya üretiminde "${mfrTier.toLowerCase()}" kategorisinde yer alıyor — bu, güçlü yerel rekabet anlamına gelebilir.` : `${c.name} büyük ölçekli bir mobilya üreticisi değil; bu, ithalata bağımlılığı ve dolayısıyla fırsatı artırabilir.`} Bu raporda ${catInfo.label.toLowerCase()} (${catInfo.hs}) kategorisi esas alınmıştır.</div>
+  </div>
+
+  <!-- 1. GENEL GÖRÜNÜM -->
+  <div class="pr-page pr-section">
+    ${HEADER}${FOOTER}
+    <div class="pr-h1"><span class="pr-num">1.</span>Genel Görünüm</div>
+    <div class="pr-ibox-grid">
+      <div class="pr-ibox"><div class="pr-ibox-label">Nüfus${prBadge(c.dq.population)}</div><div class="pr-ibox-val">${c.population}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">GSYH${prBadge(c.dq.gdp)}</div><div class="pr-ibox-val">${c.gdp}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">Kişi Başı GSYH${prBadge(c.dq.gdp)}</div><div class="pr-ibox-val">${c.gdpPerCapita}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">Para Birimi</div><div class="pr-ibox-val">${c.currency}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">Ekonomik Büyüme${prBadge('estimated')}</div><div class="pr-ibox-val">${x.gdpGrowth}%</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">Enflasyon${prBadge(x.inflationVerified ? 'real' : 'unknown')}</div><div class="pr-ibox-val">${x.inflation ? '%'+x.inflation : 'Bilinmiyor'}</div></div>
+    </div>
+    <div class="pr-lede" style="margin-top:5mm; font-size:9.5px; color:#9ca3af;">Veri yılı: Nüfus ve GSYH 2026 tahminidir (IMF World Economic Outlook, Nisan 2026 / Worldometers.info). Enflasyon 2025 verisidir (IMF WEO).</div>
+  </div>
+
+  <!-- 2. İTHALAT ANALİZİ -->
+  <div class="pr-page pr-section">
+    ${HEADER}${FOOTER}
+    <div class="pr-h1"><span class="pr-num">2.</span>İthalat Analizi</div>
+    <div class="pr-ibox-grid">
+      <div class="pr-ibox"><div class="pr-ibox-label">Toplam İthalat (${catInfo.label})${prBadge('estimated')}</div><div class="pr-ibox-val">${c.annualImports}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">Pazar Büyüklüğü${prBadge('estimated')}</div><div class="pr-ibox-val">${c.marketSize}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">Yıllık İthalat Büyümesi${prBadge(c.dq.importGrowth === 'unknown' ? 'unknown' : 'estimated')}</div><div class="pr-ibox-val">${c.dq.importGrowth === 'unknown' ? 'Bilinmiyor' : c.importGrowth}</div></div>
+    </div>
+    <div class="pr-lede">${c.dq.importGrowth === 'unknown' ? `${catInfo.label} ithalat büyüme oranına dair doğrulanmış bir veri yok.` : `${catInfo.label} ithalatı yıllık ${c.importGrowth} oranında büyüyor; pazar büyüklüğü ${c.marketSize} civarında seyrediyor.`}</div>
+    <div class="pr-lede" style="font-size:9.5px; color:#9ca3af;">Pazar Büyüklüğü ve ülkenin toplam ithalat büyüme oranı için henüz tek, kapsamlı bir ücretsiz gerçek veri kaynağı bulunamamıştır — model tahminidir.</div>
+  </div>
+
+  <!-- 3. TÜRKİYE'NİN PERFORMANSI -->
+  <div class="pr-page pr-section">
+    ${HEADER}${FOOTER}
+    <div class="pr-h1"><span class="pr-num">3.</span>Türkiye'nin Performansı</div>
+    <div class="pr-ibox-grid">
+      <div class="pr-ibox"><div class="pr-ibox-label">Türkiye'den İhracat${prBadge(tInfo.level==='unknown'?'unknown':tInfo.level)}</div><div class="pr-ibox-val">${tInfo.display}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">Türkiye Pazar Payı${prBadge(turkeyShareTier(c))}</div><div class="pr-ibox-val">${turkeyShareDisplay(c)}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">2024→2025 Büyüme${prBadge(tInfo.growthPct!==null?'real':'unknown')}</div><div class="pr-ibox-val">${tInfo.growthPct!==null ? (tInfo.growthPct>=0?'+':'')+tInfo.growthPct+'%' : 'Bilinmiyor'}</div></div>
+    </div>
+    <div class="pr-lede">${tInfo.level !== 'unknown' ? `Türkiye'den ${c.name}'ye ${catInfo.label.toLowerCase()} ihracatı ${tInfo.display} seviyesinde (${tInfo.level==='real'?'doğrulanmış veri':'tahmini'})${tInfo.growthPct !== null ? `, 2024→2025 döneminde ${tInfo.growthPct>=0?'+':''}${tInfo.growthPct}% değişti` : ''}. ${suppliersUnknown ? '' : `Türkiye, ${c.suppliers.length} tedarikçi ülke arasında ${turkeyRank}. sırada.`}` : `Türkiye'den ${c.name}'ye bu kategoride doğrulanmış bir ihracat verisi henüz yok.`}</div>
+  </div>
+
+  <!-- 4. BAŞLICA TEDARİKÇİ ÜLKELER -->
+  <div class="pr-page pr-section">
+    ${HEADER}${FOOTER}
+    <div class="pr-h1"><span class="pr-num">4.</span>Başlıca Tedarikçi Ülkeler</div>
+    ${suppliersUnknown
+      ? `<div class="pr-lede">Bu ülke için doğrulanmış veya gözden geçirilmiş tahmini bir tedarikçi verisi yok (Bilinmiyor).</div>`
+      : `<table class="pr-table">
+          <thead><tr><th>Ülke</th><th style="text-align:right;">Pazar Payı</th></tr></thead>
+          <tbody>${c.suppliers.map(s=>`<tr><td>${s.c==='Türkiye' ? '🇹🇷 <b>Türkiye</b>' : s.c}</td><td style="text-align:right;">%${s.v}</td></tr>`).join('')}</tbody>
+        </table>
+        <div class="pr-lede" style="font-size:9.5px; color:#9ca3af;">${c.importDataSource ? `Veri yılı: ${c.importDataSource}.` : ''}</div>`}
+  </div>
+
+  <!-- 5. VERGİLER VE TİCARET BİLGİLERİ -->
+  <div class="pr-page pr-section">
+    ${HEADER}${FOOTER}
+    <div class="pr-h1"><span class="pr-num">5.</span>Vergiler ve Ticaret Bilgileri</div>
+    <div class="pr-ibox-grid">
+      <div class="pr-ibox"><div class="pr-ibox-label">İthalat Vergisi${prBadge(c.dq.importTax)}</div><div class="pr-ibox-val">${c.importTax}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">KDV${prBadge(c.dq.vat)}</div><div class="pr-ibox-val">${c.vat}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">Gümrük Zorluğu</div><div class="pr-ibox-val">${difficultyIndicatorLabel(c.scores.difficulty)}</div></div>
+    </div>
+    <div class="pr-h2">Gerekli Sertifikasyon</div>
+    <table class="pr-table"><tbody>${getRequiredCerts(c, activeCategory).map(cert=>`<tr><td><b>${cert.name}</b>${prBadge(cert.level)}</td><td>${cert.note}</td></tr>`).join('')}</tbody></table>
+    <div class="pr-h2">Gerekli İhracat Evrakları</div>
+    <table class="pr-table"><tbody>${getRequiredDocs(c).map(doc=>`<tr><td><b>${doc.name}</b>${prBadge(doc.level)}</td><td>${doc.note}</td></tr>`).join('')}</tbody></table>
+    <div class="pr-lede" style="font-size:9.5px; color:#9ca3af; margin-top:4mm;">${c.dq.importTax==='real' ? 'İthalat vergisi WTO/USTR/TARIC gibi resmi kaynaklardan doğrulanmıştır.' : 'İthalat vergisi bu ülke için henüz doğrulanmadı — sevkiyat kararı öncesi mutlaka resmi bir kaynaktan teyit edin.'}</div>
+  </div>
+
+  <!-- 6. LOJİSTİK -->
+  <div class="pr-page pr-section">
+    ${HEADER}${FOOTER}
+    <div class="pr-h1"><span class="pr-num">6.</span>Lojistik</div>
+    <div class="pr-ibox-grid">
+      <div class="pr-ibox"><div class="pr-ibox-label">${c.transportMode==='road' ? 'Ana Kara Sınır Kapısı' : 'Ana Liman'}</div><div class="pr-ibox-val" style="font-size:12px;">${c.ports}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">Nakliye Süresi${prBadge('estimated')}</div><div class="pr-ibox-val">${c.transitTime}</div></div>
+      <div class="pr-ibox"><div class="pr-ibox-label">${c.transportMode==='road' ? 'Ort. TIR Maliyeti' : 'Ort. Konteyner Maliyeti'}${prBadge('estimated')}</div><div class="pr-ibox-val">${c.freightCost}</div></div>
+    </div>
+    <div class="pr-lede">Taşıma yöntemi: <b>${c.transportMode==='road' ? 'Karayolu (TIR)' : 'Deniz Yolu (Konteyner)'}</b>.</div>
+    <div class="pr-lede" style="font-size:9.5px; color:#9ca3af;">Maliyet ve süre, İstanbul'a olan mesafeye dayalı bir formülle hesaplanmıştır — gerçek navlun teklifi değildir. Kesin fiyat için bir lojistik firmasından teklif alın.</div>
+  </div>
+
+  <!-- 7. GRAFİKLER VE KARŞILAŞTIRMALAR -->
+  <div class="pr-page pr-section">
+    ${HEADER}${FOOTER}
+    <div class="pr-h1"><span class="pr-num">7.</span>Grafikler ve Karşılaştırmalar</div>
+    <div class="pr-h2">Fırsat Skorları</div>
+    <div class="pr-gauge-row">
+      ${prGauge(c.scores.overall, 'Genel Fırsat')}
+      ${prGauge(c.scores.market, 'Pazar Büyüklüğü')}
+      ${prGauge(100-c.scores.difficulty, 'Giriş Kolaylığı')}
+      ${prGauge(100-c.scores.competition, 'Rekabet Avantajı')}
+    </div>
+    ${!suppliersUnknown ? `
+    <div class="pr-h2">Tedarikçi Ülke Payları</div>
+    ${c.suppliers.slice(0,6).map(s=>`
+      <div class="pr-bar-row">
+        <span class="pr-bar-label">${s.c==='Türkiye' ? '🇹🇷 Türkiye' : s.c}</span>
+        <div class="pr-bar-track"><div class="pr-bar-fill" style="width:${s.v}%; background:${s.c==='Türkiye' ? '#1a2033' : '#c9b183'};"></div></div>
+        <span class="pr-bar-val">%${s.v}</span>
+      </div>`).join('')}` : ''}
+    <div class="pr-h2">Risk Değerlendirmesi</div>
+    ${risks.map(r=>`
+      <div class="pr-bar-row">
+        <span class="pr-bar-label">${r.label}</span>
+        <div class="pr-bar-track"><div class="pr-bar-fill" style="width:${r.score}%; background:${riskColorPr(r.score)};"></div></div>
+        <span class="pr-bar-val">${r.score}/100</span>
+      </div>`).join('')}
+  </div>
+
+  <!-- 8. SONUÇ VE GENEL DEĞERLENDİRME -->
+  <div class="pr-page pr-section">
+    ${HEADER}${FOOTER}
+    <div class="pr-h1"><span class="pr-num">8.</span>Sonuç ve Genel Değerlendirme</div>
+    <div class="pr-gauge-row pr-avoid-break">
+      ${prGauge(c.scores.overall, scoreLabel(c.scores.overall), 96)}
+      <div style="flex:1;">
+        <div class="pr-h2" style="margin-top:0;">Genel Öneri: ${recommendationLabel(c.scores.overall)}</div>
+        <div class="pr-lede">Pazar Potansiyeli: <b>${potential}</b> · Giriş Zorluğu: <b>${c.scores.difficulty}/100</b> · Rekabet Seviyesi: <b>${competitionLabel}</b></div>
+      </div>
+    </div>
+    <div class="pr-h2">Öne Çıkan Fırsatlar</div>
+    <ul class="pr-bullets">
+      <li><b>Büyüyen Segment:</b> ${c.dq.importGrowth==='unknown' ? `${catInfo.label} ithalat büyüme oranına dair doğrulanmış veri yok.` : `${catInfo.label} ithalatı ${c.importGrowth} oranında büyüyor.`}</li>
+      <li><b>Yatırım Trendi:</b> Pazar büyüklüğü ${c.marketSize}, yıllık ithalat ${c.annualImports} ile istikrarlı bir yatırım ortamına işaret ediyor.</li>
+      <li><b>Gelecek Görünümü:</b> ${c.dq.importGrowth==='unknown' ? 'Büyüme trendi için henüz doğrulanmış veri yok.' : (numFromPercent(c.importGrowth)>=3 ? 'Büyüme trendinin önümüzdeki yıllarda devam etmesi bekleniyor.' : 'Pazar olgun; farklılaşma ile büyüme yakalanabilir.')}</li>
+    </ul>
+    <div class="pr-final-infobox pr-avoid-break">
+      <h4>Bilgilendirme</h4>
+      <p>Bu rapor yalnızca bilgilendirme amacıyla hazırlanmıştır. Raporda yer alan veriler güvenilir uluslararası veri kaynaklarından derlenmiş olup düzenli olarak güncellenmektedir. Furniture Atlas, verilerin doğruluğu için azami özen göstermektedir; ancak ticari kararlar alınmadan önce resmi kurumlar ve ilgili otoritelerden doğrulama yapılması tavsiye edilir.</p>
+    </div>
+    <div class="pr-final-copyright">© Furniture Atlas<br>www.furnitureatlas.org</div>
+  </div>
+  `;
+}
+document.getElementById('printBtn').addEventListener('click', ()=>{
+  if(!currentBaseCountry) return;
+  document.getElementById('printReportRoot').innerHTML = buildPrintReportHTML(currentBaseCountry);
+  // Bayrak/harita gibi görseller yüklenmeden yazdırma diyaloğu açılırsa boş
+  // kutucuk basılabilir — bir sonraki kare beklenip öyle çağrılır (yeterli).
+  requestAnimationFrame(()=> requestAnimationFrame(()=> window.print()));
+});
 const BUSINESS_MAP_CATEGORIES = [
   { group:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:6px; opacity:0.85;"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v10h16V9"/><path d="M9 19v-6h6v6"/></svg>Retail', items:['Furniture Stores','Furniture Showrooms','Sofa Stores'] },
   { group:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:6px; opacity:0.85;"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-1 2-2 0-.6-.2-1-.5-1.4-.3-.4-.5-.8-.5-1.4 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4c0-4.4-4-7.5-9-7.5z"/><circle cx="7.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="11" cy="7.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.1" fill="currentColor" stroke="none"/></svg>Design', items:['Interior Designers','Architecture Firms','Design Studios'] },

@@ -1399,4 +1399,12 @@
   </div>
 </div>
 
+<!-- PDF/Yazdır RAPORU — web arayüzünden tamamen ayrı, bağımsız bir şablon.
+     Normalde display:none; yalnızca yazdırma anında (@media print) hem bu
+     kutu görünür kılınır hem de #legacy-root'un diğer tüm kardeşleri gizlenir.
+     İçeriği ve stili buildPrintReportHTML() tarafından çalışma zamanında
+     doldurulur — bkz. atlas-app.js. -->
+<div id="printReportRoot" aria-hidden="true"></div>
+
+
 
