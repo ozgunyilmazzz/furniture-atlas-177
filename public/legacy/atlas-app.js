@@ -4667,7 +4667,7 @@ function updateLoginUI(){
   const user = getCurrentUser();
   const loginBtn = document.getElementById('loginBtn');
   const targetsBtn = document.getElementById('myTargetsBtn');
-  const gatedBtns = ['newsBtn','fairsBtn','travelPlanBtn','reportIssueBtn'].map(id=>document.getElementById(id));
+  const gatedBtns = ['newsBtn','fairsBtn','travelPlanBtn','reportIssueBtn','fieldNotesBtn'].map(id=>document.getElementById(id));
   const eyebrowEl = document.getElementById('heroEyebrow');
   const titleEl = document.getElementById('heroTitle');
   const subEl = document.getElementById('heroSub');
@@ -5260,6 +5260,11 @@ document.getElementById('reportThanksCloseBtn').addEventListener('click', ()=>{
 
 document.getElementById('fieldNotesBtn').addEventListener('click', ()=>{
   if(!currentBaseCountry) return;
+  if(isVisitor()){
+    showToast('Saha notlarını görüntülemek için giriş yapmalısın.');
+    openLoginModal();
+    return;
+  }
   document.getElementById('fieldNotesModalCountry').textContent = '— ' + currentBaseCountry.name;
   document.getElementById('fieldNotesModal').classList.add('open');
   loadFieldNotes(currentBaseCountry);

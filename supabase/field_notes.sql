@@ -54,9 +54,10 @@ alter table field_notes enable row level security;
 
 -- Herkes onaylanmış notları görebilir; kullanıcı kendi (henüz onaylanmamış)
 -- notunu da görebilir; admin hepsini görebilir.
+-- NOT: Onaylanmış notları görmek de giriş yapmayı gerektirir (üyelere özel).
 create policy "field_notes_select" on field_notes
   for select
-  using (status = 'approved' or user_id = auth.uid() or is_app_admin());
+  using ((status = 'approved' and auth.uid() is not null) or user_id = auth.uid() or is_app_admin());
 
 -- Giriş yapan herkes kendi adına, her zaman 'pending' durumunda not oluşturabilir.
 create policy "field_notes_insert" on field_notes
@@ -144,4 +145,15 @@ grant execute on function is_app_admin() to authenticated, anon;
 -- ve aşağıdaki satırı UUID'yi yapıştırıp çalıştır:
 --
 -- insert into app_admins (user_id) values ('BURAYA-KENDI-UUID-NI-YAPISTIR');
+
+-- ---------------------------------------------------------
+-- 5) GÜNCELLEME (PATCH) — Bu dosyayı DAHA ÖNCE bir kez çalıştırdıysan,
+-- yukarıdaki tüm dosyayı tekrar çalıştırma (policy'ler zaten var, hata verir).
+-- Sadece aşağıdaki iki satırı çalıştırman yeterli — bu, onaylanmış
+-- saha notlarını görmeyi de (paylaşmak gibi) giriş yapmış üyelere özel yapar:
+-- ---------------------------------------------------------
+-- drop policy if exists "field_notes_select" on field_notes;
+-- create policy "field_notes_select" on field_notes
+--   for select
+--   using ((status = 'approved' and auth.uid() is not null) or user_id = auth.uid() or is_app_admin());
 -- =========================================================
