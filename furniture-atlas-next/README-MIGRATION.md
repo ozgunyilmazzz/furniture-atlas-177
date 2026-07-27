@@ -911,3 +911,815 @@ gorunumunu aynen koruyor.
   liste maddeleri) sayfa ciktisinda mevcut
 - globalReportsModal'in HTML'i `info-doc-body` sinifi icermiyor -
   etkilenmedi
+
+## Faz 28 - Mobil zoom butonlari + ozet kart geri geldi (TAMAMLANDI)
+
+**1) KOK NEDEN: +/- yakinlastirma butonlari mobilde tiklama uretmiyordu**
+`.zoom-controls` butonlari, kureyi surukleme icin kullanilan
+`#globeStage` (`stage`) elementinin ICINDE duruyor. `stage`'in
+`touchstart` dinleyicisi HER dokunusta `e.preventDefault()` cagiriyordu
+- bu da tarayicinin o dokunustan normalde uretecegi "click" olayini
+tamamen iptal ediyordu, butonlar dahil. Duzeltme: touchstart
+handler'ina, dokunulan yer `.zoom-controls` icindeyse hicbir sey
+yapmadan cikan bir kontrol eklendi - artik +/- butonlarina dokunmak
+normal sekilde tiklama olusturuyor, kureyi surukleme mantigi devreye
+girmiyor.
+
+**2) Mobilde artik masaustundeki gibi once ozet kart aciliyor**
+Kodda zaten hazir duran ama kullanilmayan bir fonksiyon bulundu:
+`tryPreviewAtPoint()` - masaustu "uzerine gelme" kartinin AYNISINI
+(+ "Detaya Git ->" butonu) mobilde de gostermek icin yazilmis, ama
+bir asamada devre disi birakilip yerine dogrudan tam sayfa acan
+`tryOpenAtPoint()` kullanilmaya baslanmisti.
+
+Duzeltme: `endDrag()` icinde artik parmakla dokunma (touch) ile
+tiklama ayirt ediliyor - dokunmatikse `tryPreviewAtPoint()` (ozet
+kart + "Detaya Git" butonu), fare tiklamasiysa eskisi gibi
+`tryOpenAtPoint()` (dogrudan sayfa) cagriliyor. "Detaya Git"
+butonunun kendi tiklama mantigi zaten tam calisir haldeydi
+(`hcDetailBtn`), sadece bu yeni yola hic yonlendirilmiyordu.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Uretim sunucusunda hem zoom-controls touchstart korumasi hem
+  `tryPreviewAtPoint` cagrisi bundle'da dogrulandi
+
+## Faz 29 - Veri yili notlari, Turkiye'ye uzaklik karti, Gelecek Kaynaklar kaldirildi,
+## Alici Listesi eski haline dondu, mobil kapat butonu, marka tablosu birlestirme (TAMAMLANDI)
+
+**1) Veri yili bilgisi eklendi**
+Ulke sayfasindaki Pazar Genel Bakisi (Nufus/GSYIH/Enflasyon) ve Ana
+Tedarikci Ulkeler bolumlerine, kodda zaten var olan ama ekranda hic
+gosterilmeyen gercek kaynak yillari (IMF WEO Nisan 2026, IMF WEO 2025,
+importDataSource alani) footnote olarak eklendi. Hicbir yil UYDURULMADI -
+hepsi mevcut veri/yorumlardan alindi.
+
+**2) Turkiye'ye Uzaklik karti eklendi**
+Her ulke sayfasina, ziyaretciye bile acik (kilitsiz) sicak bir kart
+eklendi: iki bayrak + ucus hatti gorseli + gercek koordinatlardan
+(zaten veride olan lat/lon) Haversine formuluyle hesaplanan km +
+tahmini dogrudan ucus suresi. `haversineKm()` ve `renderDistanceCard()`
+fonksiyonlari eklendi, matematik Node'da test edildi (Turkiye->Almanya
+~2337km, Turkiye->ABD ~10166km - gercekci degerler).
+
+**3) "Gelecek Kaynaklar" bolumu kaldirildi**
+Ulke sayfasindaki "12 Gelecek Kaynaklar" basligi ve altindaki "Yakinda
+eklenecek" placeholder kartlari tamamen kaldirildi.
+
+**4) Alicilar Listesi Talebi eski (basit) haline dondu**
+- Faz 16'da eklenen "$29 Potansiyel Alici Veritabani" urunu TAMAMEN
+  kaldirildi (modal, JS mantigi, CSS - hepsi silindi)
+- Buton artik dogrudan bir `<a>` linki: tiklaninca yeni sekmede
+  `https://musaviredanisin.ticaret.gov.tr/` aciyor
+- Altin "featured" vurgusu kaldirildi (`.dash-action-featured` CSS'i de
+  silindi)
+- Hover'da altin renkli "ticaret.gov.tr" ipucu cikiyor (yeni `.gov-link`
+  CSS sinifi)
+- /premium sayfasindaki "Alici veri tabani" ozellik maddesi kaldirildi
+- Site genelinde sirket/alici verisi paylasildigi izlenimi veren baska
+  metin bulunamadi
+
+**5) Mobil ozet kartina Kapat (X) butonu eklendi**
+`showHoverCard()` ve `showTurkeyCard()` fonksiyonlarinin ikisine de sag
+ust kosede kucuk bir kapat butonu eklendi (`hc-close-btn`). Kart
+`pointer-events:none` oldugu icin butona ozel olarak `pointer-events:auto`
+verildi (aksi halde tiklanamaz olurdu).
+
+**6) Marka tablosunda "Bilinmeyen" satirlar birlestirildi**
+"Premium Italyan Mobilya Markalari" tablosunda Natuzzi, BoConcept,
+Calligaris, Rimadesio icin her zaman 4 ayri "Bilinmiyor" satiri
+gosteriliyordu. Artik tek bir birlesik satirda: "Natuzzi Italia,
+BoConcept, Calligaris, Rimadesio | Ulke bazinda dogrulanmis veri yok"
+seklinde gosteriliyor (colspan ile).
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Uretim sunucusunda: Alici Listesi linkinin dogru URL'e gittigi,
+  "Gelecek Kaynaklar" basliginin JS'te artik gecmedigi, mesafe karti
+  fonksiyonlarinin (`renderDistanceCard`, `haversineKm`), kapat
+  butonunun (`hcCloseBtn`), birlesik marka satirinin (`noDataBrands`)
+  ve veri yili notlarinin bundle'da mevcut oldugu dogrulandi
+
+## Faz 29 - Veri yili, mesafe karti, Gelecek Kaynaklar kaldirma, Alici Listesi geri alma (TAMAMLANDI)
+
+**1) Veri yili bilgisi eklendi**
+Kodda zaten var olan ama hic ekranda gosterilmeyen kaynak/yil bilgileri
+artik ulke sayfasinda gorunuyor:
+- Pazar Genel Bakisi bolumune: "Nufus ve GSYIH 2026 tahminidir (IMF WEO,
+  Nisan 2026), Enflasyon 2025 (IMF WEO)" notu eklendi
+- Ana Tedarikci Ulkeler bolumune: mevcut ama kullanilmayan
+  `c.importDataSource` alani artik footnote olarak gosteriliyor
+  (orn. "2024, HS 9403, UN Comtrade (GTAIC)")
+- Hicbir yeni/uydurma yil eklenmedi - hepsi veride zaten mevcut olan
+  gercek kaynak bilgileri
+
+**2) Turkiye'ye Uzaklik karti eklendi (ulke sayfasi atmosferi)**
+Her ulke sayfasinin en ustune, ZIYARETCIYE BILE ACIK (kilitsiz) yeni
+bir kart eklendi: iki bayrak + kesik cizgili "ucus hatti" gorseli +
+gercek km mesafe + tahmini dogrudan ucus suresi. Mesafe, ulkelerin
+veride zaten var olan gercek lat/lon koordinatlarindan Haversine
+formuluyle hesaplaniyor (uydurma degil, gercek geometri). Ucus suresi
+acikca "tahmini" olarak etiketlendi (ortalama seyir hizi + sabit
+kalkis/inis suresi varsayimiyla).
+
+**3) "Gelecek Kaynaklar" bolumu kaldirildi**
+Ulke sayfasinin en altindaki, henuz doldurulmamis 6 veri seti icin
+"Yakinda eklenecek" placeholder karti gosteren bolum tamamen
+kaldirildi.
+
+**4) Alici Listesi Talebi eski (ucretsiz yonlendirme) haline
+DONDURULDU**
+Faz 16'da "Potansiyel Alici Veritabani" adiyla $29'a satilan urun
+kartina cevrilmisti - bu TAMAMEN GERI ALINDI:
+- Altin "featured" vurgusu kaldirildi (`dash-action-featured` sinifi
+  ve CSS'i tamamen silindi)
+- Buton artik JS ile acilan bir modal degil, DOGRUDAN dis linke giden
+  bir `<a>` etiketi: `https://musaviredanisin.ticaret.gov.tr/`,
+  `target="_blank"`
+- Uzerine gelince altin renkli "ticaret.gov.tr" ipucu cikiyor (yeni
+  `.gov-link` CSS sinifi, mevcut kilit-ipucu diliyle tutarli)
+- Eski urun karti modali (`buyerListModal`), onun JS mantigi
+  (`buyerListBtn` click handler, ~40 satir urun karti HTML'i) ve CSS'i
+  (`.buyer-db-*`, ~55 satir) TAMAMEN silindi
+
+**5) Sirket/alici verisi paylasimi izlenimi veren metin temizlendi**
+/premium sayfasinin Standart plan kartindaki "Alici veri tabani"
+ozellik maddesi kaldirildi. Baska bir yerde boyle bir ifade
+bulunamadi (arandi, dogrulandi).
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- JS bundle'inda: "Gelecek Kaynaklar" 0, "Veri yili" 2, mesafe karti
+  fonksiyonlari (renderDistanceCard/haversineKm/TURKEY_COORDS) 8,
+  eski urun karti kodu 0
+- Ana sayfa HTML'inde: musaviredanisin linki ve gov-link sinifi
+  dogrulandi, dash-action-featured tamamen kalkti
+- /premium sayfasinda "Alici veri tabani" ifadesi artik gecmiyor
+
+## Faz 30 - Filtre gostergesi, liste checkbox saglamlastirma, hedef ulke pini (TAMAMLANDI)
+
+**1) Filtre aktif gostergesi - KOK NEDEN DUZELTILDI**
+Bulunan gercek hata: buton varsayilan (filtre YOKKEN) durumda surekli
+titresiyordu (`filterPulse` animasyonu), filtre AKTIFKEN ise animasyon
+tamamen KAPANIYORDU (`animation:none`) - yani tam ters calisiyordu,
+kullanicinin filtrenin acik kaldigini unutmasinin sebebi buydu.
+Duzeltme: titresen animasyon artik SADECE filtre aktifken calisiyor
+(`filterActivePulse`, amber renkli genisleyen halka), bos durumda
+buton sakin duruyor. Aktif filtre sayisi da artik buton yaninda
+kontrast bir "rozet" (koyu zeminde altin sayi) olarak gösteriliyor,
+eskiden dusuk kontrastli duz metindi.
+
+**2) Liste sayfasi checkbox - daha saglam hale getirildi**
+Kod analizinde mevcut capture-phase korumasi yapisal olarak dogru
+gorundu (checkbox ayri bir <td>, digerleriyle onclick paylasmiyor);
+yine de riski sifirlamak icin checkbox artik bir `<label>` ile
+sarmalandi - TUM hucre artik checkbox'in native, tarayici-standardi
+tiklama alani (JS ile manuel toggle mantigi kaldirildi, cift
+tetiklenme riski de boylece ortadan kalkti). Hucrenin tamami artik
+tiklanabilir/secilebilir, ama satiri KESINLIKLE acamaz.
+
+**3) Hedef Ulkelerim icin kurede pin gosterimi eklendi**
+Kullanicinin "Hedef Ulkelerim"e ekledigi ulkeler artik ana sayfadaki
+kurede altin renkli, hafif ziplayan bir pin ile isaretleniyor - normal
+noktalardan acikca ayrisiyor, dikkat cekici. Giris/cikis ve hedef
+ekleme/cikarma anlarinda pin durumu otomatik guncelleniyor (performans
+icin bir cache mekanizmasi var, ilgili her yerde invalidate ediliyor).
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Uretim sunucusunda: `filterActivePulse` CSS'i, `td-check-label` hem
+  CSS hem JS'te, `node-pin` CSS'i ve `getTargetIdsCache`/
+  `invalidateTargetIdsCache`/`is-target` JS'te dogrulandi
+
+## Faz 31 - robots.txt ve sitemap.xml eklendi (TAMAMLANDI)
+
+Next.js App Router'in resmi Metadata API'si kullanildi - hicbir
+mevcut route/dosya degistirilmedi, sadece iki yeni dosya eklendi:
+
+- `app/robots.ts` -> `/robots.txt` otomatik uretiliyor:
+  ```
+  User-Agent: *
+  Allow: /
+
+  Sitemap: https://furnitureatlas.org/sitemap.xml
+  ```
+- `app/sitemap.ts` -> `/sitemap.xml` otomatik uretiliyor, toplam
+  **371 URL**:
+  - 17 statik sayfa (Ana Sayfa, Liste, Ahsap Mobilya varyantlari,
+    Premium, Haberler, Fuarlar, Seyahat Planla, Kuresel Raporlar,
+    Atlas Research+, Hakkimizda, Iletisim, Is Ortaklari, Yardim
+    Merkezi, Gizlilik Politikasi, Kullanim Sartlari, Cerez Politikasi)
+  - 177 ulke x 2 kategori (`/country/<slug>` ve
+    `/country/<slug>/ahsap-mobilya`) = 354 URL
+  - `lib/countries-data.js`'deki ayni `COUNTRIES` listesi kullanildi
+    (route'larin `generateStaticParams`'iyla birebir tutarli)
+- **Kasitli olarak DAHIL EDILMEYEN:** `/hedef-ulkelerim` - bu sayfa
+  zaten `noindex` (kisiye ozel/bos icerik), sitemap'e de girmiyor
+
+### Dogrulandi
+- `npm run build` hatasiz gecti, `/robots.txt` ve `/sitemap.xml`
+  route listesinde statik olarak goruldu
+- Uretim sunucusunda robots.txt icerigi istenen formatla dogrulandi
+- sitemap.xml gecerli XML, tam 371 URL iceriyor
+- `/hedef-ulkelerim` sitemap'te YOK (dogrulandi)
+- Ornek ulke sayfalari (`/country/spain`,
+  `/country/spain/ahsap-mobilya`) sitemap'te mevcut
+
+## Faz 32 - KRITIK HATA DUZELTMESI: site tamamen calismiyordu (TAMAMLANDI)
+
+**Bulunan sorun:** Bir onceki fazda (Faz 30, hedef ulke pin ozelligi)
+eklenen `getTargetIdsCache()` fonksiyonu `getCurrentUser()`'i cagiriyor,
+o da `currentSupabaseSession` degiskenini okuyordu. Sorun su: bu
+degisken `let currentSupabaseSession = null;` ile dosyanin COK
+ILERISINDE (satir ~3661) tanimliyken, kurenin render() fonksiyonu
+sayfa yuklenir yuklenmez, SENKRON olarak COK DAHA ERKEN (satir ~2303)
+cagriliyor. JavaScript'te `let`/`const` degiskenleri "temporal dead
+zone" (TDZ) icinde olur - tanimlandiklari satira gelene kadar
+erisilemezler, erisilmeye calisilirsa ReferenceError firlatilir.
+
+Sonuc: sayfa acilir acilmaz, render() -> updateMarkers() ->
+getTargetIdsCache() -> getCurrentUser() zincirinde bir
+ReferenceError firlatiliyor, bu da SENKRON oldugu icin TUM SCRIPT'IN
+o noktada calismayi durdurmasina yol aciyordu. Bu noktadan SONRAKI
+hicbir kod (Harita/Liste/Sektor Nabzi sekme tiklama olaylari, filtre
+mantigi, kurenin donme animasyon dongusu vb.) HIC KAYDEDILMIYORDU -
+tam olarak bildirilen "sekmeler calismiyor, dunya donmuyor" belirtisi.
+
+**Duzeltme:** `getTargetIdsCache()` artik `getCurrentUser()`
+cagrisini try/catch ile koruyor - degisken henuz TDZ'deyse sessizce
+bos hedef listesiyle devam ediyor, oturum bilgisi gercekten
+yuklendiginde (birkac satir sonra calisan invalidateTargetIdsCache()
+cagrilariyla) otomatik duzeliyor.
+
+**Dogrulama yontemi:** Once Node.js'te izole bir kod ornegiyle
+(`let X` kullanmadan once okuyan bir fonksiyon + try/catch) TDZ
+hatasinin gercekten bu sekilde olustugunu VE try/catch'in onu
+dogru sekilde yakaladigini kanitladim. Sonra gercek atlas-app.js
+dosyasini mock bir tarayici ortaminda calistirip, script'in artik
+eski cokme noktasinin (satir 2303) COK otesine (satir 4264'e kadar)
+sorunsuz ilerledigini dogruladim.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Node'da izole TDZ testi: hata once yakalaniyor, degisken
+  tanimlandiktan sonra dogru calisiyor
+- Uretim sunucusunda yeni try/catch korumasi bundle'da mevcut
+- Mock tarayici ortaminda script artik onceki cokme noktasinin
+  cok otesine kadar hatasiz ilerliyor
+
+## Faz 33 - Ulke sayfasi "Market Overview" hero bolumu (TAMAMLANDI)
+
+Ulke sayfalarinin en ustune, mevcut veri yapisini BOZMADAN yeni bir
+karsilama alani eklendi. Amac: sadece veri gostermek degil, hedef
+pazari "tanitmak" ve motivasyon olusturmak.
+
+**Neden gercek fotograf (Eyfel Kulesi, Tokyo skyline vb.) KULLANILMADI:**
+177 ulke icin telifsiz/lisansli gercek fotograf tedarik etmek hem
+olcek olarak imkansiza yakin hem de olasi telif hakki ihlali riski
+tasiyor (rastgele bir "Eyfel Kulesi" gorseline hotlink vermek, o
+gorselin haklarina sahip olmadan kullanmak anlamina gelebilir).
+Bunun yerine, sitenin zaten sahip oldugu GERCEK verilerle (koordinat,
+bolge siniflandirmasi, bayrak) tamamen ozgun, telif riski sifir,
+premium bir gorsel dil kuruldu.
+
+**Eklenenler:**
+
+1. **REAL_CAPITALS** - 177 ulkenin gercek baskent bilgisi (statik
+   cografi gercek, bayrak/koordinat gibi ayni kategoride - "uydurma
+   veri" degil).
+
+2. **Bolgeye gore hero teması** - mevcut `REGION_MAP` (zaten vardi)
+   kullanilarak her ulkeye kendi bolgesine (Avrupa, Ortadogu, Uzak
+   Dogu, Afrika vb.) ozgu bir gradyan renk teması atandi - 177 ulke
+   birbirinden gorsel olarak ayrisiyor.
+
+3. **Kucuk ulke haritasi** - WORLD_DATA'daki GERCEK sinir (rings)
+   koordinatlarindan (zaten kurenin kendisini cizmek icin kullanilan
+   ayni veri) kucuk bir SVG harita uretiliyor. Denizasiri topraklari
+   olan ulkelerde (ABD-Alaska, Fransa-Fransiz Guyanasi gibi) olcek
+   bozulmasin diye sadece en buyuk ana kara parcasi gosteriliyor.
+
+4. **Turkiye baglanti rotasi** - onceki fazda eklenen mesafe karti
+   buraya tasindi/birlestirildi: iki bayrak, kesikli animasyonlu
+   "ucus hatti", gercek km mesafe ve tahmini ucus suresi.
+
+5. **Baskent bilgisi** - REAL_CAPITALS'tan gosteriliyor.
+
+6. **Karsilama basligi** - "MARKET OVERVIEW" etiketi + buyuk ulke
+   adi + bayrak, sicak/modern bir karsilama hissi icin.
+
+Sayfanin geri kalani (Yonetici Ozeti, Pazar Genel Bakisi, Ticaret
+Ozeti vb.) HIC DEGISMEDI - hero sadece en basa eklendi.
+
+### Kritik hata sonrasi ekstra dogrulama adimlari
+Bir onceki mesajda yasanan "TDZ hatasi tum siteyi kilitledi" olayindan
+sonra, bu fazda EKSTRA dogrulama yapildi:
+- Node'da mock tarayici ortaminda TUM script calistirildi, hicbir
+  yeni hata bulunmadi (script eskisi gibi ayni (beklenen, zararsiz)
+  noktaya kadar sorunsuz ilerledi)
+- `renderCountryHero` fonksiyonu GERCEK COUNTRIES verisiyle DOGRUDAN
+  cagirilip HTML ciktisi dogrulandi (bayrak, baskent, minimap, route
+  hepsi doğru uretildi)
+- Ispanya, Japonya, ABD, Fransa, Nijerya icin mesafe hesaplari elle
+  kontrol edildi (ornegin Turkiye-Japonya ~8542 km, cografi olarak
+  dogru araliktadir)
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Node mock tarayici testinde script hatasiz calisti
+- `renderCountryHero` gercek veriyle dogrudan test edildi, dogru HTML
+  uretti
+- Uretim sunucusunda `country-hero`, `REAL_CAPITALS`,
+  `renderCountryMiniMap`, `hero-route` JS'te; `.country-hero{}`,
+  `.hero-minimap` CSS'te dogrulandi
+
+## Faz 34 - "Market Overview" -> "Ülke Profili" (TAMAMLANDI)
+
+Hero'daki ust etiket ingilizce "MARKET OVERVIEW" yerine "ÜLKE PROFİLİ"
+olarak degistirildi. Baska hicbir sey degismedi.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Uretim sunucusunda "ÜLKE PROFİLİ" metni bundle'da var, eski
+  "MARKET OVERVIEW" tamamen kalkti
+
+## Faz 35 - "Pazara Ilk Bakis" karti premium yeniden tasarim (TAMAMLANDI)
+
+Karti tamamen yeniden tasarladim, yerlesimi (sayfanin en ustunde tek
+kart olarak durmasi) bozulmadi. Amac ayni bilgiyi daha lüks gostermek,
+yeni bilgi eklemek degildi (2 istisna: dil ve saat farki, asagida
+aciklandi).
+
+**Degisiklikler:**
+1. Baslik: "ÜLKE PROFİLİ" -> "PAZARA İLK BAKIŞ"
+2. **Bayrak - gercek hata duzeltildi:** Onceki emoji bayrak, bazi
+   sistemlerde (ozellikle Windows) dogru render olmuyor, iki harfli
+   ulke kodu ("SG" gibi) olarak gorunuyordu - bu emoji font
+   destegindeki bilinen bir sinirlamadir. Artik gercek bir bayrak
+   GORSELİ kullaniliyor (flagcdn.com - ucretsiz, API anahtari
+   gerektirmeyen, yaygin kullanilan bir bayrak CDN'i), kucuk ve
+   kaliteli (46px, yumusak golge). Gorsel yuklenemezse otomatik
+   olarak eski emoji'ye geri donuyor (onerror fallback).
+3. Ulke adi artik sayfanin odak noktasi: 34px -> 44px, serif/italik
+   font korundu.
+4. Ulke haritasi: kucuk yan panel yerine, sag ustte BUYUK (300px),
+   dusuk opakliktaki (%18) dekoratif arka plan katmani oldu.
+5. Kart arka planina ince "harita/graticule" izgara dokusu eklendi.
+6. Turkiye->hedef rota: uc noktalar (bayrak + ulke adi etiketi) net
+   sekilde ayristirildi, ince cizgi + kucuk animasyonlu ucak ikonu.
+7. Mesafe/ucus suresi: kutu/border kaldirildi, buyuk rakam + kucuk
+   etiket seklinde "modern istatistik" gorunumune gecti.
+8. **Kartin altina tek satir bilgi eklendi** (5 ikon): 🏛 Baskent,
+   👥 Nufus, 💵 Para Birimi, 🗣 Resmi Dil, 🕒 Saat Farki.
+   - Baskent, Nufus, Para Birimi zaten mevcut veriden geliyordu.
+   - **Resmi Dil ve Saat Farki icin YENI gercek veri eklendi**
+     (`REAL_LANGUAGES`, `REAL_UTC_OFFSET` - 177 ulkenin tamami icin,
+     statik/dogrulanabilir cografi gercekler, bayrak/baskent ile ayni
+     kategoride - uydurma is verisi degil).
+9. Sag alt kosede tek cumlelik premium aciklama - tamamen mevcut
+   Firsat Skoru etiketinden (`scoreLabel`) turetiliyor, ulkeye ozel
+   uydurma bir iddia icermiyor.
+
+### Kritik hata sonrasi standart dogrulama protokolu (yine uygulandi)
+- Node'da mock tarayici ortaminda TUM script calistirildi - sadece
+  beklenen (zararsiz, test harness kaynakli) hatanin ayni yerde
+  cikip cikmadigi kontrol edildi, yeni hata YOK
+- `renderCountryHero` fonksiyonu GERCEK Singapur verisiyle DOGRUDAN
+  cagirilip tam HTML ciktisi satir satir incelendi:
+  - Mesafe: 8.098 km (Turkiye-Singapur gercek mesafesiyle tutarli)
+  - Ucus suresi: ~10sa 12dk
+  - Saat farki: +5 saat (Singapur UTC+8, Turkiye UTC+3 - doğru)
+  - Bayrak: flagcdn.com/w80/sg.png (dogru ISO kodu)
+  - Baskent: Singapur (sehir-devlet oldugu icin dogru)
+  - Dil: "İngilizce/Çince/Malayca/Tamilce" (Singapur'un 4 resmi dili)
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde yeni regresyon yok
+- `renderCountryHero` ciktisi gercek veriyle elle dogrulandi
+
+## Faz 36 - Emojiler premium SVG ikonlarla degistirildi (TAMAMLANDI)
+
+Hicbir yerlesim/icerik degismedi - sadece "Pazara Ilk Bakis" kartindaki
+emoji ikonlar (bayrak HARIC) ince-cizgili SVG ikonlarla degistirildi,
+uygulamanin geri kalaninda zaten kullanilan ayni gorsel dile
+(stroke="currentColor", stroke-width 2, yuvarlak uclar) uyumlu:
+
+- ✈ (ucak) -> "gonder/send" tarzi ince SVG ucak ikonu
+- 🏛 (Baskent) -> sutunlu bina/anit SVG ikonu
+- 👥 (Nufus) -> iki kisi SVG ikonu
+- 💵 (Para Birimi) -> daire icinde dolar isareti SVG ikonu
+- 🗣 (Resmi Dil) -> kuresel/meridyen cizgili globe SVG ikonu
+- 🕒 (Saat Farki) -> saat SVG ikonu
+
+Bayraklar (🇹🇷 ve hedef ulke bayragi rota bolumunde) kullanicinin
+istegi geregi DEGISTIRILMEDI - zaten ana bayrak da bir onceki fazda
+gercek gorsele (flagcdn.com) cevrilmisti.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde yeni regresyon yok (ayni beklenen/zararsiz
+  hataya kadar sorunsuz calisti)
+- `renderCountryHero` cikti uzerinde Python ile emoji taramasi yapildi:
+  bayrak DISINDA 0 emoji kaldigi dogrulandi, 7 SVG ikon uretildigi
+  ve flagcdn baglantisinin hala oldugu dogrulandi
+
+## Faz 37 - Hero kart iyilestirmeleri: harita, AI ozeti, chip'ler, baslik (TAMAMLANDI)
+
+**1) Harita gorunmeme sorunu - gercek KOK NEDEN bulundu:**
+`renderCountryMiniMap` fonksiyonu, ic `<path>` elemanina HER ZAMAN
+sabit `class="hero-minimap-shape"` veriyordu - bu da kendi
+fill-opacity(0.28)/stroke degerlerini tasiyordu ve benim arka plan
+icin yazdigim `.country-hero-bgmap-shape` (svg sarmalayicisina
+uygulanan) kuralini gecersiz kiliyordu (CSS'te elemanin KENDI sinifi,
+miras alinan degerden her zaman kazanir). Ayrica pozisyon (`right:-4%`)
+ile birlesince harita buyuk olcude karti kesen `overflow:hidden`
+disinda kaliyordu. Cozum: path'in sinifi da artik parametrik
+(`pathClassName`), bgmap icin AYRI, kendi kurallariyla (`fill-opacity:1,
+stroke:none`) calisan bir sinif kullaniliyor. Pozisyon `top:-4%; right:-2%`
+olarak icerde tutuldu (kirpilmiyor).
+
+**2) Harita ~%20 buyudu, opakligi dustu:** 300px -> 360px konteyner
+(mobilde 220->260px), SVG viewBox 340->408, opaklik 0.18->0.14
+(mobilde 0.14->0.11).
+
+**3) Sag alttaki zayif metin -> veri temelli "AI Ozeti":**
+Eski: "{Ulke} pazari icin firsatlar veriler arttikca netlesecek."
+(genel, degersiz). Yeni: Uygulamanin kendi ZATEN VAR OLAN skor
+esikleriyle (digger yerlerde de kullanilan `potentialLabel()` ve
+competition esigi) birebir ayni mantikla, GERCEK skorlardan
+uretiliyor:
+- Genel skor >=80 ise: "Turkiye'nin en guclu ihracat potansiyeli
+  tasiyan pazarlardan biri."
+- Aksi halde: "Mobilya ithalati {orta/yuksek/dusuk}, rekabet
+  {orta/yuksek/dusuk} seviyede." (Meksika ornegiyle test edildi:
+  gercek skorlari market=51, competition=90 -> "Mobilya ithalati
+  orta, rekabet yuksek seviyede." - dogru ve anlamli)
+- Ustune kucuk "AI OZETI" etiketi eklendi
+
+**4) Alt bilgi satiri artik chip/kart gorunumunde:** Duz metin +
+ikon yerine, her biri kendi hafif arka plan/kenarlik/yuvarlak
+kosesi olan kucuk "pill" kartlar (hover'da hafif aydinlaniyor).
+
+**5) Ulke adi ~%15 kuculdu:** 44px -> 37px (mobilde 30px -> 25px,
+orantili).
+
+### Standart dogrulama protokolu (yine uygulandi)
+- Node mock tarayici testinde yeni regresyon yok
+- `renderCountryHero` Meksika verisiyle DOGRUDAN cagirilip: tagline
+  metni, AI OZETI etiketi, chip class'lari, bgmap viewBox boyutu
+  (408x408) tek tek dogrulandi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testi temiz
+- Gercek veriyle (Meksika) dogrudan fonksiyon cagrisi ile tum 4
+  degisiklik teyit edildi
+
+## Faz 38 - Hover kart kapatma tusu duzeltmesi + gercek enflasyon verisi (TAMAMLANDI)
+
+**1) Hover kart kapatma tusu / Firsat Skoru cakismasi**
+`.hc-close-btn` mutlak konumluydu (top:10px; right:10px), `.hc-head`
+(bayrak+isim+skor rozeti) sag kenara hicbir bosluk birakmadan
+yaslaniyordu - ikisi ayni kosede ust uste biniyordu. `.hc-head`'e
+`padding-right:28px` eklenerek skor rozetine kapatma tusunun alanina
+girmeyecek kadar sag bosluk birakildi.
+
+**2) Enflasyon verisi - GERCEK KAYNAKTAN GUNCELLENDI, UYDURMA
+FALLBACK KALDIRILDI**
+KOK SORUN bulundu: kod, `REAL_INFLATION` icinde verisi olmayan her
+ulke icin `r(1,45).toFixed(1)` ile RASTGELE bir sayi uretiyordu -
+tam olarak kullanicinin endiseledigi "uydurma veri" buydu.
+
+Cozum - tr.tradingeconomics.com'un 6 kita sayfasindan (Dunya, Avrupa,
+Amerika, Asya, Afrika, Okyanusya) gercek, guncel enflasyon oranlari
+tek tek cekildi ve 177 ulkenin ID'siyle eslestirildi:
+- **167 ulke** icin gercek veri bulundu ve REAL_INFLATION guncellendi
+  (ornekler: Rusya %5.3, Almanya %2.3, Iran %88.6, Venezuela %524 -
+  hiperenflasyon dahil gercek rakamlar oldugu gibi kullanildi)
+- **10 ulke** icin kaynakta hic veri yoktu (Antarktika, Kuzey Kore,
+  Myanmar, Sudan, Yemen, Bati Sahra, Gronland, Falkland Adalari,
+  Fransiz Guney ve Antarktika Topraklari, DR Kongo) - bunlar artik
+  REAL_INFLATION'da YOK
+- Rastgele sayi ureten fallback (`r(1,45)`) tamamen kaldirildi;
+  artik veri yoksa `inflation = null` donuyor
+- Tum goruntuleme yerleri (ana panel, liste gorunumu, karsilastirma)
+  `null` durumunda "%..." yerine **"Bilinmiyor"** gosterecek sekilde
+  guncellendi
+- Veri kalitesi rozeti de duzeltildi: eskiden "tahmini" (estimated)
+  gosteriliyordu, artik dogru sekilde "bilinmiyor" (unknown) rozeti
+  cikiyor
+
+### Standart dogrulama protokolu (yine uygulandi)
+- Node mock tarayici testinde yeni regresyon yok
+- REAL_INFLATION objesi dogrudan parse edilip 167 ulke sayisi,
+  ornek degerler (Rusya, Venezuela, Iran, Almanya) ve eksik
+  ulkelerin (Myanmar/Sudan/Kuzey Kore) GERCEKTEN yer almadigi
+  tek tek dogrulandi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- `.hc-head` CSS'inde padding-right:28px dogrulandi
+- REAL_INFLATION: 167 ulke, dogru degerler, 10 eksik ulke dogru
+  sekilde yok
+
+## Faz 39 - Platform gecici olarak tamamen ucretsiz (2027'ye kadar) (TAMAMLANDI)
+
+**Onemli mimari karar:** Kurucu Uye/Standart paket altyapisi (fiyatlandirma,
+uyelik sistemi, rozet, Supabase RPC'leri) HICBIR SEY SILINMEDI. Bunun
+yerine TEK bir anahtar eklendi:
+
+```js
+const MONETIZATION_ACTIVE = false;
+```
+
+`isPremiumUser()` fonksiyonu artik bu bayraga bakiyor: bayrak `false`
+oldugu surece, GIRIS YAPMIS HERKES (Kesif/ucretsiz uye dahil) premium
+kullanici gibi davraniliyor (`!isVisitor()`). Bu TEK degisiklik,
+sitede zaten kurulu olan TUM kisitlama mantigina otomatik yayiliyor
+(cunku hepsi `isPremiumUser()` kontroluyle basliyor):
+- Haftalik 1 ulke raporu limiti -> kalkti (giris yapan herkes sinirsiz)
+- Haftalik 1 karsilastirma limiti -> kalkti
+- Filtreleme kilidi -> zaten sadece ziyaretciye ozeldi, degismedi
+- PDF/Yazdir kilidi -> kalkti
+- Kuresel Raporlar / Atlas Research+ kilidi -> kalkti
+
+**2027'de eski sisteme donmek icin** tek yapilmasi gereken:
+`MONETIZATION_ACTIVE = true` yapmak. Bunun disinda hicbir kod
+degisikligi gerekmiyor - her sey zaten hazir ve dogru calisacak
+sekilde yerinde duruyor.
+
+**Kayit formu sadelesti:** Platform ucretsizken, kayit ekraninda artik
+Kurucu Uye/Standart plan secim ekrani (fiyatlar, "$19,90/yil" vb.)
+HIC GORUNMUYOR. Kullanici dogrudan tek adimlik ucretsiz kayit formuna
+yonleniyor ("Ucretsiz Kayit Ol" butonu).
+
+**"/premium" sayfasi ve modal'i degisti:** Fiyat kartlari yerine artik
+"Furniture Atlas su anda herkese tamamen ucretsiz" mesaji gosteriliyor
+- hicbir yil veya odeme referansi yok. Hem modal uzerinden hem
+`/premium` URL'sine dogrudan gelindiginde bu mesaj gorunuyor.
+
+**Guvenlik notu:** Onceki kritik TDZ hatasindan (Faz 32) ders alinarak,
+`isVisitor()` fonksiyonuna da ayni try/catch korumasi eklendi - artik
+`currentSupabaseSession` her nerede/ne zaman cagirilirsa cagirilsin
+script'i asla cokertmiyor.
+
+**Bekletilen konu:** Toplam Ihracat (ilk 30 uretici ulke, Excel
+verisinden) ve Pazar Buyuklugu kaldirma islemleri - kullanici Excel
+dosyasini tekrar gonderecek, o zaman islenecek.
+
+### Standart dogrulama protokolu (yine uygulandi)
+- Node mock tarayici testinde yeni regresyon yok
+- `isVisitor()`/`isPremiumUser()`/`isFreeMember()` fonksiyonlari GERCEK
+  KOD'dan cikarilip iki senaryoda (ziyaretci / giris yapmis kullanici)
+  dogrudan calistirildi - beklenen sonuclar (giris yapan herkes tam
+  erisimli) dogrulandi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde script hatasiz calisti
+- Ziyaretci/giris-yapmis-kullanici senaryolari gercek fonksiyonlarla
+  test edildi, dogru sonuc verdi
+- `MONETIZATION_ACTIVE`, ucretsiz mesaj metni, "Ucretsiz Kayit Ol"
+  butonu bundle'da dogrulandi
+
+## Faz 40 - Rota ikonu/uzunlugu + kayit ekrani "Paket Secimine Don" gizleme (TAMAMLANDI)
+
+**1) Hero'daki ucak ikonu ve rota cizgisi**
+- Eski genel "gonder/dart" tarzi ikon -> gercek, taninabilir bir ucak
+  siluetine (Material Design "flight" glyph) cevrildi, altin renkte,
+  45 derece egik, hafif golgeli - daha premium.
+- `.hero-route-visual` artik `max-width:230px` ile sinirlandirildi
+  (eskiden `flex:1` ile karti tam genisligine kadar geriliyordu) -
+  Turkiye ile hedef ulke arasindaki cizgi kisaldi, ulke adi artik
+  kartin cok daha soluna, kompakt bir sekilde oturuyor.
+
+**2) Kayit ekrani "Paket Secimine Don" metni gizlendi**
+Platform ucretsizken (MONETIZATION_ACTIVE=false) kayit akisi zaten
+tek adimli (plan secim ekrani hic gosterilmiyor) - bu buton donulecek
+bir plan secim ekrani olmadigi icin anlamsizdi, artik `showAuthTab()`
+icinde bu durumda gizleniyor. Odeme aktif oldugunda (MONETIZATION_ACTIVE
+=true) buton otomatik geri geliyor (kod degismedi, sadece kosullu
+gizleme eklendi).
+
+### Standart dogrulama protokolu (yine uygulandi)
+- Node mock tarayici testinde yeni regresyon yok
+- Uretim sunucusunda: yeni ucak SVG path'i, `max-width:230px` CSS
+  kurali, ve `registerBackBtn` gizleme kodu bundle'da dogrulandi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testi temiz
+- Tum 3 degisiklik (ikon, kisaltilmis rota, gizlenen buton) uretim
+  ciktisinda teyit edildi
+
+## Faz 40 - Pazara Ilk Bakis rota gorseli: premium ucak ikonu + kisaltilmis hat (TAMAMLANDI)
+
+- Ucak ikonu, ince/stroke tabanli, uygulamanin geri kalaninda zaten
+  kullanilan ayni gorsel dile uygun premium bir ikonla degistirildi
+  (eskiden dolgu/blok stil bir ikon + garip bir 45 derece donmе vardi)
+- Turkiye <-> hedef ulke arasindaki cizgi kisaltildi (`max-width:230px`
+  -> `175px`, cizginin minimum genisligi `60px` -> `36px`) - hedef
+  ulke bayragi/etiketi artik daha sola, Turkiye'ye daha yakin duruyor
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde regresyon yok
+- Yeni ikon ve `max-width:175px` kurali uretim sunucusunda dogrulandi
+
+## Faz 41 - PDF/Yazdirma hatasi: tum modaller sayfaya siziyordu (TAMAMLANDI)
+
+**1) Kayit formu "Paket Secimine Don" - zaten Faz 39'da cozulmustu**
+Kod kontrol edildi: `MONETIZATION_ACTIVE=false` oldugunda
+`registerBackBtn` zaten gizleniyor (showAuthTab icinde). Kullanicinin
+hala gormesi, muhtemelen son zip'i (Faz 39/40) henuz siteye
+yuklememis olmasindan kaynaklaniyor - koda ek degisiklik gerekmedi.
+
+**2) PDF/Yazdir - KOK NEDEN BULUNDU: tum modaller sayfaya siziyordu**
+Sitede 20 farkli modal (Seyahat Planla, Haberler, Fuarlar, Giris,
+Kayit, Hedef Ulkelerim, Premium vb.) HEPSI ayni `.compare-modal`
+sinifini paylasiyor ve normalde `position:fixed` + ekran disina
+tasima (transform) ile gizleniyor. `@media print` kurali bu sinifi
+HIC haric tutmuyordu - tarayicilar yazdirirken `position:fixed`
+elemanlari normal belge akisina "duzlestiriyor", bu da TUM 20
+modalin dashboard'dan sonra ayri sayfalar olarak yazdirilmasina
+neden oluyordu. Kullanici hangi modalin son acik/DOM'da erisilebilir
+oldugunu gorduyse o goruniyordu (Seyahat Planla).
+
+**Cozum:** `@media print` kuraline `.compare-modal` (ve guvenlik icin
+`.score-info-popover`, `.atlas-toast`, `#atlas-ticker-wrap`,
+`.filter-panel`) eklendi - hepsi artik yazdirirken tamamen
+gizleniyor. Asil yazdirilmasi gereken ulke raporu (`#dashboard`,
+class="dashboard") FARKLI bir sinif kullandigi icin bu degisiklikten
+ETKILENMEDI, dogrulandi.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Uretim sunucusunde yeni `@media print` kurali (`.compare-modal` dahil)
+  ve `.dashboard{position:static}` kuralinin hala orada oldugu
+  (yani asil rapor icerigi gizlenmiyor) dogrulandi
+
+## Faz 42 - Anasayfa: kure ipuclari + Populer Pazarlar cipleri (TAMAMLANDI)
+
+**Onemli tespit:** Gonderilen tasarim mockup'inin COGU zaten kodda
+mevcuttu ve calisiyordu, sadece giris yapilmadan gorunmuyordu:
+- "Hosgeldin, [Isim]." kisisellestirilmis karsilama -> ZATEN VARDI
+  (`updateLoginUI()`, `titleEl.innerHTML`)
+- "★ Kurucu Uye" rozeti -> ZATEN VARDI (Faz 15)
+- "Hata Bildir" butonu + modal -> ZATEN VARDI, sadece giris yapinca
+  gorunur hale geliyordu (`display:none` -> giris yapinca acik)
+- Haberler/Fuarlar/Hedef Ulkelerim/Seyahat Planla menu -> ZATEN VARDI
+
+**Gercekten eksik olan ve bu fazda eklenen iki ozellik:**
+
+1. **Kure ipuclari (onboarding):** Kurenin sol ve saginda, ilk
+   ziyarette 0.6 sn sonra beliren, "Kureyi surukleyerek ulkeleri
+   kesfet" / "Yakinlasmak icin dondur, cift tikla" kartlari. 5 saniye
+   sonra otomatik kayboluyorlar (`setTimeout` + CSS opacity/transform
+   gecisi). localStorage ile "bir kez gosterildi" takibi yapiliyor.
+   Kurenin sol alt kosesine, ipuclarini tekrar gormek icin kucuk bir
+   "?" yardim butonu eklendi (mockup'in onerdigi gibi).
+   - **Responsive:** Masaustu (≥1200px) - kurenin iki yaninda tam
+     boy kartlar. Tablet (768-1199px) - kartlar daralip kureye
+     yaklasiyor. Mobil (≤767px) - iki yan kart gizlenip TEK bir kart
+     kurenin altinda gosteriliyor, kure genisligi ~78vw'ye cikiyor.
+   - **Basitlestirme notu:** Mockup'taki kavisli/kesikli oklar (kart
+     ile kure arasindaki baglanti cizgileri) eklenmedi - salt dekoratif
+     oldugu ve zaman/karmasiklik dengesi nedeniyle atlandi, karti
+     kendisi zaten yonu/anlami acikca anlatiyor.
+
+2. **Populer Pazarlar cipleri:** Kurenin altinda, Almanya/ABD/
+   Fransa/Irak/Suudi Arabistan icin bayrak+isim cipleri - tiklaninca
+   dogrudan o ulkenin sayfasini aciyor.
+
+**Not:** Mockup'in sag tarafindaki "ANIMASYON & DAVRANIS" /
+"RESPONSIVE DAVRANIS" paneli gercek site arayuzu degil, benim icin
+yazilmis tasarim notlariydi - o notlar bu fazin planlanmasinda
+kullanildi, ayri bir UI olarak insa edilmedi.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde regresyon yok
+- Uretim sunucusunda `globeHintLeft`/`globeHintRight`/
+  `popularMarketsChips` HTML'de, `.globe-hint`/`.popular-market-chip`
+  CSS'te, `initGlobeHints`/`renderPopularMarkets` JS'te dogrulandi
+
+## Faz 43 - Hero metinleri sadelesti, Populer Pazarlar sadece uyeye ozel (TAMAMLANDI)
+
+**1) Kure ipuclari zaten ziyaretciye de acikti**
+`initGlobeHints()` hicbir zaman giris kontrolu yapmiyordu. Onceki
+raporun sebebi muhtemelen tarayicinin "bunu zaten gordum" bilgisini
+(localStorage) hatirlamasi - gizli sekmede/localStorage temizlenince
+tekrar gorunur.
+
+**2) Basliklar - punto kucultuldu**
+`h1.hero-title` font-size: `clamp(32px,5vw,58px)` -> `clamp(28px,4.3vw,50px)`.
+Hem "Hosgeldin, [Isim]." hem "Bir sonraki ihracat pazarinizi..."
+basliklari ayni sinifi paylastigi icin ikisi de kucudu.
+
+**3) Giris yapmis kullanici alt metni degisti**
+Eski: "Bugun hangi ulkeyi analiz etmek istersin? Guncel ticaret
+verileriyle yeni ihracat firsatlarini kesfet."
+Yeni: "177 ulke seni bekliyor. Kureyi surukle ve yeni ihracat
+pazarlarini kesfet."
+
+**4) Ziyaretci alt metni AYNEN korundu** (degisiklik yapilmadi)
+
+**5) "KÜREYİ ÇEVİR · DETAY İÇİN TIKLA · İHRACATA BAŞLA" tamamen
+kaldirildi** - hem giris yapmis hem ziyaretci durumunda. Element
+HTML'den SILINMEDI (JS'te `document.getElementById('heroHint')`
+cagrilarina bagli bir null-reference riski olusturmamak icin), sadece
+CSS ile (`display:none`) kalici olarak gizlendi ve JS'teki
+icerik-atama satirlari da kaldirildi.
+
+**6) Populer Pazarlar cipleri artik SADECE giris yapmis kullaniciya
+gorunuyor** - HTML'de varsayilan `display:none` ile basliyor (flash
+onlemek icin), `updateLoginUI()` giris durumuna gore acip kapatiyor.
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde regresyon yok
+- Yeni alt metin bundle'da dogrulandi, eski "KÜREYİ ÇEVİR" metni
+  tamamen kalkti
+
+## Faz 44 - Yardim butonu +/- ile ayni sutunda + Pazara Ilk Bakis daha dolu (TAMAMLANDI)
+
+**1) "?" yardim butonu artik +/- ile ayni sutunda**
+Onceden kurenin sol alt kosesinde ayri, bagimsiz konumlanan bir
+elementti - simdi `.zoom-controls` sutununun icine tasindi (+/-
+butonlarinin hemen altina). Boylece daha gorunur, ayni gruba ait
+hissediyor. Ayni glass-panel stilini otomatik olarak miras aliyor,
+sadece yuvarlak sekli koruyor.
+
+**2) Ulke sayfasi "Pazara Ilk Bakis" karti - AI Ozeti kaldirildi,
+chip'ler yukari tasindi**
+- "AI ÖZETİ" etiketi + altindaki cumle (sag altta duran) tamamen
+  kaldirildi (hem JS ciktisindan hem CSS'ten)
+- Ikonlu chip'ler (Baskent/Nufus/Para Birimi/Dil/Saat Farki) artik
+  bayrak+ulke-adi bloğunun HEMEN ALTINDA, ayni "ust" bolumun parcasi -
+  eskiden rota (Turkiye mesafe) bilgisinden SONRA, ayri bir alt satir
+  olarak duruyorlardi
+- Yeni siralama: [Bayrak + Isim] -> [Chip'ler] -> [Turkiye Rotasi]
+- Sonuc: kart artik en ustte daha dolu gorunuyor, AI Ozeti'nin
+  kapladigi alt bosluk kalktigi icin toplam yukseklik azaldi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testinde regresyon yok, "AI ÖZETİ" metni bundle'da
+  hic gecmiyor
+- `renderCountryHero` Meksika verisiyle DOGRUDAN cagirilip tam HTML
+  ciktisi incelendi: chip'lerin identity bloğu icinde (rota
+  bolumunden ONCE) oldugu, tagline'in hic olmadigi dogrulandi
+
+## Faz 45 - Kure gorsel kalitesi yukseltildi (model/performans/etkilesim AYNI) (TAMAMLANDI)
+
+Kurenin kendisi (SVG projeksiyon, ulke poligonlari, donme/zoom mantigi,
+tiklama/surukleme etkilesimi) HIC DEGISTIRILMEDI. Sadece gorsel katmanlar
+eklendi, hepsi ya statik (bir kez cizilip performans maliyeti sifir)
+ya da zaten var olan per-frame guncellemelere "biniyor" (ek maliyet
+neredeyse sifir).
+
+1. **Turkuaz atmosfer glow** - kurenin arkasinda, STATIK, bulanik
+   (SVG feGaussianBlur) buyuk bir daire (`#atmosphereGlow` gradyani).
+   Tek seferlik render, per-frame maliyeti yok.
+2. **Gece sehir isiklari** - her ulke marker'inin ICINE, deterministik
+   (hash tabanli, rastgele degil - reload'da ayni gorunur) 2-3 kucuk
+   isik noktasi eklendi. Bu noktalar zaten HER FRAME guncellenen
+   marker grubunun transform'una "biniyor" - EK per-frame maliyeti
+   SIFIR (177 ulke x birkac ekstra <circle> elemani, sadece init'te
+   bir kez olusturuluyor).
+3. **Ince enlem/boylam grid cizgileri** - zaten vardi, opakligi
+   %8-10 hedefine getirildi (grid grubu opacity 0.5->0.7, cizgi
+   stroke-opacity ayarlandi).
+4. **Sag ustten yumusak rim light** - STATIK bir overlay daire,
+   `mix-blend-mode:screen` ile, odagi sag-ust (`cx:72% cy:24%`)
+   olan yeni bir radyal gradyan (`#rimLight`). Tek seferlik render.
+5. **Cok hafif yildiz alani (%5 opacity)** - TAMAMEN CSS (`::before`
+   pseudo-element, radial-gradient nokta deseni), hicbir JS/SVG
+   maliyeti yok.
+6. **Ulke hover gecisi yumusatildi** - 150ms -> 260ms ease.
+7. **Seyrek "Turkiye -> rastgele ulke" isik rotasi** - ~18-34 saniyede
+   bir, rastgele bir ulkeye 3 saniyelik ince, kesikli, teal renkli bir
+   cizgi beliriyor (CSS opacity transition ile yumusak fade). Cizginin
+   iki ucu, zaten her frame hesaplanan Turkiye pozisyonuna ve SADECE
+   pulse aktifken hesaplanan hedef ulke pozisyonuna dayaniyor - yani
+   ek maliyet sadece pulse gosterilirken (nadir) ve minimal (1 ekstra
+   toXY() cagrisi).
+
+Tum yeni katmanlarda `pointer-events:none` var - hicbiri fare/dokunma
+etkilesimini engellemiyor, kurenin surukleme/tiklama davranisi
+degismedi.
+
+### Standart dogrulama protokolu (yine uygulandi)
+- Node mock tarayici testinde script hatasiz calisti (yeni regresyon
+  yok, ayni beklenen/zararsiz noktaya kadar ilerledi)
+- Uretim sunucusunda tum yeni CSS siniflari (`.globe-atmosphere`,
+  `.globe-rimlight`, `.node-citylight`, `.route-pulse-line`,
+  `.globe-stage::before`) ve JS parcalari (`atmosphereGlow`,
+  `rimLight`, `node-citylight`, `route-pulse-line`, `routePulseGroup`,
+  `scheduleRoutePulses`) dogrulandi
+
+### Dogrulandi
+- `npm run build` hatasiz gecti
+- Mock tarayici testi temiz
+- Tum yeni CSS/JS parcalari uretim sunucusunda dogrulandi

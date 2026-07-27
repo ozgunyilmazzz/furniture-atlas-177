@@ -1,4 +1,4 @@
-console.log('%cFurniture Atlas build: checkbox-fix-v6', 'color:#c9a961; font-weight:bold;');
+console.log('%cFurniture Atlas build: checkbox-fix-v8-delegated', 'color:#c9a961; font-weight:bold;');
 /* =========================================================
    ÖRNEK VERİ SETİ — tamamı gösterim amaçlıdır
    ========================================================= */
@@ -258,10 +258,17 @@ const TURKEY_TOTAL_EXPORT_2025 = {"iraq":609.299,"austria":57.886,"usa":243.984,
 
 
 // Gerçek enflasyon verisi (2025) — IMF World Economic Outlook API (PCPIPCH göstergesi, resmi imf.org veri servisi).
-const REAL_INFLATION = {"mexico":3.8,"usa":2.7,"germany":2.3,"france":0.9,"uk":3.4,"turkey":34.9,"china":0,"japan":3.2,"india":2.1,"brazil":5,"southafrica":3.2,"south-korea":2.1,"canada":2.1,"australia":2.9,"italy":1.6,"spain":2.7,"netherlands":3,"switzerland":0.2,"poland":3.6,"austria":3.6,"belgium":3,"sweden":2.6,"norway":3,"denmark":1.8,"finland":1.8,"ireland":2.1,"portugal":2.2,"greece":2.9,"czechia":2.5,"hungary":4.4,"romania":7.3,"bulgaria":3.5,"croatia":4.4,"slovakia":4.2,"slovenia":2.5,"lithuania":3.4,"latvia":3.8,"estonia":4.8,"cyprus":0.8,"luxembourg":2.5,"iceland":4.1,"russia":8.7,"ukraine":12.7,"belarus":6.6,"kazakhstan":11.4,"uzbekistan":8.8,"azerbaijan":5.6,"georgia":3.9,"armenia":3.3,"indonesia":1.9,"thailand":-0.1,"vietnam":3.3,"malaysia":1.4,"philippines":1.7,"bangladesh":10,"pakistan":4.5,"sri-lanka":1.2,"myanmar":22,"cambodia":2.5,"laos":7.7,"egypt":20.4,"morocco":0.8,"algeria":1.4,"tunisia":5.3,"nigeria":23,"kenya":4.1,"ethiopia":13.2,"ghana":14.2,"tanzania":3.3,"uganda":3.6,"zambia":13.9,"angola":20.2,"cote-d-ivoire":0.1,"senegal":1.4,"cameroon":3.4,"dem-rep-congo":7.4,"sudan":100.2,"iran":50.9,"iraq":0.3,"saudi-arabia":2,"uae":1.3,"qatar":0.6,"kuwait":2.4,"oman":1,"jordan":1.8,"lebanon":14.6,"israel":3,"yemen":21.4,"afghanistan":2.9,"argentina":41.9,"chile":4.2,"colombia":5.1,"peru":1.5,"venezuela":252,"ecuador":0.7,"bolivia":19.5,"paraguay":4.1,"uruguay":4.7,"guatemala":1.6,"honduras":4.6,"nicaragua":2.1,"costa-rica":-0.1,"panama":0,"dominican-rep":3.9,"jamaica":3.9,"trinidad-and-tobago":1,"new-zealand":2.8,"fiji":-1.4,"mongolia":8.6,"nepal":4.1,"bhutan":2.6,"mozambique":4.4,"zimbabwe":81.4,"lesotho":4.4,"namibia":3.5,"botswana":2.8,"congo":2.6,"gabon":2,"eq-guinea":2.8,"chad":-2.6,"niger":-4.6,"mali":2.3,"burkina-faso":-0.5,"togo":0.4,"benin":1.1,"guinea":3.1,"sierra-leone":7.6,"liberia":8.3,"gambia":7.9,"mauritania":1.6,"guinea-bissau":0.9,"djibouti":-0.3,"somalia":3.7,"rwanda":7,"burundi":34.2,"malawi":28.4,"madagascar":8,"eswatini":3.1,"central-african-rep":1,"bosnia-and-herz":4,"north-macedonia":4.1,"albania":2.2,"serbia":3.9,"montenegro":3.9,"moldova":7.8,"libya":1.8,"papua-new-guinea":4.4,"solomon-is":3.4,"vanuatu":1.7,"brunei":-0.3,"belize":1.1,"guyana":3.3,"suriname":9.2,"bahamas":0.6};
+const REAL_INFLATION = {"romania": 10.9, "ukraine": 8.2, "kosovo": 6.8, "moldova": 6.8, "bosnia-and-herz": 5.6, "bulgaria": 5.6, "lithuania": 5.5, "russia": 5.3, "greece": 5.2, "iceland": 5.2, "belarus": 4.8, "north-macedonia": 4.8, "croatia": 4.5, "slovakia": 3.8, "estonia": 3.7, "ireland": 3.6, "montenegro": 3.6, "slovenia": 3.6, "latvia": 3.5, "serbia": 3.5, "belgium": 3.4, "austria": 3.2, "portugal": 3.2, "spain": 3.2, "norway": 3.1, "cyprus": 3.06, "albania": 3, "italy": 3, "netherlands": 2.9, "uk": 2.8, "poland": 2.5, "germany": 2.3, "luxembourg": 2.28, "czechia": 2.1, "finland": 2.1, "malta": 2.1, "denmark": 1.9, "france": 1.8, "hungary": 1.8, "sweden": 0.8, "switzerland": 0.5, "venezuela": 524, "argentina": 33.6, "haiti": 20, "cuba": 15.89, "bolivia": 12.51, "suriname": 11.4, "honduras": 6.09, "colombia": 5.84, "jamaica": 5.4, "dominican-rep": 5.35, "brazil": 4.72, "puerto-rico": 4.6, "belize": 4.3, "uruguay": 4.25, "usa": 4.2, "peru": 4.01, "mexico": 3.94, "chile": 3.9, "nicaragua": 3.72, "guyana": 3.4, "canada": 3.2, "guatemala": 2.85, "bahamas": 2.7, "el-salvador": 2.53, "paraguay": 2.1, "ecuador": 0.92, "panama": 0.3, "trinidad-and-tobago": 0.3, "costa-rica": -0.97, "iran": 88.6, "syria": 27.5, "lebanon": 17.3, "mongolia": 12, "pakistan": 11.1, "kyrgyzstan": 11, "kazakhstan": 10.3, "bangladesh": 9.16, "afghanistan": 8, "bhutan": 7.72, "laos": 7.4, "sri-lanka": 6.8, "philippines": 6.4, "uzbekistan": 6.4, "azerbaijan": 5.8, "georgia": 5.8, "cambodia": 5.79, "turkmenistan": 5.5, "nepal": 5.22, "armenia": 5.1, "vietnam": 4.69, "india": 4.38, "tajikistan": 4.1, "indonesia": 3.34, "south-korea": 3.2, "iraq": 3, "oman": 2.8, "jordan": 2.79, "taiwan": 2.6, "thailand": 2.42, "bahrain": 2.3, "qatar": 2.2, "kuwait": 2.19, "uae": 2.04, "malaysia": 1.9, "singapore": 1.9, "saudi-arabia": 1.8, "japan": 1.7, "israel": 1.6, "china": 1, "timor-leste": 0.5, "brunei": 0.1, "palestine": -40.04, "s-sudan": 113, "malawi": 23.4, "nigeria": 15.93, "egypt": 14.6, "libya": 14, "ethiopia": 13.4, "sierra-leone": 12.69, "rwanda": 12.3, "burundi": 12.1, "angola": 10.88, "botswana": 10.7, "eritrea": 9, "mauritania": 8.7, "madagascar": 7.9, "somalia": 7.8, "gambia": 7.53, "mozambique": 7.22, "zambia": 6.5, "kenya": 6.4, "tunisia": 5.5, "guinea": 5.4, "ghana": 5.3, "liberia": 5.3, "algeria": 4.9, "zimbabwe": 4.7, "southafrica": 4.5, "tanzania": 4.2, "namibia": 4.1, "eq-guinea": 4, "uganda": 3.7, "lesotho": 3.5, "djibouti": 3, "congo": 2.9, "cameroon": 2.7, "eswatini": 2.7, "gabon": 2.1, "cote-d-ivoire": 1.4, "mali": 1.3, "senegal": 1.3, "morocco": 1.2, "central-african-rep": 0.4, "togo": 0.4, "burkina-faso": -0.4, "benin": -0.7, "guinea-bissau": -2.5, "chad": -2.8, "niger": -4.8, "fiji": 6.1, "solomon-is": 4.2, "new-zealand": 4.1, "papua-new-guinea": 4.1, "australia": 4, "vanuatu": 1, "new-caledonia": 0.9};
 
 // Ülke telefon kodu (gerçek, ITU/E.164 standardı).
 const REAL_CALLING_CODE = {"fiji":679,"tanzania":255,"w-sahara":212,"canada":1,"usa":1,"kazakhstan":7,"uzbekistan":998,"papua-new-guinea":675,"indonesia":62,"argentina":54,"chile":56,"dem-rep-congo":243,"somalia":252,"kenya":254,"sudan":249,"chad":235,"haiti":509,"dominican-rep":1,"russia":7,"bahamas":1,"falkland-is":500,"norway":47,"greenland":299,"timor-leste":670,"southafrica":27,"lesotho":266,"mexico":52,"uruguay":598,"brazil":55,"bolivia":591,"peru":51,"colombia":57,"panama":507,"costa-rica":506,"nicaragua":505,"honduras":504,"el-salvador":503,"guatemala":502,"belize":501,"venezuela":58,"guyana":592,"suriname":597,"france":33,"ecuador":593,"puerto-rico":1,"jamaica":1,"cuba":53,"zimbabwe":263,"botswana":267,"namibia":264,"senegal":221,"mali":223,"mauritania":222,"benin":229,"niger":227,"nigeria":234,"cameroon":237,"togo":228,"ghana":233,"cote-d-ivoire":225,"guinea":224,"guinea-bissau":245,"liberia":231,"sierra-leone":232,"burkina-faso":226,"central-african-rep":236,"congo":242,"gabon":241,"eq-guinea":240,"zambia":260,"malawi":265,"mozambique":258,"eswatini":268,"angola":244,"burundi":257,"israel":972,"lebanon":961,"madagascar":261,"palestine":970,"gambia":220,"tunisia":216,"algeria":213,"jordan":962,"uae":971,"qatar":974,"kuwait":965,"iraq":964,"oman":968,"vanuatu":678,"cambodia":855,"thailand":66,"laos":856,"myanmar":95,"vietnam":84,"north-korea":850,"south-korea":82,"mongolia":976,"india":91,"bangladesh":880,"bhutan":975,"nepal":977,"pakistan":92,"afghanistan":93,"tajikistan":992,"kyrgyzstan":996,"turkmenistan":993,"iran":98,"syria":963,"armenia":374,"sweden":46,"belarus":375,"ukraine":380,"poland":48,"austria":43,"hungary":36,"moldova":373,"romania":40,"lithuania":370,"latvia":371,"estonia":372,"germany":49,"bulgaria":359,"greece":30,"turkey":90,"albania":355,"croatia":385,"switzerland":41,"luxembourg":352,"belgium":32,"netherlands":31,"portugal":351,"spain":34,"ireland":353,"new-caledonia":687,"solomon-is":677,"new-zealand":64,"australia":61,"sri-lanka":94,"china":86,"italy":39,"denmark":45,"uk":44,"iceland":354,"azerbaijan":994,"georgia":995,"philippines":63,"malaysia":60,"brunei":673,"slovenia":386,"finland":358,"slovakia":421,"czechia":420,"eritrea":291,"japan":81,"paraguay":595,"yemen":967,"saudi-arabia":966,"cyprus":357,"morocco":212,"egypt":20,"libya":218,"ethiopia":251,"djibouti":253,"uganda":256,"rwanda":250,"bosnia-and-herz":387,"north-macedonia":389,"serbia":381,"montenegro":382,"kosovo":383,"trinidad-and-tobago":1,"s-sudan":211,"taiwan":886};
+
+// Ülkelerin gerçek başkent bilgisi — statik/degismeyen cografi gercek, veri bozulmadan eklendi.
+const REAL_CAPITALS = {"chile": "Santiago", "germany": "Berlin", "usa": "Washington D.C.", "uk": "Londra", "france": "Paris", "poland": "Varşova", "netherlands": "Amsterdam", "uae": "Abu Dabi", "japan": "Tokyo", "southafrica": "Pretoria", "fiji": "Suva", "tanzania": "Dodoma", "w-sahara": "El Ayun", "canada": "Ottava", "kazakhstan": "Astana", "uzbekistan": "Taşkent", "papua-new-guinea": "Port Moresby", "indonesia": "Cakarta", "argentina": "Buenos Aires", "dem-rep-congo": "Kinşasa", "somalia": "Mogadişu", "kenya": "Nairobi", "sudan": "Hartum", "chad": "N'Djamena", "haiti": "Port-au-Prince", "dominican-rep": "Santo Domingo", "russia": "Moskova", "bahamas": "Nassau", "falkland-is": "Stanley", "norway": "Oslo", "greenland": "Nuuk", "fr-s-antarctic-lands": "Port-aux-Français", "timor-leste": "Dili", "lesotho": "Maseru", "mexico": "Meksiko City", "uruguay": "Montevideo", "brazil": "Brasília", "bolivia": "Sucre", "peru": "Lima", "colombia": "Bogota", "panama": "Panama City", "costa-rica": "San Jose", "nicaragua": "Managua", "honduras": "Tegucigalpa", "el-salvador": "San Salvador", "guatemala": "Guatemala City", "belize": "Belmopan", "venezuela": "Karakas", "guyana": "Georgetown", "suriname": "Paramaribo", "ecuador": "Quito", "puerto-rico": "San Juan", "jamaica": "Kingston", "cuba": "Havana", "zimbabwe": "Harare", "botswana": "Gaborone", "namibia": "Windhoek", "senegal": "Dakar", "mali": "Bamako", "mauritania": "Nuakşot", "benin": "Porto-Novo", "niger": "Niamey", "nigeria": "Abuja", "cameroon": "Yaounde", "togo": "Lome", "ghana": "Akra", "cote-d-ivoire": "Yamoussoukro", "guinea": "Konakri", "guinea-bissau": "Bissau", "liberia": "Monrovia", "sierra-leone": "Freetown", "burkina-faso": "Vagadugu", "central-african-rep": "Bangui", "congo": "Brazzaville", "gabon": "Libreville", "eq-guinea": "Malabo", "zambia": "Lusaka", "malawi": "Lilongwe", "mozambique": "Maputo", "eswatini": "Mbabane", "angola": "Luanda", "burundi": "Gitega", "israel": "Kudüs", "lebanon": "Beyrut", "madagascar": "Antananarivo", "palestine": "Ramallah", "gambia": "Banjul", "tunisia": "Tunus", "algeria": "Cezayir", "jordan": "Amman", "qatar": "Doha", "kuwait": "Kuveyt", "iraq": "Bağdat", "oman": "Maskat", "vanuatu": "Port Vila", "cambodia": "Phnom Penh", "thailand": "Bangkok", "laos": "Vientiane", "myanmar": "Naypyidaw", "vietnam": "Hanoi", "north-korea": "Pyongyang", "south-korea": "Seul", "mongolia": "Ulan Batur", "india": "Yeni Delhi", "bangladesh": "Dakka", "bhutan": "Thimphu", "nepal": "Katmandu", "pakistan": "İslamabad", "afghanistan": "Kabil", "tajikistan": "Duşanbe", "kyrgyzstan": "Bişkek", "turkmenistan": "Aşkabat", "iran": "Tahran", "syria": "Şam", "armenia": "Erivan", "sweden": "Stockholm", "belarus": "Minsk", "ukraine": "Kiev", "austria": "Viyana", "hungary": "Budapeşte", "moldova": "Kişinev", "romania": "Bükreş", "lithuania": "Vilnius", "latvia": "Riga", "estonia": "Tallinn", "bulgaria": "Sofya", "greece": "Atina", "albania": "Tiran", "croatia": "Zagreb", "switzerland": "Bern", "luxembourg": "Lüksemburg", "belgium": "Brüksel", "portugal": "Lizbon", "spain": "Madrid", "ireland": "Dublin", "new-caledonia": "Noumea", "solomon-is": "Honiara", "new-zealand": "Wellington", "australia": "Canberra", "sri-lanka": "Sri Jayawardenepura Kotte", "china": "Pekin", "taiwan": "Taipei", "italy": "Roma", "denmark": "Kopenhag", "iceland": "Reykjavik", "azerbaijan": "Bakü", "georgia": "Tiflis", "philippines": "Manila", "malaysia": "Kuala Lumpur", "brunei": "Bender Seri Begavan", "slovenia": "Ljubljana", "finland": "Helsinki", "slovakia": "Bratislava", "czechia": "Prag", "eritrea": "Asmara", "paraguay": "Asuncion", "yemen": "Sana", "saudi-arabia": "Riyad", "antarctica": "—", "cyprus": "Lefkoşa", "morocco": "Rabat", "egypt": "Kahire", "libya": "Trablus", "ethiopia": "Addis Ababa", "djibouti": "Cibuti", "uganda": "Kampala", "rwanda": "Kigali", "bosnia-and-herz": "Saraybosna", "north-macedonia": "Üsküp", "serbia": "Belgrad", "montenegro": "Podgorica", "kosovo": "Priştine", "trinidad-and-tobago": "Port of Spain", "s-sudan": "Cuba", "malta": "Valetta", "singapore": "Singapur", "bahrain": "Manama"};
+
+// Resmi/ana dil ve UTC saat farkı — statik/degismeyen gercek bilgi (DST hesaba katilmadan standart ofset).
+const REAL_LANGUAGES = {"chile": "İspanyolca", "germany": "Almanca", "usa": "İngilizce", "uk": "İngilizce", "france": "Fransızca", "poland": "Lehçe", "netherlands": "Hollandaca", "uae": "Arapça", "japan": "Japonca", "southafrica": "İngilizce", "fiji": "İngilizce", "tanzania": "Svahili", "w-sahara": "Arapça", "canada": "İngilizce/Fransızca", "kazakhstan": "Kazakça", "uzbekistan": "Özbekçe", "papua-new-guinea": "İngilizce", "indonesia": "Endonezce", "argentina": "İspanyolca", "dem-rep-congo": "Fransızca", "somalia": "Somalice", "kenya": "Svahili", "sudan": "Arapça", "chad": "Fransızca/Arapça", "haiti": "Fransızca", "dominican-rep": "İspanyolca", "russia": "Rusça", "bahamas": "İngilizce", "falkland-is": "İngilizce", "norway": "Norveççe", "greenland": "Grönlandca", "fr-s-antarctic-lands": "Fransızca", "timor-leste": "Portekizce", "lesotho": "Sesotho/İngilizce", "mexico": "İspanyolca", "uruguay": "İspanyolca", "brazil": "Portekizce", "bolivia": "İspanyolca", "peru": "İspanyolca", "colombia": "İspanyolca", "panama": "İspanyolca", "costa-rica": "İspanyolca", "nicaragua": "İspanyolca", "honduras": "İspanyolca", "el-salvador": "İspanyolca", "guatemala": "İspanyolca", "belize": "İngilizce", "venezuela": "İspanyolca", "guyana": "İngilizce", "suriname": "Hollandaca", "ecuador": "İspanyolca", "puerto-rico": "İspanyolca", "jamaica": "İngilizce", "cuba": "İspanyolca", "zimbabwe": "İngilizce", "botswana": "İngilizce", "namibia": "İngilizce", "senegal": "Fransızca", "mali": "Fransızca", "mauritania": "Arapça", "benin": "Fransızca", "niger": "Fransızca", "nigeria": "İngilizce", "cameroon": "Fransızca/İngilizce", "togo": "Fransızca", "ghana": "İngilizce", "cote-d-ivoire": "Fransızca", "guinea": "Fransızca", "guinea-bissau": "Portekizce", "liberia": "İngilizce", "sierra-leone": "İngilizce", "burkina-faso": "Fransızca", "central-african-rep": "Fransızca", "congo": "Fransızca", "gabon": "Fransızca", "eq-guinea": "İspanyolca", "zambia": "İngilizce", "malawi": "İngilizce", "mozambique": "Portekizce", "eswatini": "İngilizce", "angola": "Portekizce", "burundi": "Kirundi/Fransızca", "israel": "İbranice", "lebanon": "Arapça", "madagascar": "Malgaşça/Fransızca", "palestine": "Arapça", "gambia": "İngilizce", "tunisia": "Arapça", "algeria": "Arapça", "jordan": "Arapça", "qatar": "Arapça", "kuwait": "Arapça", "iraq": "Arapça", "oman": "Arapça", "vanuatu": "Bislama/İngilizce/Fransızca", "cambodia": "Khmerce", "thailand": "Tayca", "laos": "Laoca", "myanmar": "Birmanca", "vietnam": "Vietnamca", "north-korea": "Korece", "south-korea": "Korece", "mongolia": "Moğolca", "india": "Hintçe/İngilizce", "bangladesh": "Bengalce", "bhutan": "Dzongkha", "nepal": "Nepalce", "pakistan": "Urduca", "afghanistan": "Peştuca/Dari", "tajikistan": "Tacikçe", "kyrgyzstan": "Kırgızca", "turkmenistan": "Türkmence", "iran": "Farsça", "syria": "Arapça", "armenia": "Ermenice", "sweden": "İsveççe", "belarus": "Belarusça", "ukraine": "Ukraynaca", "austria": "Almanca", "hungary": "Macarca", "moldova": "Rumence", "romania": "Rumence", "lithuania": "Litvanca", "latvia": "Letonca", "estonia": "Estonca", "bulgaria": "Bulgarca", "greece": "Yunanca", "albania": "Arnavutça", "croatia": "Hırvatça", "switzerland": "Almanca/Fransızca/İtalyanca", "luxembourg": "Lüksemburgca/Fransızca/Almanca", "belgium": "Hollandaca/Fransızca", "portugal": "Portekizce", "spain": "İspanyolca", "ireland": "İngilizce", "new-caledonia": "Fransızca", "solomon-is": "İngilizce", "new-zealand": "İngilizce", "australia": "İngilizce", "sri-lanka": "Sinhalaca/Tamilce", "china": "Çince", "taiwan": "Çince", "italy": "İtalyanca", "denmark": "Danca", "iceland": "İzlandaca", "azerbaijan": "Azerbaycan Türkçesi", "georgia": "Gürcüce", "philippines": "Filipince/İngilizce", "malaysia": "Malayca", "brunei": "Malayca", "slovenia": "Slovence", "finland": "Fince", "slovakia": "Slovakça", "czechia": "Çekçe", "eritrea": "Tigrinya/Arapça", "paraguay": "İspanyolca", "yemen": "Arapça", "saudi-arabia": "Arapça", "antarctica": "—", "cyprus": "Rumca", "morocco": "Arapça", "egypt": "Arapça", "libya": "Arapça", "ethiopia": "Amharca", "djibouti": "Fransızca/Arapça", "uganda": "İngilizce", "rwanda": "Kinyarwanda", "bosnia-and-herz": "Boşnakça/Sırpça/Hırvatça", "north-macedonia": "Makedonca", "serbia": "Sırpça", "montenegro": "Karadağca", "kosovo": "Arnavutça/Sırpça", "trinidad-and-tobago": "İngilizce", "s-sudan": "İngilizce", "malta": "Maltaca/İngilizce", "singapore": "İngilizce/Çince/Malayca/Tamilce", "bahrain": "Arapça"};
+const REAL_UTC_OFFSET = {"chile": -4, "germany": 1, "usa": -5, "uk": 0, "france": 1, "poland": 1, "netherlands": 1, "uae": 4, "japan": 9, "southafrica": 2, "fiji": 12, "tanzania": 3, "w-sahara": 1, "canada": -5, "kazakhstan": 5, "uzbekistan": 5, "papua-new-guinea": 10, "indonesia": 7, "argentina": -3, "dem-rep-congo": 1, "somalia": 3, "kenya": 3, "sudan": 2, "chad": 1, "haiti": -5, "dominican-rep": -4, "russia": 3, "bahamas": -5, "falkland-is": -3, "norway": 1, "greenland": -2, "fr-s-antarctic-lands": 5, "timor-leste": 9, "lesotho": 2, "mexico": -6, "uruguay": -3, "brazil": -3, "bolivia": -4, "peru": -5, "colombia": -5, "panama": -5, "costa-rica": -6, "nicaragua": -6, "honduras": -6, "el-salvador": -6, "guatemala": -6, "belize": -6, "venezuela": -4, "guyana": -4, "suriname": -3, "ecuador": -5, "puerto-rico": -4, "jamaica": -5, "cuba": -5, "zimbabwe": 2, "botswana": 2, "namibia": 2, "senegal": 0, "mali": 0, "mauritania": 0, "benin": 1, "niger": 1, "nigeria": 1, "cameroon": 1, "togo": 0, "ghana": 0, "cote-d-ivoire": 0, "guinea": 0, "guinea-bissau": 0, "liberia": 0, "sierra-leone": 0, "burkina-faso": 0, "central-african-rep": 1, "congo": 1, "gabon": 1, "eq-guinea": 1, "zambia": 2, "malawi": 2, "mozambique": 2, "eswatini": 2, "angola": 1, "burundi": 2, "israel": 2, "lebanon": 2, "madagascar": 3, "palestine": 2, "gambia": 0, "tunisia": 1, "algeria": 1, "jordan": 3, "qatar": 3, "kuwait": 3, "iraq": 3, "oman": 4, "vanuatu": 11, "cambodia": 7, "thailand": 7, "laos": 7, "myanmar": 6.5, "vietnam": 7, "north-korea": 9, "south-korea": 9, "mongolia": 8, "india": 5.5, "bangladesh": 6, "bhutan": 6, "nepal": 5.75, "pakistan": 5, "afghanistan": 4.5, "tajikistan": 5, "kyrgyzstan": 6, "turkmenistan": 5, "iran": 3.5, "syria": 3, "armenia": 4, "sweden": 1, "belarus": 3, "ukraine": 2, "austria": 1, "hungary": 1, "moldova": 2, "romania": 2, "lithuania": 2, "latvia": 2, "estonia": 2, "bulgaria": 2, "greece": 2, "albania": 1, "croatia": 1, "switzerland": 1, "luxembourg": 1, "belgium": 1, "portugal": 0, "spain": 1, "ireland": 0, "new-caledonia": 11, "solomon-is": 11, "new-zealand": 12, "australia": 10, "sri-lanka": 5.5, "china": 8, "taiwan": 8, "italy": 1, "denmark": 1, "iceland": 0, "azerbaijan": 4, "georgia": 4, "philippines": 8, "malaysia": 8, "brunei": 8, "slovenia": 1, "finland": 2, "slovakia": 1, "czechia": 1, "eritrea": 3, "paraguay": -4, "yemen": 3, "saudi-arabia": 3, "antarctica": 0, "cyprus": 2, "morocco": 1, "egypt": 2, "libya": 2, "ethiopia": 3, "djibouti": 3, "uganda": 3, "rwanda": 2, "bosnia-and-herz": 1, "north-macedonia": 1, "serbia": 1, "montenegro": 1, "kosovo": 1, "trinidad-and-tobago": -4, "s-sudan": 2, "malta": 1, "singapore": 8, "bahrain": 3};
 
 // Ülkelerin İngilizce adları — Google Maps aramalarında daha güvenilir sonuç için kullanılır.
 const ENGLISH_NAME = {"fiji":"Fiji","tanzania":"Tanzania","w-sahara":"Western Sahara","canada":"Canada","usa":"USA","kazakhstan":"Kazakhstan","uzbekistan":"Uzbekistan","papua-new-guinea":"Papua New Guinea","indonesia":"Indonesia","argentina":"Argentina","chile":"Chile","dem-rep-congo":"DR Congo","somalia":"Somalia","kenya":"Kenya","sudan":"Sudan","chad":"Chad","haiti":"Haiti","dominican-rep":"Dominican Republic","russia":"Russia","bahamas":"Bahamas","falkland-is":"Falkland Islands (Malvinas)","norway":"Norway","greenland":"Greenland","fr-s-antarctic-lands":"French Southern Territories","timor-leste":"Timor-Leste","southafrica":"South Africa","lesotho":"Lesotho","mexico":"Mexico","uruguay":"Uruguay","brazil":"Brazil","bolivia":"Bolivia","peru":"Peru","colombia":"Colombia","panama":"Panama","costa-rica":"Costa Rica","nicaragua":"Nicaragua","honduras":"Honduras","el-salvador":"El Salvador","guatemala":"Guatemala","belize":"Belize","venezuela":"Venezuela","guyana":"Guyana","suriname":"Suriname","france":"France","ecuador":"Ecuador","puerto-rico":"Puerto Rico","jamaica":"Jamaica","cuba":"Cuba","zimbabwe":"Zimbabwe","botswana":"Botswana","namibia":"Namibia","senegal":"Senegal","mali":"Mali","mauritania":"Mauritania","benin":"Benin","niger":"Niger","nigeria":"Nigeria","cameroon":"Cameroon","togo":"Togo","ghana":"Ghana","cote-d-ivoire":"Côte d'Ivoire","guinea":"Guinea","guinea-bissau":"Guinea-Bissau","liberia":"Liberia","sierra-leone":"Sierra Leone","burkina-faso":"Burkina Faso","central-african-rep":"Central African Republic","congo":"Congo","gabon":"Gabon","eq-guinea":"Equatorial Guinea","zambia":"Zambia","malawi":"Malawi","mozambique":"Mozambique","eswatini":"Eswatini","angola":"Angola","burundi":"Burundi","israel":"Israel","lebanon":"Lebanon","madagascar":"Madagascar","palestine":"Palestine, State of","gambia":"Gambia","tunisia":"Tunisia","algeria":"Algeria","jordan":"Jordan","uae":"UAE","qatar":"Qatar","kuwait":"Kuwait","iraq":"Iraq","oman":"Oman","vanuatu":"Vanuatu","cambodia":"Cambodia","thailand":"Thailand","laos":"Laos","myanmar":"Myanmar","vietnam":"Vietnam","north-korea":"North Korea","south-korea":"South Korea","mongolia":"Mongolia","india":"India","bangladesh":"Bangladesh","bhutan":"Bhutan","nepal":"Nepal","pakistan":"Pakistan","afghanistan":"Afghanistan","tajikistan":"Tajikistan","kyrgyzstan":"Kyrgyzstan","turkmenistan":"Turkmenistan","iran":"Iran","syria":"Syria","armenia":"Armenia","sweden":"Sweden","belarus":"Belarus","ukraine":"Ukraine","poland":"Poland","austria":"Austria","hungary":"Hungary","moldova":"Moldova","romania":"Romania","lithuania":"Lithuania","latvia":"Latvia","estonia":"Estonia","germany":"Germany","bulgaria":"Bulgaria","greece":"Greece","turkey":"Türkiye","albania":"Albania","croatia":"Croatia","switzerland":"Switzerland","luxembourg":"Luxembourg","belgium":"Belgium","netherlands":"Netherlands","portugal":"Portugal","spain":"Spain","ireland":"Ireland","new-caledonia":"New Caledonia","solomon-is":"Solomon Islands","new-zealand":"New Zealand","australia":"Australia","sri-lanka":"Sri Lanka","china":"China","taiwan":"Taiwan, Province of China","italy":"Italy","denmark":"Denmark","uk":"UK","iceland":"Iceland","azerbaijan":"Azerbaijan","georgia":"Georgia","philippines":"Philippines","malaysia":"Malaysia","brunei":"Brunei Darussalam","slovenia":"Slovenia","finland":"Finland","slovakia":"Slovakia","czechia":"Czech Republic","eritrea":"Eritrea","japan":"Japan","paraguay":"Paraguay","yemen":"Yemen","saudi-arabia":"Saudi Arabia","antarctica":"Antarctica","cyprus":"Cyprus","morocco":"Morocco","egypt":"Egypt","libya":"Libya","ethiopia":"Ethiopia","djibouti":"Djibouti","uganda":"Uganda","rwanda":"Rwanda","bosnia-and-herz":"Bosnia and Herzegovina","north-macedonia":"North Macedonia","serbia":"Serbia","montenegro":"Montenegro","trinidad-and-tobago":"Trinidad and Tobago","s-sudan":"South Sudan","kosovo":"Kosovo"};
@@ -556,7 +563,7 @@ const IMPORT_RESTRICTIONS = {
    "Exporters" (c.exporters) ve "Buyers" (c.buyers) zaten her ülke nesnesinde
    gerçek veriyle geliyor ve kendi bölümlerinde render ediliyor — burada
    tekrar edilmiyor. Aşağıdaki 6 veri seti henüz mevcut değil; her ülke
-   nesnesine boş dizi olarak ekleniyor ve "Gelecek Kaynaklar" bölümünde
+   nesnesine boş dizi olarak ekleniyor (şu an ekranda ayrı bir bölüm olarak
    otomatik olarak "Yakında eklenecek" kartı gösteriliyor.
 
    Gerçek veri geldiğinde TEK YAPMANIZ GEREKEN: ilgili ülke nesnesine
@@ -781,6 +788,28 @@ function getRequiredDocs(country){
     c._realWoodSuppliers = REAL_SUPPLIERS_WOOD[id]; // buildWoodVariant() içinde kullanılacak
   });
 
+  // VERİ DÜRÜSTLÜĞÜ: Ne gerçek (suppliersVerified) ne de gözden geçirilmiş tahmini
+  // (turkeyShareEstimated) verisi olan ülkelerde (örn. Antarktika) tedarikçi karışımı,
+  // Türkiye payı ve büyüme tamamen SENTETİK rastgele sayılardı ve arayüzde "%2" gibi
+  // uydurma değerler olarak görünüyordu. Bu veriler artık kaynağında SİLİNİR — ekranda
+  // her yerde dürüstçe "Bilinmiyor" gösterilir, rastgele bir rakam asla sızamaz.
+  COUNTRIES.forEach(c=>{
+    if(!c.suppliersVerified && !c.turkeyShareEstimated){
+      c.suppliers = null;
+      c.turkeyShare = 'Bilinmiyor';
+      c.turkeyGrowth = 'Bilinmiyor';
+      c.turkeyHistory = null;
+      if(c.dq) c.dq.suppliers = 'unknown';
+      // Üretim sırasında yazılan AI özeti de sentetik tedarikçi paylarına atıfta
+      // bulunuyordu — dürüst, sadece bilinen kalitedeki alanlara dayanan bir özetle değiştirilir.
+      c.aiSummary = (c.dq && c.dq.importGrowth === 'unknown'
+        ? `${c.name} pazarının yıllık ithalat büyüme oranına dair doğrulanmış bir veri yok. `
+        : `${c.name} pazarı yılda ${c.importGrowth} oranında değişiyor. `) +
+        `Bu ülke için tedarikçi payları ve Türkiye'nin pazar payına dair doğrulanmış bir veri yok (Bilinmiyor). ` +
+        `Lojistik maliyeti ${c.logisticsCost} ve ortalama teslimat süresi ${c.transitTime} (her ikisi de tahmini).`;
+    }
+  });
+
   // Gerçek ithalat kısıtlaması/imkânsızlığı olan ülkelerde Fırsat Skoru ciddi şekilde aşağı çekilir
   // (bu, formülün genel mantığından bağımsız, ayrı bir gerçek düzenleyici veri kaynağıdır).
   COUNTRIES.forEach(c=>{
@@ -890,6 +919,11 @@ function buildWoodVariant(country){
     variant.suppliers = country.suppliers;
     variant.turkeyShare = country.turkeyShare;
     variantSuppliersVerified = true;
+  } else if(!country.suppliers){
+    // Bu ülke için hiçbir tedarikçi verisi yok (sentetik veri kaynağında silindi) —
+    // ahşap kategorisinde de dürüstçe "Bilinmiyor" kalır.
+    variant.suppliers = null;
+    variant.turkeyShare = 'Bilinmiyor';
   } else {
     variant.suppliers = country.suppliers.map(s => s.c==='Türkiye'
       ? {...s, v: Math.min(99, Math.max(1, Math.round(s.v * trShareFactor)))}
@@ -898,9 +932,9 @@ function buildWoodVariant(country){
     variant.turkeyShare = '%' + (trSupplier ? trSupplier.v : 0);
   }
   variant.suppliersVerified = variantSuppliersVerified;
-  variant.turkeyHistory = variantSuppliersVerified
+  variant.turkeyHistory = !country.turkeyHistory ? null : (variantSuppliersVerified
     ? country.turkeyHistory
-    : country.turkeyHistory.map(v => Math.round(v*trShareFactor*10)/10);
+    : country.turkeyHistory.map(v => Math.round(v*trShareFactor*10)/10));
   // Pazar büyüklüğü skoru (0-100) — sadece iç Fırsat Skoru hesaplamasında kullanılır, dolar
   // tutarı olarak asla gösterilmez. Ahşap'a özel gerçek veri yoksa döşemeli kategorisinin
   // skorundan kabaca türetilir (bu SADECE skor, ekrandaki "Pazar Büyüklüğü" tutarı değil).
@@ -933,7 +967,7 @@ function buildWoodVariant(country){
     woodDifficulty = woodRestriction.level === 'severe' ? 99 : Math.max(difficulty, 85);
   }
   variant.scores = { market, difficulty:woodDifficulty, competition, logistics, overall };
-  variant.aiSummary = `${country.name} pazarında ${CATEGORIES.wood.label} (${CATEGORIES.wood.hs}) kategorisi için tahmini ithalat vergisi ${variant.importTax}, pazar büyüklüğü ${variant.marketSize} civarında. Bu kategori, döşemeli oturma grubuna kıyasla ${marketFactor>1?'daha geniş':'daha dar'} bir hacme sahip ve Türkiye'nin payı %${woodShareNum} seviyesinde. Genel fırsat skoru ${overall}/100.`;
+  variant.aiSummary = `${country.name} pazarında ${CATEGORIES.wood.label} (${CATEGORIES.wood.hs}) kategorisi için tahmini ithalat vergisi ${variant.importTax}, pazar büyüklüğü ${variant.marketSize} civarında. Bu kategori, döşemeli oturma grubuna kıyasla ${marketFactor>1?'daha geniş':'daha dar'} bir hacme sahip; ${variant.turkeyShare==='Bilinmiyor' ? "Türkiye'nin payına dair doğrulanmış bir veri yok (Bilinmiyor)" : `Türkiye'nin payı %${woodShareNum} seviyesinde`}. Genel fırsat skoru ${overall}/100.`;
   variant.categoryKey = 'wood';
   return variant;
 }
@@ -1014,17 +1048,13 @@ function buildPremiumBrandRows(country){
     rows.push(['Roche Bobois', 0, 0, '—', 'Yok', 'real']);
   }
 
-  // Natuzzi — sadece küresel/bölgesel veri var, ülke bazlı yok
-  rows.push(['Natuzzi Italia', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'unknown']);
-  // BoConcept — ülke bazlı resmi veri yok
-  rows.push(['BoConcept', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'unknown']);
-  // Calligaris, Rimadesio — henüz araştırılmadı
-  rows.push(['Calligaris', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'unknown']);
-  rows.push(['Rimadesio', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'Bilinmiyor', 'unknown']);
+  // Natuzzi, BoConcept, Calligaris, Rimadesio — ülke bazlı doğrulanmış veri
+  // hiçbirinde yok; tek tek "Bilinmiyor" satırları yerine tek satırda birleştirilir.
+  const noDataBrands = ['Natuzzi Italia', 'BoConcept', 'Calligaris', 'Rimadesio'];
 
   return rows.map(([brand,mono,dealer,cities,strength,level])=>
     `<tr><td class="bright">${brand}</td><td>${mono}</td><td>${dealer}</td><td>${cities}</td><td>${strength} ${dqBadge(level)}</td></tr>`
-  ).join('');
+  ).join('') + `<tr><td class="bright">${noDataBrands.join(', ')}</td><td colspan="4" style="color:var(--text-2);">Ülke bazlı doğrulanmış veri yok ${dqBadge('unknown')}</td></tr>`;
 }
 function turkeyImportVolumeM(country){
   return Math.round(numFromMoney(country.annualImports) * numFromPercent(country.turkeyShare) / 100);
@@ -1333,6 +1363,63 @@ const TRAVEL_OVERRIDES = {
 };
 
 function getRegion(country){ return REGION_MAP[country.iso] || 'other'; }
+// Bölgeye göre hero gradyanı — 177 ülkenin görsel olarak birbirinden
+// ayrışması için, mevcut REGION_MAP verisi kullanılarak sabit bir renk
+// teması atanır (uydurma veri değil, zaten var olan cografi siniflandirma).
+const REGION_HERO_THEME = {
+  europe:    ['#1b3a5c', '#3fd0c0'],
+  mideast:   ['#4a2f14', '#c9a961'],
+  cis:       ['#2b2e4a', '#7b8fd6'],
+  eastasia:  ['#4a1620', '#e0685a'],
+  seasia:    ['#0f3d2e', '#3fd0c0'],
+  southasia: ['#4a2a0a', '#e0a23f'],
+  africa:    ['#3d2410', '#c9a961'],
+  latam:     ['#0f3d3a', '#3fd0c0'],
+  namerica:  ['#152a4a', '#7b8fd6'],
+  oceania:   ['#0f3a4a', '#3fd0c0'],
+  asia_other:['#2a2a3d', '#a78fd6'],
+  other:     ['#242833', '#8891a3'],
+};
+function heroTheme(country){
+  return REGION_HERO_THEME[getRegion(country)] || REGION_HERO_THEME.other;
+}
+// Ülkenin küçük düz haritası — WORLD_DATA'daki GERÇEK sınır (rings)
+// koordinatlarından üretilir, uydurma bir görsel değildir. Basit bir
+// eşit-dikdörtgen projeksiyonla küçük bir SVG viewBox'a sığdırılır.
+function renderCountryMiniMap(countryId, opts){
+  const feature = WORLD_DATA.find(f => f.id === countryId);
+  if(!feature) return '';
+  // Bazı ülkelerin (ör. ABD-Alaska, Fransa-Fransız Guyanası) uzak denizaşırı
+  // parçaları aynı feature içinde ayrı bir "ring" olarak geliyor — küçük
+  // haritada olcegi bozmasin diye sadece EN BUYUK (nokta sayısı en fazla)
+  // ring gösterilir; bu, ülkenin ana kara parçasıdır.
+  const mainRing = feature.rings.reduce((a, b) => (b.length > a.length ? b : a), feature.rings[0]);
+  let minLon = Infinity, maxLon = -Infinity, minLat = Infinity, maxLat = -Infinity;
+  mainRing.forEach(([lon, lat]) => {
+    if(lon < minLon) minLon = lon;
+    if(lon > maxLon) maxLon = lon;
+    if(lat < minLat) minLat = lat;
+    if(lat > maxLat) maxLat = lat;
+  });
+  const w = (opts && opts.w) || 168, h = (opts && opts.h) || 128, pad = (opts && opts.pad) || 10;
+  const lonSpan = Math.max(maxLon - minLon, 0.01);
+  const latSpan = Math.max(maxLat - minLat, 0.01);
+  const scale = Math.min((w - pad*2) / lonSpan, (h - pad*2) / latSpan);
+  const offX = pad + ((w - pad*2) - lonSpan*scale) / 2;
+  const offY = pad + ((h - pad*2) - latSpan*scale) / 2;
+  const project = ([lon, lat]) => [
+    (offX + (lon - minLon) * scale).toFixed(1),
+    (offY + (maxLat - lat) * scale).toFixed(1), // lat ekseni ters çevrilir (kuzey yukarı)
+  ];
+  const pathD = 'M' + mainRing.map(p => project(p).join(',')).join('L') + 'Z';
+  const cls = (opts && opts.className) || 'hero-minimap';
+  const pathCls = (opts && opts.pathClassName) || 'hero-minimap-shape';
+  return `
+    <svg class="${cls}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <path d="${pathD}" class="${pathCls}"/>
+    </svg>
+  `;
+}
 
 function getTravelInfo(country){
   const region = getRegion(country);
@@ -1601,9 +1688,8 @@ function generateExtraFields(country){
   const r=(a,b)=>a+rnd()*(b-a);
   const realInflation = REAL_INFLATION[country.id];
   const hasRealInflation = realInflation !== undefined && realInflation !== null;
-  const inflation = hasRealInflation ? realInflation.toFixed(1) : r(1,45).toFixed(1);
+  const inflation = hasRealInflation ? realInflation.toFixed(1) : null;
   const inflationVerified = hasRealInflation;
-  const internetPen = Math.round(r(40,98));
   const tzOffset = Math.round(country.lon/15);
   const totalExports = Math.round(numFromMoney(country.marketSize) * r(0.15,0.6));
   // İtalyan premium/high-end mobilya markalarının (Poltrona Frau, Cassina, B&B Italia, Natuzzi vb.)
@@ -1624,10 +1710,10 @@ function generateExtraFields(country){
     {label:'Ekonomik İstikrar', score: Math.round(100-r(10,60)), note: `GSYH büyüme trendi ${country.importGrowth}`},
     {label:'Regülasyon Riski', score: country.scores.difficulty, note:'İthalat mevzuatı ve standart uyumu karmaşıklığı.'},
     {label:'Yerel Rekabet', score: Math.round(r(20,75)), note:'Yerli üreticilerin pazar payı ve fiyat baskısı.'},
-    {label:'Çin Rekabeti', score: (country.suppliers.find(s=>s.c==='Çin')||{v:30}).v + 15, note:'Çin menşeli düşük maliyetli ürünlerin pazar baskısı.'},
+    {label:'Çin Rekabeti', score: ((country.suppliers||[]).find(s=>s.c==='Çin')||{v:30}).v + 15, note:'Çin menşeli düşük maliyetli ürünlerin pazar baskısı.'},
     {label:'İthalat Kısıtlamaları', score: Math.round(r(10,55)), note: country.fta.includes('yok')?'Serbest ticaret anlaşması yok, tarife riski mevcut.':'Ticaret anlaşması avantajı mevcut.'}
   ];
-  return { inflation, inflationVerified, internetPen, tzOffset, totalExports, italianPremiumBrands, gdpGrowth, holidays, risks,
+  return { inflation, inflationVerified, tzOffset, totalExports, italianPremiumBrands, gdpGrowth, holidays, risks,
     language: LANGUAGES[country.id] || 'Yerel dil',
     negStyle: NEG_STYLES[Math.floor(r(0,NEG_STYLES.length))],
     meeting: MEETING_CULTURES[Math.floor(r(0,MEETING_CULTURES.length))],
@@ -1649,13 +1735,13 @@ function generateReportHTML(baseCountry){
   const potential = potentialLabel(c.scores.market);
   const competitionLabel = c.scores.competition>=65?'Yüksek':c.scores.competition>=40?'Orta':'Düşük';
 
-  const execSummary = `${c.name} pazarı, ${catInfo.label.toLowerCase()} kategorisinde ${c.importGrowth} oranında ${numFromPercent(c.importGrowth)>=3?'güçlü bir büyüme':'ölçülü bir değişim'} gösteriyor. Türkiye'nin bu pazardaki payı şu an %${numFromPercent(c.turkeyShare)} seviyesinde ve yıllık ${c.turkeyGrowth} artıyor — bu, ${numFromPercent(c.turkeyShare)<8?'genişleme için önemli boşluk olduğunu':'zaten sağlam bir konum olduğunu'} gösteriyor. En büyük fırsat, ${potential==='Yüksek'?'pazarın büyük hacmi ve güçlü ithalat talebinde':'niş, farklılaşmış ürün kategorilerinde'} yatıyor. En büyük zorluk ise ${c.scores.competition>=60?(c.suppliers[0].c+' menşeli yoğun rekabet'):(c.scores.difficulty>=55?'gümrük ve mevzuat karmaşıklığı':'lojistik mesafe ve maliyet')}. Genel değerlendirme: bu pazar ${c.scores.overall>=70?'yüksek öncelikli bir hedef':c.scores.overall>=45?'orta vadeli bir fırsat':'temkinli yaklaşılması gereken bir pazar'}. Girişte ${c.scores.difficulty>=55?'yerel bir distribütörle çalışmak':'doğrudan ihracat veya bölgesel bir toptancı ortaklığı'} önerilir.`;
+  const execSummary = `${c.name} pazarı, ${catInfo.label.toLowerCase()} kategorisinde ${c.importGrowth} oranında ${numFromPercent(c.importGrowth)>=3?'güçlü bir büyüme':'ölçülü bir değişim'} gösteriyor. ${c.turkeyShare==='Bilinmiyor' ? "Türkiye'nin bu pazardaki payına dair doğrulanmış bir veri yok." : `Türkiye'nin bu pazardaki payı şu an %${numFromPercent(c.turkeyShare)} seviyesinde${c.turkeyGrowth==='Bilinmiyor'?'':` ve yıllık ${c.turkeyGrowth} artıyor`} — bu, ${numFromPercent(c.turkeyShare)<8?'genişleme için önemli boşluk olduğunu':'zaten sağlam bir konum olduğunu'} gösteriyor.`} En büyük fırsat, ${potential==='Yüksek'?'pazarın büyük hacmi ve güçlü ithalat talebinde':'niş, farklılaşmış ürün kategorilerinde'} yatıyor. En büyük zorluk ise ${c.scores.competition>=60?(((c.suppliers&&c.suppliers[0])?c.suppliers[0].c:'Çin')+' menşeli yoğun rekabet'):(c.scores.difficulty>=55?'gümrük ve mevzuat karmaşıklığı':'lojistik mesafe ve maliyet')}. Genel değerlendirme: bu pazar ${c.scores.overall>=70?'yüksek öncelikli bir hedef':c.scores.overall>=45?'orta vadeli bir fırsat':'temkinli yaklaşılması gereken bir pazar'}. Girişte ${c.scores.difficulty>=55?'yerel bir distribütörle çalışmak':'doğrudan ihracat veya bölgesel bir toptancı ortaklığı'} önerilir.`;
 
   const oppCards = [
     { t:'Büyüyen Sektör', d:`${catInfo.label} ithalatı ${c.importGrowth} oranında büyüyor.` },
-    { t:'İnşaat Faaliyeti', d:`Kentsel nüfus oranı %${x.urbanPop} — konut ve inşaat talebiyle mobilya talebi ilişkili.` },
+    { t:'İnşaat Faaliyeti', d:'Konut ve inşaat talebi mobilya talebiyle doğrudan ilişkilidir; kentsel nüfus oranına dair doğrulanmış veri yok.' },
     { t:'Konut Talebi', d:`Pazar büyüklüğü ${c.marketSize}, yıllık ithalat ${c.annualImports}.` },
-    { t:'Premium Segment', d:`Toplam pazarın yaklaşık %${x.premiumSegment}'i premium/üst segment ürünlerden oluşuyor.` },
+    { t:'Premium Segment', d:'Premium/üst segment payına dair doğrulanmış bir veri yok (Bilinmiyor).' },
   ];
 
   const strategyPoints = [
@@ -1663,8 +1749,8 @@ function generateReportHTML(baseCountry){
     ['Hangi şehirler hedeflenmeli?', 'Ana liman/lojistik merkezine yakın büyük şehirler ilk etapta önceliklendirilmeli.'],
     ['Distribütörle mi çalışılmalı?', c.scores.difficulty>=50 ? 'Evet, yerel mevzuat ve gümrük karmaşıklığı nedeniyle deneyimli bir distribütör önerilir.' : 'Doğrudan ihracat da değerlendirilebilir, distribütör şart değil.'],
     ['Perakende mi toptan mı?', c.scores.market>=60 ? 'Toptan/B2B kanalıyla hacim yakalamak, sonra perakende ortaklıklarına geçmek mantıklı.' : 'Küçük ölçekli perakende/butik ortaklıklarla başlamak daha düşük risklidir.'],
-    ['Önerilen fiyat konumlandırması', x.premiumSegment>=20 ? 'Orta-üst / premium segment fırsatı güçlü.' : 'Rekabetçi orta segment fiyatlandırma önerilir.'],
-    ['Tahmini ilk yıl potansiyeli', `${c.annualImports} pazar hacminin %${Math.max(1,Math.round(numFromPercent(c.turkeyShare)*0.15))}–%${Math.max(2,Math.round(numFromPercent(c.turkeyShare)*0.3))}'i civarında ek pay hedeflenebilir.`],
+    ['Önerilen fiyat konumlandırması', numFromMoney(c.gdpPerCapita)>=30000 ? 'Orta-üst / premium segment fırsatı güçlü.' : 'Rekabetçi orta segment fiyatlandırma önerilir.'],
+    ['Tahmini ilk yıl potansiyeli', (c.turkeyShare==='Bilinmiyor' || c.annualImports==='Bilinmiyor') ? 'Doğrulanmış pazar verisi olmadığı için hesaplanamıyor (Bilinmiyor).' : `${c.annualImports} pazar hacminin %${Math.max(1,Math.round(numFromPercent(c.turkeyShare)*0.15))}–%${Math.max(2,Math.round(numFromPercent(c.turkeyShare)*0.3))}'i civarında ek pay hedeflenebilir.`],
     ['Sık yapılan hatalar', 'Yerel sertifikasyon gerekliliklerini atlamak, tek siparişe göre kapasite planlamak, lojistik maliyetini fiyatlamaya dahil etmemek.'],
   ];
 
@@ -1675,14 +1761,19 @@ function generateReportHTML(baseCountry){
       <div class="rnote">${r.note}</div>
     </div>`).join('');
 
-  const supplierBars = c.suppliers.map(s=>`
+  // Doğrulanmış/tahmini veri yoksa (suppliers null) rastgele bir görsel yerine dürüst "Bilinmiyor" satırı basılır.
+  const supplierBars = !c.suppliers
+    ? `<div class="footnote">Bilinmiyor — bu ülke için doğrulanmış tedarikçi verisi yok.</div>`
+    : c.suppliers.map(s=>`
     <div class="sup-row">
       <span class="sup-name">${s.c}</span>
       <div class="sup-bar-wrap"><div class="sup-bar" style="width:${s.v}%; background:${s.c==='Türkiye'?'#3fd0c0':'#c9a961'}"></div></div>
       <span class="sup-val">%${s.v}</span>
     </div>`).join('');
 
-  const trHistoryBars = c.turkeyHistory.map((v,i)=>{
+  const trHistoryBars = !c.turkeyHistory
+    ? `<div class="footnote">Bilinmiyor — Türkiye ihracat geçmişine dair doğrulanmış veri yok.</div>`
+    : c.turkeyHistory.map((v,i)=>{
     const max = Math.max(...c.turkeyHistory);
     const h = Math.max(6, Math.round((v/max)*100));
     return `<div class="hbar" style="height:${h}%;" title="${v}"></div>`;
@@ -1774,11 +1865,10 @@ function generateReportHTML(baseCountry){
         <div class="card"><div class="card-label">Kişi Başı GSYH</div><div class="card-val">${c.gdpPerCapita}</div></div>
         <div class="card"><div class="card-label">Para Birimi</div><div class="card-val">${c.currency}</div></div>
         <div class="card"><div class="card-label">Döviz Kuru</div><div class="card-val" style="font-size:13px">${c.exchangeRate}</div></div>
-        <div class="card"><div class="card-label">Enflasyon</div><div class="card-val">%${x.inflation}</div></div>
-        <div class="card"><div class="card-label">Faiz Oranı</div><div class="card-val">%${x.interestRate}</div></div>
+        <div class="card"><div class="card-label">Enflasyon</div><div class="card-val">${x.inflation ? '%' + x.inflation : 'Bilinmiyor'}</div></div>
+        <div class="card"><div class="card-label">Faiz Oranı</div><div class="card-val">Bilinmiyor</div></div>
         <div class="card"><div class="card-label">İş Yapma Kolaylığı</div><div class="card-val">${c.eodb}</div></div>
-        <div class="card"><div class="card-label">Kentsel Nüfus</div><div class="card-val">%${x.urbanPop}</div></div>
-        <div class="card"><div class="card-label">İnternet Penetrasyonu</div><div class="card-val">%${x.internetPen}</div></div>
+        <div class="card"><div class="card-label">Kentsel Nüfus</div><div class="card-val">Bilinmiyor</div></div>
         <div class="card"><div class="card-label">Dil</div><div class="card-val" style="font-size:14px">${x.language}</div></div>
         <div class="card"><div class="card-label">Saat Dilimi</div><div class="card-val">UTC${x.tzOffset>=0?'+':''}${x.tzOffset}</div></div>
       </div>
@@ -1789,7 +1879,7 @@ function generateReportHTML(baseCountry){
       <div class="grid">
         <div class="card"><div class="card-label">Toplam İthalat</div><div class="card-val">${c.annualImports}</div></div>
         <div class="card"><div class="card-label">Toplam İhracat (Ülke)</div><div class="card-val">$${x.totalExports.toLocaleString('en-US')}M</div></div>
-        <div class="card"><div class="card-label">Türkiye İhracat Değeri</div><div class="card-val">$${Math.round(numFromMoney(c.annualImports)*numFromPercent(c.turkeyShare)/100).toLocaleString('en-US')}M</div></div>
+        <div class="card"><div class="card-label">Türkiye İhracat Değeri</div><div class="card-val">${(c.turkeyShare==='Bilinmiyor'||c.annualImports==='Bilinmiyor')?'Bilinmiyor':'$'+Math.round(numFromMoney(c.annualImports)*numFromPercent(c.turkeyShare)/100).toLocaleString('en-US')+'M'}</div></div>
         <div class="card"><div class="card-label">5 Yıllık Büyüme</div><div class="card-val">${c.importGrowth}</div></div>
         <div class="card"><div class="card-label">Pazar Büyüklüğü</div><div class="card-val">${c.marketSize}</div></div>
         <div class="card"><div class="card-label">Türkiye Pazar Payı</div><div class="card-val">${c.turkeyShare}</div></div>
@@ -1802,7 +1892,7 @@ function generateReportHTML(baseCountry){
         <div class="card"><div class="card-label">Toplam İthalat</div><div class="card-val">${c.annualImports}</div></div>
         <div class="card"><div class="card-label">Yıllık Büyüme</div><div class="card-val">${c.importGrowth}</div></div>
         <div class="card"><div class="card-label">Türk İhracat Payı</div><div class="card-val">${c.turkeyShare}</div></div>
-        <div class="card"><div class="card-label">Ort. İthalat Fiyatı</div><div class="card-val">$${x.avgImportPrice}/birim</div></div>
+        <div class="card"><div class="card-label">Ort. İthalat Fiyatı</div><div class="card-val">Bilinmiyor</div></div>
         <div class="card"><div class="card-label">Premium Segment</div><div class="card-val">%${x.premiumSegment}</div></div>
         <div class="card"><div class="card-label">Büyüme Tahmini</div><div class="card-val">${c.importGrowth}</div></div>
       </div>
@@ -1833,7 +1923,7 @@ function generateReportHTML(baseCountry){
         <div class="card"><div class="card-label">Ana Liman</div><div class="card-val" style="font-size:14px">${c.ports}</div></div>
         <div class="card"><div class="card-label">Deniz Transit Süresi</div><div class="card-val">${c.transitTime}</div></div>
         <div class="card"><div class="card-label">Ort. Deniz Navlunu</div><div class="card-val">${c.freightCost}</div></div>
-        <div class="card"><div class="card-label">Ort. Hava Navlunu</div><div class="card-val">$${x.airFreight.toLocaleString('en-US')}/ton</div></div>
+        <div class="card"><div class="card-label">Ort. Hava Navlunu</div><div class="card-val">Bilinmiyor</div></div>
         <div class="card"><div class="card-label">Lojistik Zorluk Skoru</div><div class="card-val">${scoreTo10(100-c.scores.logistics)}/10</div></div>
         <div class="card"><div class="card-label">İç Taşıma Kalitesi</div><div class="card-val">${c.eodb}</div></div>
       </div>
@@ -1958,6 +2048,26 @@ let markerEls = {};            // ülke id -> {g, ring, dot}
 let gridEllipseEls = [];       // enlem çizgileri
 let gridPolylineEls = [];      // boylam çizgileri
 let sphereCircleEl = null;
+// Seyrek "Türkiye'den seçili ülkeye ışık rotası" animasyonu — çok nadiren
+// tetiklenir, aktif değilken render maliyeti sıfırdır.
+let activeRoutePulseId = null;
+let routePulseLineEl = null;
+// Hedef ülkeler (★ Hedef Ülkelerim) için küre üzerinde pin gösterimi —
+// her frame'de localStorage okumamak için sonuç cache'leniyor, giriş/çıkış
+// veya hedef ekleme/çıkarma anında invalidateTargetIdsCache() ile temizleniyor.
+let targetIdsCache = null;
+function getTargetIdsCache(){
+  if(targetIdsCache) return targetIdsCache;
+  // NOT: render() sayfa yüklenirken çok erken, senkron olarak çağrılıyor —
+  // bu noktada aşağıda tanımlanan `currentSupabaseSession` değişkeni henüz
+  // "temporal dead zone" içinde olabilir. try/catch olmadan bu, TÜM script'in
+  // burada çökmesine (sekmelerin/kürenin hiç çalışmamasına) yol açıyordu.
+  let user = null;
+  try{ user = getCurrentUser(); }catch(e){ user = null; }
+  targetIdsCache = new Set(user ? getTargets(user) : []);
+  return targetIdsCache;
+}
+function invalidateTargetIdsCache(){ targetIdsCache = null; styleVersion++; needsRender = true; }
 
 function initSvgSkeleton(){
   svg.innerHTML = `<defs>
@@ -1970,12 +2080,28 @@ function initSvgSkeleton(){
       <stop offset="86%" stop-color="rgba(201,169,97,0)"/>
       <stop offset="100%" stop-color="rgba(201,169,97,0.25)"/>
     </radialGradient>
+    <radialGradient id="atmosphereGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(63,208,192,0)"/>
+      <stop offset="80%" stop-color="rgba(63,208,192,0)"/>
+      <stop offset="100%" stop-color="rgba(63,208,192,0.16)"/>
+    </radialGradient>
+    <radialGradient id="rimLight" cx="72%" cy="24%" r="60%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.28)"/>
+      <stop offset="35%" stop-color="rgba(255,255,255,0.06)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
     <clipPath id="sphereClip"><circle cx="${CX}" cy="${CY}" r="${R}"/></clipPath>
+    <filter id="softBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="10"/></filter>
   </defs>
+  <circle class="globe-atmosphere" cx="${CX}" cy="${CY}" r="${R * 1.14}" fill="url(#atmosphereGlow)" filter="url(#softBlur)"/>
   <circle class="globe-sphere" cx="${CX}" cy="${CY}" r="${R}" fill="url(#sphereGrad)" stroke="rgba(201,169,97,0.2)" stroke-width="1"/>
-  <g id="gridGroup" clip-path="url(#sphereClip)" opacity="0.5"></g>
+  <g id="gridGroup" clip-path="url(#sphereClip)" opacity="0.7"></g>
   <g id="shapesGroup" clip-path="url(#sphereClip)"></g>
+  <g id="routePulseGroup" clip-path="url(#sphereClip)"><line class="route-pulse-line" x1="0" y1="0" x2="0" y2="0"/></g>
+  <circle class="globe-rimlight" cx="${CX}" cy="${CY}" r="${R}" fill="url(#rimLight)" clip-path="url(#sphereClip)"/>
   <g id="markersGroup"></g>`;
+
+  routePulseLineEl = svg.querySelector('.route-pulse-line');
 
   sphereCircleEl = svg.querySelector('.globe-sphere');
   const gridGroup = svg.querySelector('#gridGroup');
@@ -2002,11 +2128,30 @@ function initSvgSkeleton(){
   });
 
   const markersGroup = svg.querySelector('#markersGroup');
+  // Basit, deterministik hash — "gece şehir ışıkları" noktalarının konumunu
+  // her ülke için sabit (ama farklı) tutmak için. Sadece init'te bir kez
+  // çalışır, per-frame maliyeti yoktur.
+  function cheapHash(str){
+    let h = 0;
+    for(let i = 0; i < str.length; i++){ h = (h * 31 + str.charCodeAt(i)) | 0; }
+    return h;
+  }
   COUNTRIES.forEach(c=>{
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', 'node');
     g.setAttribute('data-id', c.id);
-    g.innerHTML = `<circle class="node-hit" r="11" fill="transparent"/><circle class="node-ring" r="11"/><circle class="node-dot" r="3.5"/><text class="node-label" x="9" y="3.5">${c.name.toUpperCase()}</text>`;
+    // "Gece şehir ışıkları" — marker grubunun zaten her frame'de güncellenen
+    // transform'una biniyor, bu yüzden ekstra per-frame maliyeti yok.
+    const seed = cheapHash(c.id);
+    const cityLights = [0, 1, 2].map(i=>{
+      const a = ((seed >> (i * 6)) & 63) / 63 * Math.PI * 2;
+      const dist = 3 + ((seed >> (i * 4 + 3)) & 7);
+      const cx = (Math.cos(a) * dist).toFixed(1);
+      const cy = (Math.sin(a) * dist).toFixed(1);
+      const r = (0.5 + ((seed >> (i * 5)) & 3) * 0.15).toFixed(2);
+      return `<circle class="node-citylight" cx="${cx}" cy="${cy}" r="${r}"/>`;
+    }).join('');
+    g.innerHTML = `<circle class="node-hit" r="11" fill="transparent"/><circle class="node-ring" r="11"/>${cityLights}<circle class="node-dot" r="3.5"/><text class="node-label" x="9" y="3.5">${c.name.toUpperCase()}</text><g class="node-pin"><path class="node-pin-shape" d="M0,-26 C4.5,-26 8,-22.7 8,-18.3 C8,-12.5 0,-4 0,-4 C0,-4 -8,-12.5 -8,-18.3 C-8,-22.7 -4.5,-26 0,-26 Z"/><circle class="node-pin-hole" r="2.6" cy="-18.3"/></g>`;
     markersGroup.appendChild(g);
     markerEls[c.id] = { g, ring: g.querySelector('.node-ring'), dot: g.querySelector('.node-dot') };
   });
@@ -2054,6 +2199,9 @@ function ringPathD(pts){
 let isInteracting = false;
 function updateWorldShapes(){
   const cache = getDisplayCache();
+  // Performans: fill/stroke/class kareler arasında değişmez — sadece filtre/hedef
+  // değişince (styleVersion artınca) yeniden yazılır. Her karede yalnızca `d` güncellenir.
+  const restyle = worldStyledVersion !== styleVersion;
   WORLD_DATA.forEach((f, i)=>{
     const el = pathEls[i];
     let dAttr = '';
@@ -2062,7 +2210,10 @@ function updateWorldShapes(){
       if(frac < 0.3) return;
       dAttr += ringPathD(pts);
     });
-    if(!dAttr){ el.setAttribute('d', ''); return; }
+    el.setAttribute('d', dAttr);
+    if(!restyle) return;
+    // NOT: stil, ülke o an arka yüzde olsa bile uygulanır — aksi halde küre dönüp
+    // ülke görünür olduğunda eski (bayat) renklerle çizilirdi.
     const isSource = f.iso === 'TR';
     const isTarget = !!f.id && !isSource;
     let fill, strokeCol, fillOp, strokeW, cls;
@@ -2083,19 +2234,23 @@ function updateWorldShapes(){
     // Hover durumu class'ı korunmalı — sadece taban class'ı güncellenir, "hovered" varsa yeniden eklenir.
     const wasHovered = el.classList.contains('hovered');
     el.setAttribute('class', cls + (wasHovered ? ' hovered' : ''));
-    el.setAttribute('d', dAttr);
     el.setAttribute('fill', fill);
     el.setAttribute('fill-opacity', fillOp);
     el.setAttribute('stroke', strokeCol);
     el.setAttribute('stroke-width', strokeW);
   });
+  if(restyle) worldStyledVersion = styleVersion;
 }
 
 // Kategori/filtre değişmediği sürece her ülke için aynı sonucu veren hesaplamaları
 // önbelleğe alır — hem şekiller hem işaretçiler aynı önbelleği kullanır, kare başına
 // iki kez tekrar hesaplama yapılmaz.
 let displayCache = null;
-function invalidateDisplayCache(){ displayCache = null; }
+// Stil sürümü: fill/stroke/class gibi kareler arasında DEĞİŞMEYEN stiller artık
+// her karede değil, sadece bu sayaç arttığında (filtre/hedef değişince) yazılır.
+// ~200 path × 6 öznitelik × 60fps gereksiz DOM yazımını ortadan kaldırır.
+let styleVersion = 0, worldStyledVersion = -1, markerStyledVersion = -1;
+function invalidateDisplayCache(){ displayCache = null; styleVersion++; needsRender = true; }
 function getDisplayCache(){
   if(displayCache) return displayCache;
   displayCache = {};
@@ -2109,21 +2264,43 @@ function getDisplayCache(){
 
 function updateMarkers(){
   const cache = getDisplayCache();
+  const targetIds = getTargetIdsCache();
+  // Performans: renkler ve is-target sınıfı yalnızca filtre/hedef değişince yazılır;
+  // her karede sadece konum (transform) ve görünürlük (opacity) güncellenir.
+  const restyle = markerStyledVersion !== styleVersion;
   COUNTRIES.forEach(c=>{
     const p = toXY(c.lat, c.lon);
     const { passes, color } = cache[c.id];
-    const col = passes ? color : '#5a6172';
     const op = p.visible ? (passes ? 1 : 0.35) : 0;
     const m = markerEls[c.id];
     m.g.setAttribute('style', `opacity:${op}`);
     m.g.setAttribute('transform', `translate(${p.x.toFixed(1)},${p.y.toFixed(1)})`);
-    m.ring.setAttribute('stroke', col);
-    m.dot.setAttribute('fill', col);
+    if(restyle){
+      const col = passes ? color : '#5a6172';
+      m.ring.setAttribute('stroke', col);
+      m.dot.setAttribute('fill', col);
+      m.g.classList.toggle('is-target', targetIds.has(c.id));
+    }
   });
+  if(restyle) markerStyledVersion = styleVersion;
   const t = toXY(38.96, 35.24);
   const tm = markerEls['turkey'];
   tm.g.setAttribute('style', `opacity:${t.visible?1:0}`);
   tm.g.setAttribute('transform', `translate(${t.x.toFixed(1)},${t.y.toFixed(1)})`);
+
+  // Seyrek "ışık rotası" — sadece bir pulse aktifken (birkaç saniyede bir,
+  // nadiren) çalışır; aktif değilken hiçbir ek maliyeti yoktur.
+  if(activeRoutePulseId && routePulseLineEl){
+    const target = COUNTRIES.find(x=> x.id === activeRoutePulseId);
+    if(target){
+      const tp = toXY(target.lat, target.lon);
+      routePulseLineEl.setAttribute('x1', t.x.toFixed(1));
+      routePulseLineEl.setAttribute('y1', t.y.toFixed(1));
+      routePulseLineEl.setAttribute('x2', tp.x.toFixed(1));
+      routePulseLineEl.setAttribute('y2', tp.y.toFixed(1));
+      routePulseLineEl.style.opacity = (t.visible && tp.visible) ? '' : '0';
+    }
+  }
 }
 
 function render(){
@@ -2217,7 +2394,10 @@ function endDrag(clientX, clientY, isTouch){
   if(!wasDrag && clientX !== undefined){
     autoRotate = isTouch || !mouseOverStage;
     isInteracting = false;
-    tryOpenAtPoint(clientX, clientY); // mobilde de artık doğrudan ülke sayfası açılır, önizleme baloncuğu yok
+    // Mobilde artık masaüstündeki gibi önce özet kart (+ "Detaya Git" butonu) açılıyor;
+    // masaüstünde fare zaten hover'da önizlemeyi gösterdiği için tıklama direkt sayfayı açar.
+    if(isTouch) tryPreviewAtPoint(clientX, clientY);
+    else tryOpenAtPoint(clientX, clientY);
   } else if(wasDrag && (Math.abs(velRotY) > 0.0005 || Math.abs(velTiltX) > 0.0005)){
     momentumActive = true; // oyun hissi: sürükleme hızıyla dönmeye devam eder, sonra yavaşlar — hafif çizim modu sürer
   } else {
@@ -2235,6 +2415,9 @@ stage.addEventListener('mouseleave', ()=>{ mouseOverStage = false; if(!dragging)
 
 let touchActiveOnStage = false;
 stage.addEventListener('touchstart', e=>{
+  // +/- yakınlaştırma butonlarına dokunuşu küre-sürükleme mantığı yutmasın —
+  // aksi halde preventDefault() tarayıcının "tıklama" olayını hiç oluşturmuyordu.
+  if(e.target.closest('.zoom-controls')) return;
   touchActiveOnStage = true;
   if(e.cancelable) e.preventDefault();
   startDrag(e.touches[0].clientX, e.touches[0].clientY);
@@ -2268,7 +2451,14 @@ document.getElementById('zoomOutBtn').addEventListener('click', ()=>{
   zoomLevel = Math.max(0.6, zoomLevel - 0.25); applyZoom();
 });
 
-function tick(){
+// Otomatik dönüş artık ZAMANA bağlı (kare sayısına değil) — cihaz 30fps'e
+// düşse bile küre aynı hızda döner. Eski kod her karede sabit 0.0016 rad
+// ekliyordu; FPS düşünce dönüş de yarı hıza iniyordu ("kasıyor" hissinin nedeni).
+const AUTO_ROTATE_SPEED = 0.096; // rad/sn (eski 0.0016 rad/kare × 60fps'e denk)
+let lastTickTs = 0;
+function tick(ts){
+  const dt = lastTickTs ? Math.min((ts - lastTickTs) / 1000, 0.1) : 1/60;
+  lastTickTs = ts;
   if(momentumActive){
     rotY += velRotY;
     tiltX = Math.max(-0.9, Math.min(0.9, tiltX + velTiltX));
@@ -2280,7 +2470,7 @@ function tick(){
       isInteracting = false; // tam detaylı çizime geri dön
     }
   } else if(autoRotate){
-    rotY += 0.0016; needsRender = true;
+    rotY += AUTO_ROTATE_SPEED * dt; needsRender = true;
   }
   if(needsRender){ render(); needsRender = false; }
   requestAnimationFrame(tick);
@@ -2379,7 +2569,7 @@ filterSlidersWrap.innerHTML = FILTER_DEFS.map(def => `
 
 function updateFilterUI(){
   const activeCount = Object.values(activeFilters).filter(v=>v!==undefined && v!==null).length;
-  document.getElementById('filterActiveCount').textContent = activeCount ? `(${activeCount})` : '';
+  document.getElementById('filterActiveCount').textContent = activeCount ? `${activeCount}` : '';
   document.getElementById('filterToggleBtn').classList.toggle('has-active', activeCount > 0);
   const matching = COUNTRIES.filter(countryPassesFilters).length;
   document.getElementById('filterResultCount').textContent = hasActiveFilters() ? `${matching} pazar eşleşiyor` : `${COUNTRIES.length} pazar (filtre yok)`;
@@ -2427,18 +2617,28 @@ document.getElementById('filterUpsellBtn').addEventListener('click', (e)=>{
 document.addEventListener('click', (e)=>{
   if(!e.target.closest('.filter-wrap')) document.getElementById('filterPanel').classList.remove('show');
 });
-document.getElementById('filterResetBtn').addEventListener('click', ()=>{
+// Tüm daraltıcıları tek yerden sıfırlar: filtre panelindeki "Sıfırla" butonu ve
+// liste görünümündeki "Filtreleri Temizle" şeridi aynı fonksiyonu kullanır.
+// (Eski panel-sıfırlama kodu invalidateDisplayCache() çağırmıyordu — filtre
+// temizlendikten sonra küre renkleri bayat kalabiliyordu; bu da düzeltildi.)
+function resetAllFilters(){
   activeFilters = {};
   FILTER_DEFS.forEach(def=>{
     const slider = document.getElementById(`filterSlider-${def.id}`);
     slider.value = def.mode==='max' ? def.max : def.min;
     document.getElementById(`filterNum-${def.id}`).value = '';
   });
+  activeContinent = 'Tümü';
+  listSearchQ = '';
+  if(searchInput) searchInput.value = '';
   updateFilterUI();
+  invalidateDisplayCache();
   needsRender = true;
   if(listView.classList.contains('show')) renderListTable();
   pushHistoryState();
-});
+}
+document.getElementById('filterResetBtn').addEventListener('click', resetAllFilters);
+document.getElementById('listClearFiltersBtn').addEventListener('click', resetAllFilters);
 document.getElementById('filterApplyBtn').addEventListener('click', ()=>{
   document.getElementById('filterPanel').classList.remove('show');
   renderListTable();
@@ -2488,7 +2688,7 @@ function getColumnCellHtml(key, cd, xf){
     case 'importTax': return `<td>${cd.importTax}</td>`;
     case 'logisticsCost': return `<td>${cd.logisticsCost}</td>`;
     case 'gdpPerCapita': return `<td>${cd.gdpPerCapita}</td>`;
-    case 'inflation': return `<td>%${xf.inflation}</td>`;
+    case 'inflation': return `<td>${xf.inflation ? '%' + xf.inflation : 'Bilinmiyor'}</td>`;
     case 'population': return `<td>${cd.population}</td>`;
     case 'isManufacturer': return `<td>${manufacturerTierLabel(cd.iso) ? 'Evet — ' + manufacturerTierLabel(cd.iso) : 'Hayır'}</td>`;
     default: return '<td></td>';
@@ -2570,46 +2770,82 @@ function renderListTable(){
     return (va - vb) * listSortDir;
   });
   document.getElementById('listCount').textContent = rows.length + ' pazar';
+  // Kullanıcı farkında olmadan filtre/arama/kıta seçimiyle listeyi daraltmış olabilir —
+  // 1-2 ülke görüp "veri eksik" sanmasın diye, herhangi bir daraltıcı aktifken listenin
+  // üstünde kaç pazarın gizlendiğini söyleyen bir şerit ve "Filtreleri Temizle" butonu gösterilir.
+  const narrowed = hasActiveFilters() || activeContinent !== 'Tümü' || !!listSearchQ;
+  const noticeEl = document.getElementById('listFilterNotice');
+  if(noticeEl){
+    if(narrowed){
+      const parts = [];
+      if(hasActiveFilters()) parts.push('filtre');
+      if(activeContinent !== 'Tümü') parts.push(activeContinent === 'NATO Ülkeleri' ? 'NATO seçimi' : 'kıta seçimi');
+      if(listSearchQ) parts.push('arama');
+      document.getElementById('listFilterNoticeText').innerHTML =
+        `<b>${rows.length} / ${COUNTRIES.length}</b> pazar gösteriliyor — aktif ${parts.join(' + ')} listeyi daraltıyor.`;
+      noticeEl.style.display = '';
+    } else {
+      noticeEl.style.display = 'none';
+    }
+  }
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="${listColumnOrder.length + 2}" style="text-align:center; padding:36px 16px; color:var(--text-2);">Bu filtrelerle eşleşen pazar yok. Yukarıdaki <b>Filtreleri Temizle</b> butonuyla tüm pazarları geri getirebilirsiniz.</td></tr>`;
+    return;
+  }
   tbody.innerHTML = rows.map(({base,cd})=> {
     const xf = generateExtraFields(cd);
-    const openAttr = `onclick="handleListRowClick('${base.id}')" style="cursor:pointer;"`;
-    const dataCells = listColumnOrder.map(key => getColumnCellHtml(key, cd, xf).replace('<td', `<td ${openAttr}`)).join('');
+    // NOT: hücrelerde artık HİÇBİR inline onclick yok. Satır açma, aşağıdaki tek
+    // belge-seviyesi delege dinleyicisinden yapılır — checkbox bölgesi orada
+    // kategorik olarak navigasyondan muaftır.
+    const dataCells = listColumnOrder.map(key => getColumnCellHtml(key, cd, xf)).join('');
     return `
     <tr data-id="${base.id}">
-      <td class="td-check"><input type="checkbox" class="compare-check" data-id="${base.id}" ${compareIds.includes(base.id)?'checked':''}></td>
+      <td class="td-check"><label class="td-check-label"><input type="checkbox" class="compare-check" data-id="${base.id}" ${compareIds.includes(base.id)?'checked':''}></label></td>
       ${dataCells}
-      <td ${openAttr}><span class="row-open">Aç →</span></td>
+      <td><span class="row-open">Aç →</span></td>
     </tr>`;
   }).join('');
 }
-// Satır açma davranışı YALNIZCA checkbox DIŞINDAKİ her hücrenin kendi onclick
-// özniteliğine ayrı ayrı eklenir — <tr> üzerinde artık hiç onclick yok.
-// Ek olarak: checkbox hücresine yapılan HER tıklama, CAPTURE aşamasında
-// (satırın kendi onclick'i çalışmadan ÖNCE) durduruluyor — böylece hiçbir
-// koşulda checkbox'a tıklamak ülke sayfasını açamaz, sadece seçim yapar.
-const countryTableBodyEl = document.getElementById('countryTableBody');
-if(countryTableBodyEl){
-  countryTableBodyEl.addEventListener('click', (e)=>{
-    if(e.target.closest('.td-check')) e.stopPropagation();
-  }, true);
-  countryTableBodyEl.addEventListener('click', (e)=>{
-    const cell = e.target.closest('.td-check');
-    if(!cell || e.target.tagName === 'INPUT') return; // checkbox'ın kendi native davranışı zaten çalışır
-    const chk = cell.querySelector('input.compare-check');
-    if(chk){ chk.checked = !chk.checked; chk.dispatchEvent(new Event('change', { bubbles:true })); }
-  });
-  countryTableBodyEl.addEventListener('change', (e)=>{
-    const chk = e.target.closest('input.compare-check');
-    if(chk) handleListCheckboxChange(chk);
-  });
-}
-function handleListRowClick(id){
-  const c = COUNTRIES.find(x=>x.id===id);
+/* CHECKBOX / SATIR AÇMA — NİHAİ MİMARİ
+   Önceki yaklaşımların hepsi (satır onclick'i, hücre onclick'leri, tbody'ye bağlı
+   capture koruması) bazı gerçek tarayıcılarda checkbox tıklamasının ülke sayfasını
+   da açmasına yol açan yollar bırakıyordu. Yeni tasarım bunu yapısal olarak imkânsız kılar:
+   — Hücrelerde HİÇBİR inline onclick yok; navigasyonu yapabilecek TEK kod aşağıdaki
+     delege dinleyicisi ve o, checkbox bölgesindeki (.td-check ve içindekiler)
+     tıklamalarda navigasyona hiç girmeden çıkar. "Hem işaretle hem aç" fiziksel
+     olarak mümkün değil, art arda seçim serbest.
+   — Dinleyiciler tbody'ye değil DOCUMENT'a bağlı: tablo her yeniden çizildiğinde
+     (filtre, sıralama, arama) ya da dış bir etken DOM'u değiştirse bile çalışmaya
+     devam ederler.
+   — Checkbox etkileşiminden sonraki 400ms içindeki satır tıklamaları yok sayılır
+     (mobil tarayıcıların gecikmeli "hayalet" click'lerine karşı). */
+let lastCheckboxInteractionTs = 0;
+document.addEventListener('click', (e)=>{
+  const t = e.target;
+  if(!t || !t.closest) return;
+  const inCheckZone = t.closest('#countryTableBody .td-check');
+  if(inCheckZone){
+    // Checkbox bölgesi: sadece işaretleme (label native yapar) — navigasyon YASAK.
+    lastCheckboxInteractionTs = Date.now();
+    return;
+  }
+  const tr = t.closest('#countryTableBody tr[data-id]');
+  if(!tr) return;
+  if(Date.now() - lastCheckboxInteractionTs < 400) return; // hayalet click koruması
+  const c = COUNTRIES.find(x=>x.id===tr.getAttribute('data-id'));
   if(c) openDashboard(c);
-}
+});
+document.addEventListener('change', (e)=>{
+  const chk = e.target && e.target.closest && e.target.closest('#countryTableBody input.compare-check');
+  if(chk) handleListCheckboxChange(chk);
+});
 function handleListCheckboxChange(chk){
+  lastCheckboxInteractionTs = Date.now();
   const id = chk.getAttribute('data-id');
   if(chk.checked) addToCompare(id); else removeFromCompare(id);
+  // Limit dolduysa addToCompare eklemeyi reddeder — checkbox'ın görünümü gerçek
+  // listeyle senkron kalsın (eskiden işaretli kalıp yanıltıyordu).
+  chk.checked = compareIds.includes(id);
 }
 // arama kutusu liste görünümünü de filtrelesin
 searchInput.addEventListener('input', ()=>{
@@ -2627,10 +2863,18 @@ hoverCard.addEventListener('click', (e)=>{
     hideHoverCard();
     openCountry(hoverCardCountry);
   }
+  // Mobilde Türkiye'ye dokununca özet kart açılıyor ama (normal ülkelerin aksine)
+  // kartta "Detaya Git" butonu yoktu — yani Türkiye sayfasını açmanın hiçbir yolu
+  // kalmıyordu. Artık Türkiye kartındaki buton da tam sayfayı açıyor.
+  if(e.target && e.target.id === 'hcTurkeyDetailBtn'){
+    hideHoverCard();
+    renderTurkeyPage();
+  }
 });
 function showTurkeyCard(e){
   const t = TURKEY_PROFILE;
   hoverCard.innerHTML = `
+    <button class="hc-close-btn" id="hcCloseBtn" aria-label="Kapat" onclick="event.stopPropagation(); hideHoverCard();">✕</button>
     <div class="hc-head">
       <div style="display:flex;align-items:center;gap:9px;">
         <span class="hc-flag">${t.flag}</span><span class="hc-country">${t.name}</span>
@@ -2649,6 +2893,7 @@ function showTurkeyCard(e){
       <div class="hc-supplier-list">${t.exportDestinations.slice(0,5).map(s=>`<span>${s.c} %${s.v}</span>`).join('')}</div>
     </div>
     <div class="hc-footer"><span>Türkiye'nin ihracat kaynağı</span><span>—</span></div>
+    <button class="hc-detail-btn" id="hcTurkeyDetailBtn">Detaya Git →</button>
   `;
   hoverCard.classList.add('show');
   positionHoverCard(e);
@@ -2719,6 +2964,7 @@ function showHoverCard(baseCountry, e){
   hoverCardCountry = baseCountry;
   const restriction = IMPORT_RESTRICTIONS[baseCountry.id];
   hoverCard.innerHTML = `
+    <button class="hc-close-btn" id="hcCloseBtn" aria-label="Kapat" onclick="event.stopPropagation(); hideHoverCard();">✕</button>
     ${restriction ? `<div class="hc-restriction ${restriction.level}">${restriction.level==='severe' ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg> İthalat fiilen mümkün değil' : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/></svg> Ciddi ithalat kısıtlaması'}</div>` : ''}
     <div class="hc-head">
       <div style="display:flex;align-items:center;gap:9px;">
@@ -2736,11 +2982,22 @@ function showHoverCard(baseCountry, e){
       <div class="hc-item"><span class="hc-label">Türkiyeden Mobilya İthalatı${(()=>{const ti=getTurkeyImportInfo(c); return ti.level==='real' ? (' <span style="color:var(--teal); font-size:8px;">✓ '+(ti.isTotal?'Bakanlık (toplam)':'ITC')+'</span>') : ti.level==='estimated' ? ' <span style="color:var(--text-2); font-size:8px; opacity:0.7;">~ tahmini</span>' : '';})()}</span><span class="hc-value">${getTurkeyImportInfo(c).display}</span></div>
       <div class="hc-item"><span class="hc-label">Mobilya Üreticisi mi? <span style="color:var(--teal);font-size:8px;">✓</span></span><span class="hc-value">${manufacturerTierLabel(c.iso) ? 'Evet — ' + manufacturerTierLabel(c.iso) : 'Hayır'}</span></div>
     </div>
-    <div class="hc-suppliers">
+    ${(()=>{
+      const tier = turkeyShareTier(c);
+      if(tier === 'unknown' || !c.suppliers){
+        // Doğrulanmış/tahmini hiçbir tedarikçi verisi yok — rastgele bir rakam göstermek
+        // yerine dürüstçe "Bilinmiyor" gösterilir.
+        return `<div class="hc-suppliers">
       <span class="hc-label">İthalatta Tedarikçi Payları</span>
+      <div class="hc-value" style="color:var(--text-2); font-size:12px; padding:6px 0;">Bilinmiyor — bu ülke için doğrulanmış tedarikçi verisi yok</div>
+    </div>`;
+      }
+      return `<div class="hc-suppliers">
+      <span class="hc-label">İthalatta Tedarikçi Payları ${tier==='real' ? '<span style="color:var(--teal);font-size:8px;">✓</span>' : '<span style="color:var(--text-2);font-size:8px;opacity:0.7;">~ tahmini</span>'}</span>
       <div class="hc-bar">${c.suppliers.map(s=>`<span style="flex:${s.v}" class="${s.c==='Türkiye'?'seg-tr':'seg-other'}" title="${s.c} %${s.v}"></span>`).join('')}</div>
       <div class="hc-supplier-list">${c.suppliers.slice(0,4).map(s=>`<span class="${s.c==='Türkiye'?'tr-hl':''}">${s.c} %${s.v}</span>`).join('')}</div>
-    </div>
+    </div>`;
+    })()}
     <div class="hc-footer" style="margin-bottom:2px;"><span>${c.ports}</span></div>
     <button class="hc-detail-btn" id="hcDetailBtn">Detaya Git →</button>
   `;
@@ -2814,6 +3071,104 @@ function animateFillBars(){
     });
   });
 }
+// Türkiye'nin coğrafi merkezi (Yozgat/Sivas civarı, ~39.0°K 35.0°D) — kaynak: harita
+// verilerinde standart kabul edilen Türkiye merkez noktası.
+const TURKEY_COORDS = { lat: 39.0, lon: 35.0 };
+// Kuş uçuşu mesafe — Haversine formülü, ülkelerin zaten mevcut olan gerçek
+// enlem/boylam (lat/lon) verisinden hesaplanır. Uydurma bir rakam değildir.
+function haversineKm(lat1, lon1, lat2, lon2){
+  const R = 6371; // Dünya yarıçapı (km)
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+// Türkiye (UTC+3, DST yok) ile hedef ülke arasındaki saat farkı — ülkenin
+// standart UTC ofsetinden hesaplanır (bazı büyük ülkelerde birden fazla dilim
+// olabilir, başkentin/en yaygın dilimi kullanılır).
+function formatTimeDiff(countryId){
+  const off = REAL_UTC_OFFSET[countryId];
+  if(off === undefined) return 'Bilinmiyor';
+  const diff = off - 3;
+  if(Math.abs(diff) < 0.01) return 'Aynı saat dilimi';
+  const sign = diff > 0 ? '+' : '';
+  const val = Number.isInteger(diff) ? diff : diff.toFixed(2).replace(/0$/, '').replace(/\.$/, '');
+  return `${sign}${val} saat`;
+}
+// Tek cümlelik "AI Özeti" — tamamen mevcut/gerçek verilerden (Pazar ve
+// Rekabet skorları, zaten uygulamanın başka yerlerinde de kullanılan aynı
+// eşik değerleriyle) türetilir; ülkeye özel uydurma bir iddia içermez.
+function heroTagline(baseCountry, c){
+  if(c.scores.overall >= 80){
+    return `Türkiye'nin en güçlü ihracat potansiyeli taşıyan pazarlardan biri.`;
+  }
+  const potential = potentialLabel(c.scores.market);
+  const competitionLabel = c.scores.competition >= 65 ? 'Yüksek' : c.scores.competition >= 40 ? 'Orta' : 'Düşük';
+  return `Mobilya ithalatı ${potential.toLowerCase()}, rekabet ${competitionLabel.toLowerCase()} seviyede.`;
+}
+function renderCountryHero(baseCountry, c){
+  if(typeof baseCountry.lat !== 'number' || typeof baseCountry.lon !== 'number') return '';
+  const [gradFrom, gradTo] = heroTheme(baseCountry);
+  const capital = REAL_CAPITALS[baseCountry.id] || 'Bilinmiyor';
+  const language = REAL_LANGUAGES[baseCountry.id] || 'Bilinmiyor';
+  const timeDiff = formatTimeDiff(baseCountry.id);
+  const bgMap = renderCountryMiniMap(baseCountry.id, { w:408, h:408, pad:16, className:'country-hero-bgmap-shape', pathClassName:'country-hero-bgmap-path' });
+  const flagImg = `<img class="country-hero-flagimg" src="https://flagcdn.com/w80/${baseCountry.iso.toLowerCase()}.png" alt="${c.name} bayrağı" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span class="country-hero-flag-fallback" style="display:none;">${c.flag}</span>`;
+
+  let routeHtml = '';
+  if(baseCountry.id !== 'turkey'){
+    const km = haversineKm(TURKEY_COORDS.lat, TURKEY_COORDS.lon, baseCountry.lat, baseCountry.lon);
+    // Tahmini doğrudan uçuş süresi: ortalama ~850 km/sa yolcu uçağı seyir hızı +
+    // kalkış/iniş/taksi için sabit ~40 dk ek — kabaca bir tahmindir, gerçek uçuş
+    // rotaları rüzgar/aktarma nedeniyle farklılık gösterebilir.
+    const flightHoursRaw = km / 850 + 0.67;
+    const fH = Math.floor(flightHoursRaw);
+    const fM = Math.round((flightHoursRaw - fH) * 60);
+    const flightLabel = fH > 0 ? `~${fH} sa ${fM > 0 ? fM + ' dk' : ''}`.trim() : `~${fM} dk`;
+    const kmLabel = km >= 1000 ? Math.round(km).toLocaleString('tr-TR') : Math.round(km).toString();
+    routeHtml = `
+      <div class="hero-route">
+        <div class="hero-route-visual">
+          <span class="hero-route-endpoint" title="Türkiye">
+            <span class="hero-route-endpoint-flag">🇹🇷</span>
+            <span class="hero-route-endpoint-label">Türkiye</span>
+          </span>
+          <span class="hero-route-line"><span class="hero-route-plane"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.5l-.4.5c-.4.4-.2 1.1.3 1.3L9 11l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.5.9.7 1.4.4l.6-.4c.4-.3.6-.8.5-1.3Z"/></svg></span></span>
+          <span class="hero-route-endpoint" title="${c.name}">
+            <span class="hero-route-endpoint-flag">${c.flag}</span>
+            <span class="hero-route-endpoint-label">${c.name}</span>
+          </span>
+        </div>
+        <div class="hero-route-stats">
+          <div class="hero-route-stat"><span class="hero-route-stat-val">${kmLabel}<span class="hero-route-stat-unit">km</span></span><span class="hero-route-stat-label">Kuş uçuşu mesafe</span></div>
+          <div class="hero-route-stat-divider"></div>
+          <div class="hero-route-stat"><span class="hero-route-stat-val">${flightLabel}</span><span class="hero-route-stat-label">Tahmini uçuş süresi</span></div>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="country-hero" style="--hero-from:${gradFrom}; --hero-to:${gradTo};">
+      <div class="country-hero-bgmap">${bgMap}</div>
+      <div class="country-hero-top">
+        <div class="country-hero-eyebrow">PAZARA İLK BAKIŞ</div>
+        <div class="country-hero-identity">
+          <span class="country-hero-flagwrap">${flagImg}</span>
+          <h2 class="country-hero-title">${c.name}</h2>
+        </div>
+        <div class="country-hero-facts">
+          <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h18"/><path d="M6 22V11M10 22V11M14 22V11M18 22V11"/><path d="M4 11l8-6 8 6"/></svg></span>${capital}</div>
+          <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2.5 20v-1a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1"/><circle cx="17.5" cy="8.5" r="2.3"/><path d="M15.8 9.7a4 4 0 0 1 5.7 3.6V15"/></svg></span>${c.population}</div>
+          <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 8.7c0-.9 1.1-1.5 3-1.5s3 .6 3 1.5-1.1 1.3-3 1.3-3 .6-3 1.5 1.1 1.5 3 1.5 3 .6 3 1.5-1.1 1.5-3 1.5"/><path d="M12 6v1.2M12 16.8V18"/></svg></span>${c.currency}</div>
+          <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.4 3.8 5.6 3.8 9s-1.4 6.6-3.8 9c-2.4-2.4-3.8-5.6-3.8-9s1.4-6.6 3.8-9z"/></svg></span>${language}</div>
+          <div class="country-hero-fact"><span class="country-hero-fact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>${timeDiff}</div>
+        </div>
+      </div>
+      ${routeHtml}
+    </div>
+  `;
+}
 function renderCountryPage(baseCountry){
   const c = withCategory(baseCountry);
   const x = generateExtraFields(c);
@@ -2882,15 +3237,19 @@ function renderCountryPage(baseCountry){
     ['İlk üç adım', '1) Küçük hacimli test siparişiyle pazara giriş, 2) yerel sertifikasyon/gümrük süreçlerini tamamlama, 3) 2-3 potansiyel distribütör/alıcı ile görüşme.'],
   ];
 
-  const supplierBars = c.suppliers.map(s=>`
+  const suppliersUnknown = !c.suppliers || turkeyShareTier(c) === 'unknown';
+  const supplierBars = suppliersUnknown
+    ? `<div class="footnote" style="padding:10px 0;">Bilinmiyor — bu ülke için doğrulanmış tedarikçi verisi henüz yok.</div>`
+    : c.suppliers.map(s=>`
     <div class="sup-row">
       <span class="sup-name">${s.c}</span>
       <div class="sup-bar-wrap"><div class="sup-bar" style="width:${s.v}%; background:${s.c==='Türkiye'?'#3fd0c0':'#c9a961'}"></div></div>
       <span class="sup-val">%${s.v}</span>
     </div>`).join('');
-  const turkeyRank = [...c.suppliers].sort((a,b)=>b.v-a.v).findIndex(s=>s.c==='Türkiye') + 1;
+  const turkeyRank = suppliersUnknown ? null : [...c.suppliers].sort((a,b)=>b.v-a.v).findIndex(s=>s.c==='Türkiye') + 1;
 
   document.getElementById('dashBody').innerHTML = `
+    ${renderCountryHero(baseCountry, c)}
     <div class="tr-export-hero ${getTurkeyImportInfo(c).level}">
       <div class="tr-export-hero-label">🇹🇷 Türkiye'den ${catInfo.label} İhracatı ${dqBadge(getTurkeyImportInfo(c).level==='real'?'real':getTurkeyImportInfo(c).level==='estimated'?'estimated':'unknown')}</div>
       <div class="tr-export-hero-value">${getTurkeyImportInfo(c).display}</div>
@@ -2964,9 +3323,10 @@ function renderCountryPage(baseCountry){
         <div class="card ${dqCardClass(c.dq.gdp)}"><div class="card-label">Kişi Başı GSYH${dqBadge(c.dq.gdp)}</div><div class="card-value">${c.gdpPerCapita}</div></div>
         <div class="card"><div class="card-label">Para Birimi</div><div class="card-value">${c.currency}</div></div>
         <div class="card ${dqCardClass('estimated')}"><div class="card-label">Ekonomik Büyüme${dqBadge('estimated')}</div><div class="card-value">${x.gdpGrowth}%</div></div>
-        <div class="card ${dqCardClass(x.inflationVerified ? 'real' : 'estimated')}"><div class="card-label">Enflasyon${dqBadge(x.inflationVerified ? 'real' : 'estimated')}</div><div class="card-value">%${x.inflation}</div></div>
+        <div class="card ${dqCardClass(x.inflationVerified ? 'real' : 'unknown')}"><div class="card-label">Enflasyon${dqBadge(x.inflationVerified ? 'real' : 'unknown')}</div><div class="card-value">${x.inflation ? '%' + x.inflation : 'Bilinmiyor'}</div></div>
         <div class="card ${dqCardClass(REAL_CALLING_CODE[c.id] ? 'real' : 'unknown')}"><div class="card-label">Telefon Kodu${dqBadge(REAL_CALLING_CODE[c.id] ? 'real' : 'unknown')}</div><div class="card-value">${REAL_CALLING_CODE[c.id] ? '+'+REAL_CALLING_CODE[c.id] : 'Bilinmiyor'}</div></div>
       </div>
+      <div class="footnote" style="margin-top:10px;">Veri yılı: Nüfus ve GSYH 2026 tahminidir (IMF World Economic Outlook, Nisan 2026 / Worldometers.info). Enflasyon 2025 verisidir (IMF WEO).</div>
     </div>
 
     <div class="cp-section">
@@ -2975,7 +3335,7 @@ function renderCountryPage(baseCountry){
         <div class="card ${dqCardClass(getTurkeyImportInfo(c).level==='real'?'real':getTurkeyImportInfo(c).level==='estimated'?'estimated':'unknown')}"><div class="card-label">Türkiyeden Mobilya İthalatı${dqBadge(getTurkeyImportInfo(c).level==='real'?'real':getTurkeyImportInfo(c).level==='estimated'?'estimated':'unknown')}${getTurkeyImportInfo(c).isTotal ? ' <span class="footnote" style="margin:0;">(tüm kategoriler)</span>' : ''}</div><div class="card-value">${getTurkeyImportInfo(c).display}</div></div>
         <div class="card ${dqCardClass(turkeyShareTier(c))}"><div class="card-label">Türkiye Pazar Payı${dqBadge(turkeyShareTier(c))}</div><div class="card-value">${turkeyShareDisplay(c)}</div></div>
         <div class="card ${dqCardClass('estimated')}"><div class="card-label">Pazar Büyüklüğü${dqBadge('estimated')}</div><div class="card-value">${c.marketSize}</div></div>
-        <div class="card ${dqCardClass(getTurkeyImportInfo(c).growthPct!==null?'real':'estimated')}"><div class="card-label">Türkiye İhracat Büyümesi${dqBadge(getTurkeyImportInfo(c).growthPct!==null?'real':'estimated')}</div><div class="card-value ${(()=>{const g=getTurkeyImportInfo(c).growthPct; return g!==null && g<0 ? 'down' : 'up';})()}">${(()=>{const g=getTurkeyImportInfo(c).growthPct; if(g!==null) return (g>=0?'+':'')+g+'%'; return c.turkeyGrowth;})()}</div></div>
+        <div class="card ${dqCardClass(getTurkeyImportInfo(c).growthPct!==null?'real':(c.turkeyGrowth==='Bilinmiyor'?'unknown':'estimated'))}"><div class="card-label">Türkiye İhracat Büyümesi${dqBadge(getTurkeyImportInfo(c).growthPct!==null?'real':(c.turkeyGrowth==='Bilinmiyor'?'unknown':'estimated'))}</div><div class="card-value ${(()=>{const g=getTurkeyImportInfo(c).growthPct; if(g!==null) return g<0?'down':'up'; return c.turkeyGrowth==='Bilinmiyor'?'':'up';})()}">${(()=>{const g=getTurkeyImportInfo(c).growthPct; if(g!==null) return (g>=0?'+':'')+g+'%'; return c.turkeyGrowth;})()}</div></div>
       </div>
       <div class="footnote" style="margin-top:10px;">${(()=>{const ti=getTurkeyImportInfo(c); if(ti.level==='real') return '✓ '+ti.note; if(ti.level==='estimated') return '~ '+ti.note; return '⚠ Bu ülke için Türkiye\'ye özel doğrulanmış ticaret verisi bulunamadı — rakamlar örnek/tahminidir.';})()}</div>
       <div class="footnote" style="margin-top:4px;">${dqBadge('estimated')} Pazar Büyüklüğü ve ülkenin toplam ithalat büyüme oranı (bkz. İlgili Kaynaklar) için henüz tek bir kapsamlı, ücretsiz gerçek veri kaynağı bulunamadı — model tahminidir.</div>
@@ -2985,13 +3345,17 @@ function renderCountryPage(baseCountry){
       <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="var(--amber)" stroke="none"/></svg><span class="num">04</span> Rekabet</h3>
       <div class="two-col">
         <div>
-          <div class="card-label" style="margin-bottom:12px;">Ana Tedarikçi Ülkeler${dqBadge(c.suppliersVerified ? 'real' : 'estimated')}</div>
+          <div class="card-label" style="margin-bottom:12px;">Ana Tedarikçi Ülkeler${dqBadge(suppliersUnknown ? 'unknown' : (c.suppliersVerified ? 'real' : 'estimated'))}</div>
           ${supplierBars}
+          ${c.importDataSource ? `<div class="footnote" style="margin-top:10px;">Veri yılı: ${c.importDataSource}.</div>` : ''}
         </div>
         <div class="card" style="align-self:start;">
           <div class="card-label">Türkiye'nin Konumu</div>
-          <div class="card-value" style="font-size:26px; margin:8px 0;">${turkeyRank}. sıra</div>
-          <div class="footnote" style="margin:0;">${c.suppliers.length} tedarikçi arasında, %${(c.suppliers.find(s=>s.c==='Türkiye')||{v:0}).v} pazar payıyla.</div>
+          ${suppliersUnknown
+            ? `<div class="card-value" style="font-size:20px; margin:8px 0; color:var(--text-2);">Bilinmiyor</div>
+          <div class="footnote" style="margin:0;">Doğrulanmış tedarikçi verisi olmadan sıralama hesaplanamaz.</div>`
+            : `<div class="card-value" style="font-size:26px; margin:8px 0;">${turkeyRank}. sıra</div>
+          <div class="footnote" style="margin:0;">${c.suppliers.length} tedarikçi arasında, %${(c.suppliers.find(s=>s.c==='Türkiye')||{v:0}).v} pazar payıyla.</div>`}
         </div>
       </div>
     </div>
@@ -3086,8 +3450,6 @@ function renderCountryPage(baseCountry){
         </details>
       </div>
 
-      <h3 class="cp-section-title" style="margin-top:32px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="num">12</span> Gelecek Kaynaklar</h3>
-      ${renderFutureDataSection(c)}
     </div>
     </div>
   `;
@@ -3173,14 +3535,24 @@ function setMembershipCache(tier, founderNumber){
   updatePremiumUI();
   if(dashboard.classList.contains('open')) applyContentGate();
 }
+// ===========================================================
+// FAZ 39 — PLATFORM ŞU ANDA TAMAMEN ÜCRETSİZ.
+// Kurucu Üye / Standart paket mantığı (fiyatlandırma, haftalık limitler,
+// PDF/filtre kısıtlamaları) SİLİNMEDİ — sadece bu bayrakla devre dışı
+// bırakıldı. 2027'de tekrar aktif etmek için tek yapılması gereken bu
+// değeri `true` yapmak; altındaki tüm kod (canOpenCountryFree,
+// canCompareFree, filtre/PDF kilidi, rozet sistemi, /premium sayfası vb.)
+// zaten hazır ve değişmeden çalışmaya devam edecek.
+const MONETIZATION_ACTIVE = false;
 function isPremiumUser(){
+  if(!MONETIZATION_ACTIVE) return !isVisitor(); // ücretsiz dönemde: giriş yapan herkes tam erişimli
   const t = getMembershipTier();
   return t === 'founding' || t === 'standard';
 }
 // Ziyaretçi: hiç oturum açmamış. Başlangıç (ücretsiz) üye: oturum açmış ama
 // Kurucu/Standart değil. Kullanıcı yolculuğundaki üç seviye bu ikisi + premium.
 function isVisitor(){
-  return !currentSupabaseSession;
+  try{ return !currentSupabaseSession; }catch(e){ return true; } // henüz tanımlanmadıysa (TDZ) güvenli varsayım: ziyaretçi
 }
 function isFreeMember(){
   return !!currentSupabaseSession && !isPremiumUser();
@@ -3286,6 +3658,18 @@ function showToast(message){
 function showPremiumModal(){
   document.getElementById('premiumModal').classList.add('open');
   pushHistoryState();
+  const pricingSection = document.getElementById('premiumPricingSection');
+  const freeMessage = document.getElementById('premiumFreeMessage');
+  const titleEl = document.getElementById('premiumModal').querySelector('.dash-title');
+  if(!MONETIZATION_ACTIVE){
+    if(pricingSection) pricingSection.style.display = 'none';
+    if(freeMessage) freeMessage.style.display = 'block';
+    if(titleEl) titleEl.textContent = 'Furniture Atlas';
+    return;
+  }
+  if(pricingSection) pricingSection.style.display = '';
+  if(freeMessage) freeMessage.style.display = 'none';
+  if(titleEl) titleEl.textContent = 'Üyeliğinizi Yükseltin';
   refreshFoundingSlotsUI();
   updatePremiumFreeCard();
 }
@@ -3361,8 +3745,9 @@ function canCompareFree(){
     return true;
   }catch(e){ return true; }
 }
-// PDF / Yazdır — Başlangıç (ücretsiz) üyelikte de yok, sadece Kurucu/Standart'a özel.
-const PREMIUM_GATED_SELECTOR = '#printBtn';
+// PDF / Yazdır ve ülke sayfasındaki Karşılaştır — Başlangıç (ücretsiz) üyelikte de yok,
+// sadece Kurucu/Standart'a özel. İkisi de aynı kilit görünümü ve kapı mantığını paylaşır.
+const PREMIUM_GATED_SELECTOR = '#printBtn, #addCompareBtn';
 document.addEventListener('click', function(e){
   const gated = e.target.closest(PREMIUM_GATED_SELECTOR);
   if(gated && !isPremiumUser()){
@@ -3379,6 +3764,7 @@ function updatePremiumUI(){
   const lockTooltip = isFreeMember() ? 'ÜYELİĞİNİZİ YÜKSELTİN' : 'ÜYELERE ÖZEL';
   [
     ['printBtn', '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1"/><path d="M6 17v4h12v-4"/></svg>Yazdır / PDF'],
+    ['addCompareBtn', '+ Karşılaştır'],
   ].forEach(([id, plainLabel])=>{
     const el = document.getElementById(id);
     if(!el) return;
@@ -3488,7 +3874,26 @@ document.getElementById('brandLogo').addEventListener('click', ()=>{
   searchInput.value = '';
 });
 document.getElementById('addCompareBtn').addEventListener('click', ()=>{
-  if(currentBaseCountry) addToCompare(currentBaseCountry.id);
+  // ESKİ SORUN: buton ülkeyi sessizce listeye ekliyordu ama karşılaştırma tepsisi
+  // ülke sayfası modalının altında kaldığı için kullanıcı hiçbir şey olmadığını
+  // sanıyordu ("çalışmıyor"). YENİ AKIŞ: ülke eklenir, sayfa kapanır ve kullanıcı
+  // ya doğrudan karşılaştırma ekranına (2+ ülke seçiliyse) ya da ikinci ülkeyi
+  // işaretleyebileceği listeye yönlendirilir. (Üyelik kapısı, PDF butonuyla aynı
+  // capture-aşaması dinleyicide — üye olmayanlar buraya hiç ulaşmaz.)
+  if(!currentBaseCountry) return;
+  const added = currentBaseCountry;
+  addToCompare(added.id);
+  if(!compareIds.includes(added.id)) return; // limit reddi — toast zaten gösterildi
+  closeCountry();
+  if(compareIds.length >= 2){
+    renderCompareModal();
+    document.getElementById('compareModal').classList.add('open');
+  } else {
+    renderListTable();
+    showView('list');
+    pushHistoryState();
+    showToast(`${added.flag} ${added.name} karşılaştırmaya eklendi — karşılaştırılacak ülkeyi soldaki kutucuktan işaretleyin.`);
+  }
 });
 document.getElementById('printBtn').addEventListener('click', ()=> window.print());
 const BUSINESS_MAP_CATEGORIES = [
@@ -3539,48 +3944,6 @@ document.getElementById('mapsSearchBtn').addEventListener('click', ()=>{
 });
 document.getElementById('closeMaps').addEventListener('click', ()=>{
   document.getElementById('mapsModal').classList.remove('open');
-});
-
-document.getElementById('buyerListBtn').addEventListener('click', ()=>{
-  if(!currentBaseCountry) return;
-  if(isVisitor()){
-    openLoginModal();
-    showAuthTab('register');
-    return;
-  }
-  const c = currentBaseCountry;
-  const featureIcon = '<span class="buyer-db-feature-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>';
-  document.getElementById('buyerListBody').innerHTML = `
-    <div class="buyer-db-card">
-      <div class="buyer-db-badge">POTANSİYEL ALICI VERİTABANI</div>
-      <h3 class="buyer-db-title">Potansiyel Alıcı Veritabanı</h3>
-      <p class="buyer-db-subtitle">Seçtiğiniz ülke ve GTİP koduna göre doğrulanmış ithalatçı, distribütör, toptancı ve perakendeci firmalara erişin.</p>
-      <p class="buyer-db-desc">Her liste güncel ticari veriler kullanılarak hazırlanır ve ihracatçılar için zaman kazandırmayı amaçlar.</p>
-      <div class="buyer-db-features">
-        <div class="buyer-db-feature">${featureIcon}Firma adı</div>
-        <div class="buyer-db-feature">${featureIcon}Web sitesi</div>
-        <div class="buyer-db-feature">${featureIcon}Şehir / Ülke</div>
-        <div class="buyer-db-feature">${featureIcon}Faaliyet alanı</div>
-        <div class="buyer-db-feature">${featureIcon}İthalat profili</div>
-        <div class="buyer-db-feature">${featureIcon}İletişim bilgileri (varsa)</div>
-        <div class="buyer-db-feature">${featureIcon}Güncellenme tarihi</div>
-      </div>
-      <div class="buyer-db-price-card">
-        <div class="buyer-db-price-label">Tek Ülke (${c.name}) + 2 GTİP Kodu</div>
-        <div class="buyer-db-price-value">$29<span>USD</span></div>
-        <div class="buyer-db-price-note">Hazır veri dosyası</div>
-      </div>
-      <button class="buyer-db-cta" id="buyerDbBuyBtn">Satın Al ve İndir</button>
-      <div class="buyer-db-footnote">Ödeme tamamlandıktan sonra liste hesabınıza tanımlanır ve indirilebilir hale gelir.</div>
-    </div>
-  `;
-  document.getElementById('buyerListModal').classList.add('open');
-  document.getElementById('buyerDbBuyBtn').addEventListener('click', ()=>{
-    showToast('Ödeme altyapısı yakında aktif olacak — çok yakında satın alabileceksiniz.');
-  });
-});
-document.getElementById('closeBuyerList').addEventListener('click', ()=>{
-  document.getElementById('buyerListModal').classList.remove('open');
 });
 
 function fillNotes(baseCountry){
@@ -3733,6 +4096,7 @@ document.getElementById('favBtn').addEventListener('click', ()=>{
   const nowTarget = toggleTarget(user, currentBaseCountry.id);
   btn.textContent = nowTarget ? '★' : '☆';
   refreshMyTargetsBadge();
+  invalidateTargetIdsCache();
 });
 
 /* =========================================================
@@ -3742,7 +4106,12 @@ let compareIds = [];
 function addToCompare(id){
   if(compareIds.includes(id)) return;
   const maxCompare = isPremiumUser() ? 4 : 2;
-  if(compareIds.length >= maxCompare){ alert(`En fazla ${maxCompare} pazar karşılaştırabilirsin.`); return; }
+  if(compareIds.length >= maxCompare){
+    // alert() yerine toast: alert, checkbox'ın change olayı sırasında senkron bloklayarak
+    // mobilde işaretçi/tıklama sırasını bozabiliyordu — toast engellemez.
+    showToast(`En fazla ${maxCompare} pazar karşılaştırabilirsin.`);
+    return;
+  }
   compareIds.push(id);
   renderCompareTray();
 }
@@ -3834,7 +4203,7 @@ function updateLoginUI(){
   const eyebrowEl = document.getElementById('heroEyebrow');
   const titleEl = document.getElementById('heroTitle');
   const subEl = document.getElementById('heroSub');
-  const hintEl = document.getElementById('heroHint');
+  const popularMarketsEl = document.getElementById('popularMarkets');
   if(user){
     const profile = getCurrentUserProfile();
     let displayName = profile.full_name || user;
@@ -3843,8 +4212,8 @@ function updateLoginUI(){
     gatedBtns.forEach(b=> b.style.display = '');
     eyebrowEl.style.display = 'none';
     titleEl.innerHTML = `Hoşgeldin, <em>${displayName}</em>.`;
-    subEl.textContent = 'Bugün hangi ülkeyi analiz etmek istersin? Güncel ticaret verileriyle yeni ihracat fırsatlarını keşfet.';
-    hintEl.textContent = 'KÜREYİ ÇEVİR · DETAY İÇİN TIKLA · İHRACATA BAŞLA';
+    subEl.textContent = '177 ülke seni bekliyor. Küreyi sürükle ve yeni ihracat pazarlarını keşfet.';
+    if(popularMarketsEl) popularMarketsEl.style.display = '';
   } else {
     loginBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Giriş Yap';
     targetsBtn.style.display = 'none';
@@ -3853,7 +4222,7 @@ function updateLoginUI(){
     eyebrowEl.textContent = 'INTERACTIVE MARKET MAP';
     titleEl.innerHTML = 'Bir sonraki ihracat pazarınızı <em>tek bakışta</em> keşfedin.';
     subEl.textContent = 'Mobilya ithalat verileri, rakip analizleri, gümrük tarifeleri, lojistik maliyetleri ve pazar büyüklüklerini tek bir küre üzerinde birleştirdik. Bir ülkenin üzerine gelin ve o pazarın potansiyelini anında görün.';
-    hintEl.textContent = 'KÜREYİ ÇEVİR · DETAY İÇİN TIKLA · İHRACATA BAŞLA';
+    if(popularMarketsEl) popularMarketsEl.style.display = 'none';
   }
   refreshMyTargetsBadge();
 }
@@ -3898,6 +4267,7 @@ function openProfileModal(){
     document.getElementById('profileModal').classList.remove('open');
     updateLoginUI();
     updatePremiumUI();
+    invalidateTargetIdsCache();
     if(dashboard.classList.contains('open')){ updateFavButton(); applyContentGate(); }
   });
 }
@@ -3928,9 +4298,23 @@ function showAuthTab(tab){
   document.getElementById('registerFormWrap').style.display = isLogin ? 'none' : 'block';
   document.getElementById('otpFormWrap').style.display = 'none';
   document.getElementById('authHeaderText').style.display = isLogin ? 'none' : 'block';
-  document.getElementById('registerStep1').style.display = 'block';
-  document.getElementById('registerStep2').style.display = 'none';
-  document.getElementById('authModalInner').style.maxWidth = isLogin ? '460px' : '1040px';
+  if(!isLogin && !MONETIZATION_ACTIVE){
+    // Platform şu an tamamen ücretsiz — plan seçimi ekranı hiç gösterilmiyor,
+    // doğrudan tek adımlı ücretsiz kayıt formuna geçiliyor.
+    selectedRegisterPlan = 'free';
+    document.getElementById('registerStep1').style.display = 'none';
+    document.getElementById('registerStep2').style.display = 'block';
+    document.getElementById('registerStep2PlanLabel').style.display = 'none';
+    document.getElementById('registerBackBtn').style.display = 'none';
+    document.getElementById('registerSubmitBtn').textContent = 'Ücretsiz Kayıt Ol';
+    document.getElementById('authModalInner').style.maxWidth = '460px';
+  } else {
+    document.getElementById('registerStep1').style.display = 'block';
+    document.getElementById('registerStep2').style.display = 'none';
+    document.getElementById('registerStep2PlanLabel').style.display = '';
+    document.getElementById('registerBackBtn').style.display = '';
+    document.getElementById('authModalInner').style.maxWidth = isLogin ? '460px' : '1040px';
+  }
   const authIcon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>';
   document.getElementById('authModalTitle').innerHTML = authIcon + (isLogin ? 'Giriş Yap' : 'Kayıt Ol');
 }
@@ -4216,6 +4600,7 @@ function renderTargetsPanel(){
       renderTargetsPanel();
       refreshMyTargetsBadge();
       if(dashboard.classList.contains('open')) updateFavButton();
+      invalidateTargetIdsCache();
     });
   });
 }
@@ -4243,6 +4628,7 @@ sb.auth.getSession().then(async ({ data }) => {
   if(data.session) await syncMembershipFromServer();
   updatePremiumUI(); // Keşif (ücretsiz) üyede memberships satırı yok — syncMembershipFromServer
                       // sessizce çıkar, bu yüzden burada her koşulda tekrar çağırmak gerekiyor.
+  invalidateTargetIdsCache();
   if(dashboard.classList.contains('open')){ updateFavButton(); applyContentGate(); }
 });
 sb.auth.onAuthStateChange((event, session) => {
@@ -4254,6 +4640,7 @@ sb.auth.onAuthStateChange((event, session) => {
     syncMembershipFromServer();
   }
   updatePremiumUI();
+  invalidateTargetIdsCache();
 });
 
 /* =========================================================
@@ -4659,7 +5046,96 @@ if(window.ResizeObserver){
 [100, 350, 800, 1500].forEach(t=> setTimeout(syncChromeOffsets, t));
 
 document.getElementById('mkt-count').textContent = COUNTRIES.length;
+
+// ---------- KÜRE İPUÇLARI: ilk ziyarette bir kez, 5 sn sonra otomatik kaybolur ----------
+(function initGlobeHints(){
+  const HINTS_SEEN_KEY = 'fa_globe_hints_seen';
+  const left = document.getElementById('globeHintLeft');
+  const right = document.getElementById('globeHintRight');
+  const mobileHint = document.getElementById('globeHintMobile');
+  const helpBtn = document.getElementById('globeHelpBtn');
+  if(!left || !right || !mobileHint || !helpBtn) return;
+  let hideTimer = null;
+  function showHints(){
+    [left, right, mobileHint].forEach(el => el.classList.add('show'));
+    helpBtn.style.display = 'none';
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(hideHints, 5000);
+  }
+  function hideHints(){
+    [left, right, mobileHint].forEach(el => el.classList.remove('show'));
+    helpBtn.style.display = '';
+  }
+  helpBtn.addEventListener('click', showHints);
+  let seen = false;
+  try{ seen = localStorage.getItem(HINTS_SEEN_KEY) === '1'; }catch(e){}
+  if(!seen){
+    setTimeout(showHints, 600);
+    try{ localStorage.setItem(HINTS_SEEN_KEY, '1'); }catch(e){}
+  } else {
+    helpBtn.style.display = '';
+  }
+})();
+
+// ---------- SEYREK IŞIK ROTASI: Türkiye'den rastgele bir ülkeye, aralıklarla ----------
+(function scheduleRoutePulses(){
+  // ESKİ SORUN: hedef ülke tamamen rastgele seçiliyordu; hem Türkiye hem hedef aynı
+  // anda görünür yarımkürede olmadıkça çizgi opacity:0'da kalıyordu. Sonuç: pulse'lar
+  // çoğunlukla kürenin ARKA yüzünde "boşa" ateşleniyor ve kullanıcı hiç görmüyordu.
+  // YENİ: pulse yalnızca Türkiye görünürken ateşlenir ve hedef, O AN görünür ülkeler
+  // arasından seçilir. Uygun an yoksa döngü boşa harcanmaz — birkaç saniye sonra
+  // tekrar denenir. "Seyrek" karakteri korunur ama artık her pulse gerçekten görülür.
+  function pickVisibleTarget(){
+    const candidates = COUNTRIES.filter(c => c.id !== 'turkey' && toXY(c.lat, c.lon).z > 0.25);
+    if(!candidates.length) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+  function firePulse(){
+    const turkeyVisible = toXY(38.96, 35.24).z > 0.25;
+    const target = (routePulseLineEl && turkeyVisible) ? pickVisibleTarget() : null;
+    if(target){
+      activeRoutePulseId = target.id;
+      needsRender = true;
+      routePulseLineEl.classList.add('show');
+      setTimeout(()=>{
+        routePulseLineEl.classList.remove('show');
+        setTimeout(()=>{ activeRoutePulseId = null; }, 1300);
+      }, 4000);
+      setTimeout(firePulse, 14000 + Math.random() * 12000); // ~14–26 sn arayla, seyrek
+    } else {
+      setTimeout(firePulse, 2500 + Math.random() * 2500); // uygun an değil — kısa süre sonra tekrar dene
+    }
+  }
+  setTimeout(firePulse, 6000 + Math.random() * 4000); // ilk gösterim biraz gecikmeli
+})();
+
+// ---------- POPÜLER PAZARLAR: hızlı erişim çipleri ----------
+const POPULAR_MARKET_IDS = ['germany', 'usa', 'france', 'iraq', 'saudi-arabia'];
+(function renderPopularMarkets(){
+  const wrap = document.getElementById('popularMarketsChips');
+  if(!wrap) return;
+  wrap.innerHTML = POPULAR_MARKET_IDS.map(id=>{
+    const c = COUNTRIES.find(x=> x.id === id);
+    if(!c) return '';
+    return `<button type="button" class="popular-market-chip" data-id="${c.id}">${c.flag} ${c.name}</button>`;
+  }).join('');
+  wrap.querySelectorAll('.popular-market-chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const c = COUNTRIES.find(x=> x.id === btn.getAttribute('data-id'));
+      if(c) openCountry(c);
+    });
+  });
+})();
+
 updatePremiumUI();
+// KOPYA KORUMASI (JS katmanı): CSS user-select engeli tarayıcıların çoğunda yeterli,
+// ama Ctrl+A / programatik seçim gibi yollara karşı kopyalama olayı da engellenir.
+// Form alanlarında (arama, e-posta, hata bildirimi vb.) kopyalama serbest kalır.
+document.addEventListener('copy', (e)=>{
+  const t = e.target;
+  if(t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]')) return;
+  e.preventDefault();
+});
 // Footer bağlantıları henüz gerçek sayfalara bağlı değil (placeholder) — tıklanınca sayfa kaymasın.
 document.querySelectorAll('.footer-link').forEach(a=>{
   a.addEventListener('click', (e)=> e.preventDefault());
@@ -4668,13 +5144,10 @@ document.querySelectorAll('.footer-link').forEach(a=>{
 // Kurucu/Standart üyelere açık. Hem link tıklamasında hem doğrudan URL ile
 // gelindiğinde (bkz. applyHistoryState) bu kısıtlama uygulanır.
 const PREMIUM_ONLY_MODALS = new Set(['reports', 'research']);
-// "Küresel Raporlar" gerçek içeriğe sahip — kendi modalını açar.
-document.getElementById('globalReportsLink').addEventListener('click', (e)=>{
-  e.preventDefault();
-  if(!isPremiumUser()){ showPremiumModal(); return; }
-  document.getElementById('globalReportsModal').classList.add('open');
-  pushHistoryState();
-});
+// "Küresel Raporlar" — kullanıcı isteğiyle devre dışı: footer'daki bağlantıya
+// tıklamak artık HİÇBİR sayfa/modal açmaz (yukarıdaki genel .footer-link
+// preventDefault'u tıklamayı sessizce yutar). Modal HTML'i ve kapatma düğmesi
+// ileride tekrar aktifleştirilebilsin diye yerinde bırakıldı.
 document.getElementById('closeGlobalReports').addEventListener('click', ()=>{
   document.getElementById('globalReportsModal').classList.remove('open');
   pushHistoryState();
@@ -4886,7 +5359,10 @@ function applyHistoryState(state){
     }
 
     closeTrackedModals();
-    const modalName = state && state.modal;
+    let modalName = state && state.modal;
+    // "Küresel Raporlar" devre dışı — eski paylaşılan linklerle (/kuresel-raporlar
+    // veya ?modal=reports) gelinse bile artık hiçbir modal açılmaz.
+    if(modalName === 'reports') modalName = null;
     if(modalName && PREMIUM_ONLY_MODALS.has(modalName) && !isPremiumUser()){
       document.getElementById('premiumModal').classList.add('open');
     } else if(modalName && TRACKED_MODALS[modalName]){
@@ -4895,7 +5371,19 @@ function applyHistoryState(state){
         if(modalName === 'news') renderNews();
         else if(modalName === 'fairs') renderFairs();
         else if(modalName === 'targets') renderTargetsPanel();
-        else if(modalName === 'premium'){ refreshFoundingSlotsUI(); updatePremiumFreeCard(); }
+        else if(modalName === 'premium'){
+          const pricingSection = document.getElementById('premiumPricingSection');
+          const freeMessage = document.getElementById('premiumFreeMessage');
+          if(!MONETIZATION_ACTIVE){
+            if(pricingSection) pricingSection.style.display = 'none';
+            if(freeMessage) freeMessage.style.display = 'block';
+          } else {
+            if(pricingSection) pricingSection.style.display = '';
+            if(freeMessage) freeMessage.style.display = 'none';
+            refreshFoundingSlotsUI();
+            updatePremiumFreeCard();
+          }
+        }
         el.classList.add('open');
       }
     }

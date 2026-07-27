@@ -28,7 +28,7 @@
     </div>
     <div class="compare-body" style="padding:24px 28px;">
       <div id="reportFormWrap">
-        <div class="footnote" style="margin-bottom:16px; line-height:1.6;">Furniture Atlas şu an <b>beta</b> aşamasında ve verilerin büyük kısmı örnek/tahminidir. Yanlış veya güncel olmayan bir bilgi görürsen, elindeki kanıtla (kaynak linki, resmi belge, ekran görüntüsü vb.) bize bildir — düzeltelim. Gelişime açığız.</div>
+        <div class="footnote" style="margin-bottom:16px; line-height:1.6;">Furniture Atlas şu an <b>beta</b> aşamasında ve verilerin bir kısmı örnek/tahminidir. Yanlış veya güncel olmayan bir bilgi görürsen, elindeki kanıtla (kaynak linki, resmi belge, ekran görüntüsü vb.) bize bildir — düzeltelim. Gelişime açığız.</div>
         <div class="card-label" style="margin-bottom:8px;">Hangi ülke/bölüm ile ilgili?</div>
         <input type="text" id="reportCountryInput" class="search-input" aria-label="Hangi ülke/bölüm ile ilgili" placeholder="örn. Meksika — İthalat Vergisi" style="padding:11px 16px; margin-bottom:14px; width:100%;">
         <div class="card-label" style="margin-bottom:8px;">Sorun ve kanıtın (varsa link) *</div>
@@ -858,7 +858,9 @@
         <div class="gr-card gr-card-feature"><div class="gr-card-title">Pazar büyüklüklerini ve büyüme eğilimlerini analiz edebilir</div></div>
         <div class="gr-card gr-card-feature"><div class="gr-card-title">Gümrük vergileri ve ticaret koşullarını görüntüleyebilir</div></div>
         <div class="gr-card gr-card-feature"><div class="gr-card-title">Potansiyel hedef pazarları keşfedebilir</div></div>
-        <div class="gr-card gr-card-feature"><div class="gr-card-title">Rakip ülke ve şirket analizleri yapabilir</div></div>
+        <div class="gr-card gr-card-feature"><div class="gr-card-title">Rakip ülke analizleri yapabilir</div></div>
+        <div class="gr-card gr-card-feature"><div class="gr-card-title">Sektördeki önemli fuarları ve gelişmeleri takip edebilir</div></div>
+        <div class="gr-card gr-card-feature"><div class="gr-card-title">Döşemeli Oturma Grubu ve Ahşap Mobilya olmak üzere iki GTİP koduyla analiz yapabilir</div></div>
         <div class="gr-card gr-card-feature"><div class="gr-card-title">Yapay zekâ destekli pazar özetlerine erişebilirsiniz</div></div>
       </div>
       <p style="margin-top:14px;">Sürekli güncellenen veriler sayesinde kullanıcılarımız değişen küresel ticaret dinamiklerini yakından takip edebilir.</p>
@@ -907,16 +909,6 @@
       <button class="close-btn modal-close-btn" id="closeMaps" aria-label="Kapat">✕</button>
     </div>
     <div class="compare-body" id="mapsModalBody" style="padding:24px 28px;"></div>
-  </div>
-</div>
-
-<div class="compare-modal" id="buyerListModal" role="dialog" aria-modal="true">
-  <div class="compare-modal-inner" style="max-width:620px; margin:60px auto;">
-    <div class="modal-header" style="border-radius:16px 16px 0 0;">
-      <div class="dash-title-wrap"><div class="dash-title" style="font-size:20px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg>Potansiyel Alıcı Veritabanı</div></div>
-      <button class="close-btn modal-close-btn" id="closeBuyerList" aria-label="Kapat">✕</button>
-    </div>
-    <div class="compare-body" id="buyerListBody" style="padding:36px 40px 32px;"></div>
   </div>
 </div>
 
@@ -1065,6 +1057,7 @@
       <button class="close-btn modal-close-btn" id="closePremium" aria-label="Kapat">✕</button>
     </div>
     <div class="compare-body" style="padding:26px 32px 32px;">
+      <div id="premiumPricingSection">
       <p style="font-family:var(--body); font-size:13.5px; color:var(--text-1); line-height:1.7; margin:0 0 24px; text-align:center; max-width:640px; margin-left:auto; margin-right:auto;">
         Diğer ülkeleri incelemek, pazarları karşılaştırmak ve tüm ihracat analizlerine sınırsız erişmek için üyeliğinizi yükseltin.
       </p>
@@ -1124,7 +1117,6 @@
             <li>Tüm ülke raporları</li>
             <li>Pazar karşılaştırmaları</li>
             <li>Gelişmiş filtreler</li>
-            <li>Alıcı veri tabanı</li>
             <li>Premium analizler</li>
           </ul>
           <div class="plan-info-box">
@@ -1135,6 +1127,14 @@
             Standart ile Devam Et — $99,90 / yıl
           </button>
         </div>
+      </div>
+      </div>
+      <div id="premiumFreeMessage" style="display:none; text-align:center; padding:24px 12px 8px;">
+        <div style="margin-bottom:16px;"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 10px rgba(63,208,192,0.35));"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 7.8-1.3"/><circle cx="12" cy="16" r="1.4" fill="var(--teal)" stroke="none"/></svg></div>
+        <div style="font-family:var(--display); font-style:italic; font-size:22px; color:var(--text-0); margin-bottom:12px;">Furniture Atlas şu anda herkese tamamen ücretsiz</div>
+        <p style="font-family:var(--body); font-size:14px; color:var(--text-1); line-height:1.7; max-width:480px; margin:0 auto;">
+          Ücretsiz bir hesap oluşturduğunuzda 177 ülkenin tüm verilerine, karşılaştırma ve filtreleme araçlarına herhangi bir kısıtlama olmadan erişebilirsiniz.
+        </p>
       </div>
     </div>
   </div>
@@ -1203,7 +1203,35 @@
     <div class="zoom-controls">
       <button id="zoomInBtn" aria-label="Yakınlaştır">+</button>
       <button id="zoomOutBtn" aria-label="Uzaklaştır">−</button>
+      <button class="globe-help-btn" id="globeHelpBtn" aria-label="Yardım" title="İpuçlarını tekrar göster" style="display:none;">?</button>
     </div>
+
+    <div class="globe-hint globe-hint-left" id="globeHintLeft">
+      <div class="globe-hint-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11.5V6a1.5 1.5 0 0 1 3 0v5"/><path d="M12 11V4.5a1.5 1.5 0 0 1 3 0V11"/><path d="M15 11.2V7a1.5 1.5 0 0 1 3 0v7c0 3.5-2.5 6-6 6h-1c-2 0-3-.5-4.3-2.2L3.8 14a1.4 1.4 0 0 1 2-2L9 14.5"/></svg></div>
+      <div class="globe-hint-text">
+        <div class="globe-hint-title">Küreyi sürükleyerek ülkeleri keşfet</div>
+        <div class="globe-hint-sub">Bir ülkeye tıklayarak analizini aç.</div>
+      </div>
+    </div>
+    <div class="globe-hint globe-hint-right" id="globeHintRight">
+      <div class="globe-hint-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="5"/><path d="M12 7v3"/></svg></div>
+      <div class="globe-hint-text">
+        <div class="globe-hint-title">Yakınlaşmak için orta tuşu döndür</div>
+        <div class="globe-hint-sub">Detaylı analiz için bir ülkeye tıkla.</div>
+      </div>
+    </div>
+    <div class="globe-hint globe-hint-mobile" id="globeHintMobile">
+      <div class="globe-hint-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11.5V6a1.5 1.5 0 0 1 3 0v5"/><path d="M12 11V4.5a1.5 1.5 0 0 1 3 0V11"/><path d="M15 11.2V7a1.5 1.5 0 0 1 3 0v7c0 3.5-2.5 6-6 6h-1c-2 0-3-.5-4.3-2.2L3.8 14a1.4 1.4 0 0 1 2-2L9 14.5"/></svg></div>
+      <div class="globe-hint-text">
+        <div class="globe-hint-title">Küreyi sürükleyerek keşfet, ülkeye dokun</div>
+        <div class="globe-hint-sub">Detaylı analiz için bir ülkeye dokun.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="popular-markets" id="popularMarkets" style="display:none;">
+    <div class="popular-markets-label">POPÜLER PAZARLAR</div>
+    <div class="popular-markets-chips" id="popularMarketsChips"></div>
   </div>
 
   <div class="info-panel">
@@ -1233,11 +1261,15 @@
     <div class="list-view-head">
       <div>
         <h2 class="section-title" style="margin:0;">Tüm Pazarlar <span class="num" id="listCount"></span></h2>
-        <div class="list-view-legend">Sütun başlığına tıklayarak sırala · Kontrol/⌘ + tıkla ile hızlı karşılaştırmaya ekle</div>
+        <div class="list-view-legend">Soldaki kutucuk: karşılaştırmaya ekle · Satıra tıkla: ülke sayfası · Sütun başlığı: sırala / sürükleyerek taşı</div>
       </div>
       <button class="tray-btn tray-btn-primary" id="topCompareBtn" disabled>Karşılaştır (0)</button>
     </div>
     <div class="continent-filter" id="continentFilter"></div>
+    <div class="list-filter-notice" id="listFilterNotice" style="display:none;">
+      <span id="listFilterNoticeText"></span>
+      <button type="button" class="tray-btn" id="listClearFiltersBtn">Filtreleri Temizle</button>
+    </div>
     <div class="table-scroll">
       <table id="countryTable">
         <thead id="countryTableHead"></thead>
@@ -1309,7 +1341,7 @@
     </div>
     <div class="dash-actions">
       <button class="close-btn" id="mapsSearchBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d='M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2-6-2z'/><path d='M9 4v14M15 6v14'/></svg>İş Haritası</button>
-      <button class="close-btn dash-action-featured" id="buyerListBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg>Alıcı Listesi Talebi</button>
+      <a class="close-btn gov-link" id="buyerListBtn" href="https://musaviredanisin.ticaret.gov.tr/" target="_blank" rel="noopener" data-hint="ticaret.gov.tr"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg>Alıcı Listesi Talebi</a>
       <button class="close-btn" id="addCompareBtn">+ Karşılaştır</button>
       <button class="close-btn" id="printBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; margin-right:4px;"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1"/><path d="M6 17v4h12v-4"/></svg>Yazdır / PDF</button>
       <button class="close-btn" id="closeDash">← PAZARLARA DÖN</button>
