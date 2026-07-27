@@ -28,7 +28,7 @@
     </div>
     <div class="compare-body" style="padding:24px 28px;">
       <div id="reportFormWrap">
-        <div class="footnote" style="margin-bottom:16px; line-height:1.6;">Furniture Atlas şu an <b>beta</b> aşamasında ve verilerin büyük kısmı örnek/tahminidir. Yanlış veya güncel olmayan bir bilgi görürsen, elindeki kanıtla (kaynak linki, resmi belge, ekran görüntüsü vb.) bize bildir — düzeltelim. Gelişime açığız.</div>
+        <div class="footnote" style="margin-bottom:16px; line-height:1.6;">Furniture Atlas şu an <b>beta</b> aşamasında ve verilerin bir kısmı örnek/tahminidir. Yanlış veya güncel olmayan bir bilgi görürsen, elindeki kanıtla (kaynak linki, resmi belge, ekran görüntüsü vb.) bize bildir — düzeltelim. Gelişime açığız.</div>
         <div class="card-label" style="margin-bottom:8px;">Hangi ülke/bölüm ile ilgili?</div>
         <input type="text" id="reportCountryInput" class="search-input" aria-label="Hangi ülke/bölüm ile ilgili" placeholder="örn. Meksika — İthalat Vergisi" style="padding:11px 16px; margin-bottom:14px; width:100%;">
         <div class="card-label" style="margin-bottom:8px;">Sorun ve kanıtın (varsa link) *</div>
@@ -859,6 +859,8 @@
         <div class="gr-card gr-card-feature"><div class="gr-card-title">Gümrük vergileri ve ticaret koşullarını görüntüleyebilir</div></div>
         <div class="gr-card gr-card-feature"><div class="gr-card-title">Potansiyel hedef pazarları keşfedebilir</div></div>
         <div class="gr-card gr-card-feature"><div class="gr-card-title">Rakip ülke analizleri yapabilir</div></div>
+        <div class="gr-card gr-card-feature"><div class="gr-card-title">Sektördeki önemli fuarları ve gelişmeleri takip edebilir</div></div>
+        <div class="gr-card gr-card-feature"><div class="gr-card-title">Döşemeli Oturma Grubu ve Ahşap Mobilya olmak üzere iki GTİP koduyla analiz yapabilir</div></div>
         <div class="gr-card gr-card-feature"><div class="gr-card-title">Yapay zekâ destekli pazar özetlerine erişebilirsiniz</div></div>
       </div>
       <p style="margin-top:14px;">Sürekli güncellenen veriler sayesinde kullanıcılarımız değişen küresel ticaret dinamiklerini yakından takip edebilir.</p>
@@ -1264,6 +1266,10 @@
       <button class="tray-btn tray-btn-primary" id="topCompareBtn" disabled>Karşılaştır (0)</button>
     </div>
     <div class="continent-filter" id="continentFilter"></div>
+    <div class="list-filter-notice" id="listFilterNotice" style="display:none;">
+      <span id="listFilterNoticeText"></span>
+      <button type="button" class="tray-btn" id="listClearFiltersBtn">Filtreleri Temizle</button>
+    </div>
     <div class="table-scroll">
       <table id="countryTable">
         <thead id="countryTableHead"></thead>

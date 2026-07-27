@@ -2617,18 +2617,28 @@ document.getElementById('filterUpsellBtn').addEventListener('click', (e)=>{
 document.addEventListener('click', (e)=>{
   if(!e.target.closest('.filter-wrap')) document.getElementById('filterPanel').classList.remove('show');
 });
-document.getElementById('filterResetBtn').addEventListener('click', ()=>{
+// Tüm daraltıcıları tek yerden sıfırlar: filtre panelindeki "Sıfırla" butonu ve
+// liste görünümündeki "Filtreleri Temizle" şeridi aynı fonksiyonu kullanır.
+// (Eski panel-sıfırlama kodu invalidateDisplayCache() çağırmıyordu — filtre
+// temizlendikten sonra küre renkleri bayat kalabiliyordu; bu da düzeltildi.)
+function resetAllFilters(){
   activeFilters = {};
   FILTER_DEFS.forEach(def=>{
     const slider = document.getElementById(`filterSlider-${def.id}`);
     slider.value = def.mode==='max' ? def.max : def.min;
     document.getElementById(`filterNum-${def.id}`).value = '';
   });
+  activeContinent = 'Tümü';
+  listSearchQ = '';
+  if(searchInput) searchInput.value = '';
   updateFilterUI();
+  invalidateDisplayCache();
   needsRender = true;
   if(listView.classList.contains('show')) renderListTable();
   pushHistoryState();
-});
+}
+document.getElementById('filterResetBtn').addEventListener('click', resetAllFilters);
+document.getElementById('listClearFiltersBtn').addEventListener('click', resetAllFilters);
 document.getElementById('filterApplyBtn').addEventListener('click', ()=>{
   document.getElementById('filterPanel').classList.remove('show');
   renderListTable();
@@ -2760,6 +2770,28 @@ function renderListTable(){
     return (va - vb) * listSortDir;
   });
   document.getElementById('listCount').textContent = rows.length + ' pazar';
+  // Kullanıcı farkında olmadan filtre/arama/kıta seçimiyle listeyi daraltmış olabilir —
+  // 1-2 ülke görüp "veri eksik" sanmasın diye, herhangi bir daraltıcı aktifken listenin
+  // üstünde kaç pazarın gizlendiğini söyleyen bir şerit ve "Filtreleri Temizle" butonu gösterilir.
+  const narrowed = hasActiveFilters() || activeContinent !== 'Tümü' || !!listSearchQ;
+  const noticeEl = document.getElementById('listFilterNotice');
+  if(noticeEl){
+    if(narrowed){
+      const parts = [];
+      if(hasActiveFilters()) parts.push('filtre');
+      if(activeContinent !== 'Tümü') parts.push(activeContinent === 'NATO Ülkeleri' ? 'NATO seçimi' : 'kıta seçimi');
+      if(listSearchQ) parts.push('arama');
+      document.getElementById('listFilterNoticeText').innerHTML =
+        `<b>${rows.length} / ${COUNTRIES.length}</b> pazar gösteriliyor — aktif ${parts.join(' + ')} listeyi daraltıyor.`;
+      noticeEl.style.display = '';
+    } else {
+      noticeEl.style.display = 'none';
+    }
+  }
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="${listColumnOrder.length + 2}" style="text-align:center; padding:36px 16px; color:var(--text-2);">Bu filtrelerle eşleşen pazar yok. Yukarıdaki <b>Filtreleri Temizle</b> butonuyla tüm pazarları geri getirebilirsiniz.</td></tr>`;
+    return;
+  }
   tbody.innerHTML = rows.map(({base,cd})=> {
     const xf = generateExtraFields(cd);
     const openAttr = `onclick="handleListRowClick('${base.id}')" style="cursor:pointer;"`;
@@ -5052,6 +5084,14 @@ const POPULAR_MARKET_IDS = ['germany', 'usa', 'france', 'iraq', 'saudi-arabia'];
 })();
 
 updatePremiumUI();
+// KOPYA KORUMASI (JS katmanı): CSS user-select engeli tarayıcıların çoğunda yeterli,
+// ama Ctrl+A / programatik seçim gibi yollara karşı kopyalama olayı da engellenir.
+// Form alanlarında (arama, e-posta, hata bildirimi vb.) kopyalama serbest kalır.
+document.addEventListener('copy', (e)=>{
+  const t = e.target;
+  if(t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]')) return;
+  e.preventDefault();
+});
 // Footer bağlantıları henüz gerçek sayfalara bağlı değil (placeholder) — tıklanınca sayfa kaymasın.
 document.querySelectorAll('.footer-link').forEach(a=>{
   a.addEventListener('click', (e)=> e.preventDefault());
