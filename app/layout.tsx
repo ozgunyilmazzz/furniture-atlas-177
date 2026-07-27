@@ -18,19 +18,24 @@ export const metadata: Metadata = {
     locale: "tr_TR",
     images: [
       {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 800,
-        alt: "Furniture Atlas — Dünya Pazarları. Doğru Veri. Doğru Karar.",
+        // WhatsApp/Telegram gibi uygulamalarda büyük fotoğraf yerine, favicon
+        // görünümünde KÜÇÜK KARE bir simge çıkması için: kare (512×512) ve koyu
+        // zeminli özel ikon. (logo.png 2.2MB + şeffaf zemin — WhatsApp şeffaflığı
+        // siyah basabiliyor; favicon-180.png ise 180px ile WhatsApp'ın alt
+        // sınırının altında kalıp hiç görünmeyebiliyordu.)
+        url: "/og-icon.png",
+        width: 512,
+        height: 512,
+        alt: "Furniture Atlas",
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Furniture Atlas — Mobilya İhracatı için Pazar İstihbarat Platformu",
     description:
       "Türk mobilya ihracatçıları için interaktif pazar istihbaratı: ithalat verileri, gümrük tarifeleri, rakip analizi ve lojistik maliyetleriyle bir sonraki ihracat pazarınızı keşfedin.",
-    images: ["/og-image.jpg"],
+    images: ["/og-icon.png"],
   },
   robots: { index: true, follow: true },
 };

@@ -788,6 +788,28 @@ function getRequiredDocs(country){
     c._realWoodSuppliers = REAL_SUPPLIERS_WOOD[id]; // buildWoodVariant() içinde kullanılacak
   });
 
+  // VERİ DÜRÜSTLÜĞÜ: Ne gerçek (suppliersVerified) ne de gözden geçirilmiş tahmini
+  // (turkeyShareEstimated) verisi olan ülkelerde (örn. Antarktika) tedarikçi karışımı,
+  // Türkiye payı ve büyüme tamamen SENTETİK rastgele sayılardı ve arayüzde "%2" gibi
+  // uydurma değerler olarak görünüyordu. Bu veriler artık kaynağında SİLİNİR — ekranda
+  // her yerde dürüstçe "Bilinmiyor" gösterilir, rastgele bir rakam asla sızamaz.
+  COUNTRIES.forEach(c=>{
+    if(!c.suppliersVerified && !c.turkeyShareEstimated){
+      c.suppliers = null;
+      c.turkeyShare = 'Bilinmiyor';
+      c.turkeyGrowth = 'Bilinmiyor';
+      c.turkeyHistory = null;
+      if(c.dq) c.dq.suppliers = 'unknown';
+      // Üretim sırasında yazılan AI özeti de sentetik tedarikçi paylarına atıfta
+      // bulunuyordu — dürüst, sadece bilinen kalitedeki alanlara dayanan bir özetle değiştirilir.
+      c.aiSummary = (c.dq && c.dq.importGrowth === 'unknown'
+        ? `${c.name} pazarının yıllık ithalat büyüme oranına dair doğrulanmış bir veri yok. `
+        : `${c.name} pazarı yılda ${c.importGrowth} oranında değişiyor. `) +
+        `Bu ülke için tedarikçi payları ve Türkiye'nin pazar payına dair doğrulanmış bir veri yok (Bilinmiyor). ` +
+        `Lojistik maliyeti ${c.logisticsCost} ve ortalama teslimat süresi ${c.transitTime} (her ikisi de tahmini).`;
+    }
+  });
+
   // Gerçek ithalat kısıtlaması/imkânsızlığı olan ülkelerde Fırsat Skoru ciddi şekilde aşağı çekilir
   // (bu, formülün genel mantığından bağımsız, ayrı bir gerçek düzenleyici veri kaynağıdır).
   COUNTRIES.forEach(c=>{
@@ -897,6 +919,11 @@ function buildWoodVariant(country){
     variant.suppliers = country.suppliers;
     variant.turkeyShare = country.turkeyShare;
     variantSuppliersVerified = true;
+  } else if(!country.suppliers){
+    // Bu ülke için hiçbir tedarikçi verisi yok (sentetik veri kaynağında silindi) —
+    // ahşap kategorisinde de dürüstçe "Bilinmiyor" kalır.
+    variant.suppliers = null;
+    variant.turkeyShare = 'Bilinmiyor';
   } else {
     variant.suppliers = country.suppliers.map(s => s.c==='Türkiye'
       ? {...s, v: Math.min(99, Math.max(1, Math.round(s.v * trShareFactor)))}
@@ -905,9 +932,9 @@ function buildWoodVariant(country){
     variant.turkeyShare = '%' + (trSupplier ? trSupplier.v : 0);
   }
   variant.suppliersVerified = variantSuppliersVerified;
-  variant.turkeyHistory = variantSuppliersVerified
+  variant.turkeyHistory = !country.turkeyHistory ? null : (variantSuppliersVerified
     ? country.turkeyHistory
-    : country.turkeyHistory.map(v => Math.round(v*trShareFactor*10)/10);
+    : country.turkeyHistory.map(v => Math.round(v*trShareFactor*10)/10));
   // Pazar büyüklüğü skoru (0-100) — sadece iç Fırsat Skoru hesaplamasında kullanılır, dolar
   // tutarı olarak asla gösterilmez. Ahşap'a özel gerçek veri yoksa döşemeli kategorisinin
   // skorundan kabaca türetilir (bu SADECE skor, ekrandaki "Pazar Büyüklüğü" tutarı değil).
@@ -940,7 +967,7 @@ function buildWoodVariant(country){
     woodDifficulty = woodRestriction.level === 'severe' ? 99 : Math.max(difficulty, 85);
   }
   variant.scores = { market, difficulty:woodDifficulty, competition, logistics, overall };
-  variant.aiSummary = `${country.name} pazarında ${CATEGORIES.wood.label} (${CATEGORIES.wood.hs}) kategorisi için tahmini ithalat vergisi ${variant.importTax}, pazar büyüklüğü ${variant.marketSize} civarında. Bu kategori, döşemeli oturma grubuna kıyasla ${marketFactor>1?'daha geniş':'daha dar'} bir hacme sahip ve Türkiye'nin payı %${woodShareNum} seviyesinde. Genel fırsat skoru ${overall}/100.`;
+  variant.aiSummary = `${country.name} pazarında ${CATEGORIES.wood.label} (${CATEGORIES.wood.hs}) kategorisi için tahmini ithalat vergisi ${variant.importTax}, pazar büyüklüğü ${variant.marketSize} civarında. Bu kategori, döşemeli oturma grubuna kıyasla ${marketFactor>1?'daha geniş':'daha dar'} bir hacme sahip; ${variant.turkeyShare==='Bilinmiyor' ? "Türkiye'nin payına dair doğrulanmış bir veri yok (Bilinmiyor)" : `Türkiye'nin payı %${woodShareNum} seviyesinde`}. Genel fırsat skoru ${overall}/100.`;
   variant.categoryKey = 'wood';
   return variant;
 }
@@ -1683,7 +1710,7 @@ function generateExtraFields(country){
     {label:'Ekonomik İstikrar', score: Math.round(100-r(10,60)), note: `GSYH büyüme trendi ${country.importGrowth}`},
     {label:'Regülasyon Riski', score: country.scores.difficulty, note:'İthalat mevzuatı ve standart uyumu karmaşıklığı.'},
     {label:'Yerel Rekabet', score: Math.round(r(20,75)), note:'Yerli üreticilerin pazar payı ve fiyat baskısı.'},
-    {label:'Çin Rekabeti', score: (country.suppliers.find(s=>s.c==='Çin')||{v:30}).v + 15, note:'Çin menşeli düşük maliyetli ürünlerin pazar baskısı.'},
+    {label:'Çin Rekabeti', score: ((country.suppliers||[]).find(s=>s.c==='Çin')||{v:30}).v + 15, note:'Çin menşeli düşük maliyetli ürünlerin pazar baskısı.'},
     {label:'İthalat Kısıtlamaları', score: Math.round(r(10,55)), note: country.fta.includes('yok')?'Serbest ticaret anlaşması yok, tarife riski mevcut.':'Ticaret anlaşması avantajı mevcut.'}
   ];
   return { inflation, inflationVerified, tzOffset, totalExports, italianPremiumBrands, gdpGrowth, holidays, risks,
@@ -1708,13 +1735,13 @@ function generateReportHTML(baseCountry){
   const potential = potentialLabel(c.scores.market);
   const competitionLabel = c.scores.competition>=65?'Yüksek':c.scores.competition>=40?'Orta':'Düşük';
 
-  const execSummary = `${c.name} pazarı, ${catInfo.label.toLowerCase()} kategorisinde ${c.importGrowth} oranında ${numFromPercent(c.importGrowth)>=3?'güçlü bir büyüme':'ölçülü bir değişim'} gösteriyor. Türkiye'nin bu pazardaki payı şu an %${numFromPercent(c.turkeyShare)} seviyesinde ve yıllık ${c.turkeyGrowth} artıyor — bu, ${numFromPercent(c.turkeyShare)<8?'genişleme için önemli boşluk olduğunu':'zaten sağlam bir konum olduğunu'} gösteriyor. En büyük fırsat, ${potential==='Yüksek'?'pazarın büyük hacmi ve güçlü ithalat talebinde':'niş, farklılaşmış ürün kategorilerinde'} yatıyor. En büyük zorluk ise ${c.scores.competition>=60?(c.suppliers[0].c+' menşeli yoğun rekabet'):(c.scores.difficulty>=55?'gümrük ve mevzuat karmaşıklığı':'lojistik mesafe ve maliyet')}. Genel değerlendirme: bu pazar ${c.scores.overall>=70?'yüksek öncelikli bir hedef':c.scores.overall>=45?'orta vadeli bir fırsat':'temkinli yaklaşılması gereken bir pazar'}. Girişte ${c.scores.difficulty>=55?'yerel bir distribütörle çalışmak':'doğrudan ihracat veya bölgesel bir toptancı ortaklığı'} önerilir.`;
+  const execSummary = `${c.name} pazarı, ${catInfo.label.toLowerCase()} kategorisinde ${c.importGrowth} oranında ${numFromPercent(c.importGrowth)>=3?'güçlü bir büyüme':'ölçülü bir değişim'} gösteriyor. ${c.turkeyShare==='Bilinmiyor' ? "Türkiye'nin bu pazardaki payına dair doğrulanmış bir veri yok." : `Türkiye'nin bu pazardaki payı şu an %${numFromPercent(c.turkeyShare)} seviyesinde${c.turkeyGrowth==='Bilinmiyor'?'':` ve yıllık ${c.turkeyGrowth} artıyor`} — bu, ${numFromPercent(c.turkeyShare)<8?'genişleme için önemli boşluk olduğunu':'zaten sağlam bir konum olduğunu'} gösteriyor.`} En büyük fırsat, ${potential==='Yüksek'?'pazarın büyük hacmi ve güçlü ithalat talebinde':'niş, farklılaşmış ürün kategorilerinde'} yatıyor. En büyük zorluk ise ${c.scores.competition>=60?(((c.suppliers&&c.suppliers[0])?c.suppliers[0].c:'Çin')+' menşeli yoğun rekabet'):(c.scores.difficulty>=55?'gümrük ve mevzuat karmaşıklığı':'lojistik mesafe ve maliyet')}. Genel değerlendirme: bu pazar ${c.scores.overall>=70?'yüksek öncelikli bir hedef':c.scores.overall>=45?'orta vadeli bir fırsat':'temkinli yaklaşılması gereken bir pazar'}. Girişte ${c.scores.difficulty>=55?'yerel bir distribütörle çalışmak':'doğrudan ihracat veya bölgesel bir toptancı ortaklığı'} önerilir.`;
 
   const oppCards = [
     { t:'Büyüyen Sektör', d:`${catInfo.label} ithalatı ${c.importGrowth} oranında büyüyor.` },
-    { t:'İnşaat Faaliyeti', d:`Kentsel nüfus oranı %${x.urbanPop} — konut ve inşaat talebiyle mobilya talebi ilişkili.` },
+    { t:'İnşaat Faaliyeti', d:'Konut ve inşaat talebi mobilya talebiyle doğrudan ilişkilidir; kentsel nüfus oranına dair doğrulanmış veri yok.' },
     { t:'Konut Talebi', d:`Pazar büyüklüğü ${c.marketSize}, yıllık ithalat ${c.annualImports}.` },
-    { t:'Premium Segment', d:`Toplam pazarın yaklaşık %${x.premiumSegment}'i premium/üst segment ürünlerden oluşuyor.` },
+    { t:'Premium Segment', d:'Premium/üst segment payına dair doğrulanmış bir veri yok (Bilinmiyor).' },
   ];
 
   const strategyPoints = [
@@ -1722,8 +1749,8 @@ function generateReportHTML(baseCountry){
     ['Hangi şehirler hedeflenmeli?', 'Ana liman/lojistik merkezine yakın büyük şehirler ilk etapta önceliklendirilmeli.'],
     ['Distribütörle mi çalışılmalı?', c.scores.difficulty>=50 ? 'Evet, yerel mevzuat ve gümrük karmaşıklığı nedeniyle deneyimli bir distribütör önerilir.' : 'Doğrudan ihracat da değerlendirilebilir, distribütör şart değil.'],
     ['Perakende mi toptan mı?', c.scores.market>=60 ? 'Toptan/B2B kanalıyla hacim yakalamak, sonra perakende ortaklıklarına geçmek mantıklı.' : 'Küçük ölçekli perakende/butik ortaklıklarla başlamak daha düşük risklidir.'],
-    ['Önerilen fiyat konumlandırması', x.premiumSegment>=20 ? 'Orta-üst / premium segment fırsatı güçlü.' : 'Rekabetçi orta segment fiyatlandırma önerilir.'],
-    ['Tahmini ilk yıl potansiyeli', `${c.annualImports} pazar hacminin %${Math.max(1,Math.round(numFromPercent(c.turkeyShare)*0.15))}–%${Math.max(2,Math.round(numFromPercent(c.turkeyShare)*0.3))}'i civarında ek pay hedeflenebilir.`],
+    ['Önerilen fiyat konumlandırması', numFromMoney(c.gdpPerCapita)>=30000 ? 'Orta-üst / premium segment fırsatı güçlü.' : 'Rekabetçi orta segment fiyatlandırma önerilir.'],
+    ['Tahmini ilk yıl potansiyeli', (c.turkeyShare==='Bilinmiyor' || c.annualImports==='Bilinmiyor') ? 'Doğrulanmış pazar verisi olmadığı için hesaplanamıyor (Bilinmiyor).' : `${c.annualImports} pazar hacminin %${Math.max(1,Math.round(numFromPercent(c.turkeyShare)*0.15))}–%${Math.max(2,Math.round(numFromPercent(c.turkeyShare)*0.3))}'i civarında ek pay hedeflenebilir.`],
     ['Sık yapılan hatalar', 'Yerel sertifikasyon gerekliliklerini atlamak, tek siparişe göre kapasite planlamak, lojistik maliyetini fiyatlamaya dahil etmemek.'],
   ];
 
@@ -1734,14 +1761,19 @@ function generateReportHTML(baseCountry){
       <div class="rnote">${r.note}</div>
     </div>`).join('');
 
-  const supplierBars = c.suppliers.map(s=>`
+  // Doğrulanmış/tahmini veri yoksa (suppliers null) rastgele bir görsel yerine dürüst "Bilinmiyor" satırı basılır.
+  const supplierBars = !c.suppliers
+    ? `<div class="footnote">Bilinmiyor — bu ülke için doğrulanmış tedarikçi verisi yok.</div>`
+    : c.suppliers.map(s=>`
     <div class="sup-row">
       <span class="sup-name">${s.c}</span>
       <div class="sup-bar-wrap"><div class="sup-bar" style="width:${s.v}%; background:${s.c==='Türkiye'?'#3fd0c0':'#c9a961'}"></div></div>
       <span class="sup-val">%${s.v}</span>
     </div>`).join('');
 
-  const trHistoryBars = c.turkeyHistory.map((v,i)=>{
+  const trHistoryBars = !c.turkeyHistory
+    ? `<div class="footnote">Bilinmiyor — Türkiye ihracat geçmişine dair doğrulanmış veri yok.</div>`
+    : c.turkeyHistory.map((v,i)=>{
     const max = Math.max(...c.turkeyHistory);
     const h = Math.max(6, Math.round((v/max)*100));
     return `<div class="hbar" style="height:${h}%;" title="${v}"></div>`;
@@ -1834,9 +1866,9 @@ function generateReportHTML(baseCountry){
         <div class="card"><div class="card-label">Para Birimi</div><div class="card-val">${c.currency}</div></div>
         <div class="card"><div class="card-label">Döviz Kuru</div><div class="card-val" style="font-size:13px">${c.exchangeRate}</div></div>
         <div class="card"><div class="card-label">Enflasyon</div><div class="card-val">${x.inflation ? '%' + x.inflation : 'Bilinmiyor'}</div></div>
-        <div class="card"><div class="card-label">Faiz Oranı</div><div class="card-val">%${x.interestRate}</div></div>
+        <div class="card"><div class="card-label">Faiz Oranı</div><div class="card-val">Bilinmiyor</div></div>
         <div class="card"><div class="card-label">İş Yapma Kolaylığı</div><div class="card-val">${c.eodb}</div></div>
-        <div class="card"><div class="card-label">Kentsel Nüfus</div><div class="card-val">%${x.urbanPop}</div></div>
+        <div class="card"><div class="card-label">Kentsel Nüfus</div><div class="card-val">Bilinmiyor</div></div>
         <div class="card"><div class="card-label">Dil</div><div class="card-val" style="font-size:14px">${x.language}</div></div>
         <div class="card"><div class="card-label">Saat Dilimi</div><div class="card-val">UTC${x.tzOffset>=0?'+':''}${x.tzOffset}</div></div>
       </div>
@@ -1847,7 +1879,7 @@ function generateReportHTML(baseCountry){
       <div class="grid">
         <div class="card"><div class="card-label">Toplam İthalat</div><div class="card-val">${c.annualImports}</div></div>
         <div class="card"><div class="card-label">Toplam İhracat (Ülke)</div><div class="card-val">$${x.totalExports.toLocaleString('en-US')}M</div></div>
-        <div class="card"><div class="card-label">Türkiye İhracat Değeri</div><div class="card-val">$${Math.round(numFromMoney(c.annualImports)*numFromPercent(c.turkeyShare)/100).toLocaleString('en-US')}M</div></div>
+        <div class="card"><div class="card-label">Türkiye İhracat Değeri</div><div class="card-val">${(c.turkeyShare==='Bilinmiyor'||c.annualImports==='Bilinmiyor')?'Bilinmiyor':'$'+Math.round(numFromMoney(c.annualImports)*numFromPercent(c.turkeyShare)/100).toLocaleString('en-US')+'M'}</div></div>
         <div class="card"><div class="card-label">5 Yıllık Büyüme</div><div class="card-val">${c.importGrowth}</div></div>
         <div class="card"><div class="card-label">Pazar Büyüklüğü</div><div class="card-val">${c.marketSize}</div></div>
         <div class="card"><div class="card-label">Türkiye Pazar Payı</div><div class="card-val">${c.turkeyShare}</div></div>
@@ -1860,7 +1892,7 @@ function generateReportHTML(baseCountry){
         <div class="card"><div class="card-label">Toplam İthalat</div><div class="card-val">${c.annualImports}</div></div>
         <div class="card"><div class="card-label">Yıllık Büyüme</div><div class="card-val">${c.importGrowth}</div></div>
         <div class="card"><div class="card-label">Türk İhracat Payı</div><div class="card-val">${c.turkeyShare}</div></div>
-        <div class="card"><div class="card-label">Ort. İthalat Fiyatı</div><div class="card-val">$${x.avgImportPrice}/birim</div></div>
+        <div class="card"><div class="card-label">Ort. İthalat Fiyatı</div><div class="card-val">Bilinmiyor</div></div>
         <div class="card"><div class="card-label">Premium Segment</div><div class="card-val">%${x.premiumSegment}</div></div>
         <div class="card"><div class="card-label">Büyüme Tahmini</div><div class="card-val">${c.importGrowth}</div></div>
       </div>
@@ -1891,7 +1923,7 @@ function generateReportHTML(baseCountry){
         <div class="card"><div class="card-label">Ana Liman</div><div class="card-val" style="font-size:14px">${c.ports}</div></div>
         <div class="card"><div class="card-label">Deniz Transit Süresi</div><div class="card-val">${c.transitTime}</div></div>
         <div class="card"><div class="card-label">Ort. Deniz Navlunu</div><div class="card-val">${c.freightCost}</div></div>
-        <div class="card"><div class="card-label">Ort. Hava Navlunu</div><div class="card-val">$${x.airFreight.toLocaleString('en-US')}/ton</div></div>
+        <div class="card"><div class="card-label">Ort. Hava Navlunu</div><div class="card-val">Bilinmiyor</div></div>
         <div class="card"><div class="card-label">Lojistik Zorluk Skoru</div><div class="card-val">${scoreTo10(100-c.scores.logistics)}/10</div></div>
         <div class="card"><div class="card-label">İç Taşıma Kalitesi</div><div class="card-val">${c.eodb}</div></div>
       </div>
@@ -2035,7 +2067,7 @@ function getTargetIdsCache(){
   targetIdsCache = new Set(user ? getTargets(user) : []);
   return targetIdsCache;
 }
-function invalidateTargetIdsCache(){ targetIdsCache = null; needsRender = true; }
+function invalidateTargetIdsCache(){ targetIdsCache = null; styleVersion++; needsRender = true; }
 
 function initSvgSkeleton(){
   svg.innerHTML = `<defs>
@@ -2167,6 +2199,9 @@ function ringPathD(pts){
 let isInteracting = false;
 function updateWorldShapes(){
   const cache = getDisplayCache();
+  // Performans: fill/stroke/class kareler arasında değişmez — sadece filtre/hedef
+  // değişince (styleVersion artınca) yeniden yazılır. Her karede yalnızca `d` güncellenir.
+  const restyle = worldStyledVersion !== styleVersion;
   WORLD_DATA.forEach((f, i)=>{
     const el = pathEls[i];
     let dAttr = '';
@@ -2175,7 +2210,10 @@ function updateWorldShapes(){
       if(frac < 0.3) return;
       dAttr += ringPathD(pts);
     });
-    if(!dAttr){ el.setAttribute('d', ''); return; }
+    el.setAttribute('d', dAttr);
+    if(!restyle) return;
+    // NOT: stil, ülke o an arka yüzde olsa bile uygulanır — aksi halde küre dönüp
+    // ülke görünür olduğunda eski (bayat) renklerle çizilirdi.
     const isSource = f.iso === 'TR';
     const isTarget = !!f.id && !isSource;
     let fill, strokeCol, fillOp, strokeW, cls;
@@ -2196,19 +2234,23 @@ function updateWorldShapes(){
     // Hover durumu class'ı korunmalı — sadece taban class'ı güncellenir, "hovered" varsa yeniden eklenir.
     const wasHovered = el.classList.contains('hovered');
     el.setAttribute('class', cls + (wasHovered ? ' hovered' : ''));
-    el.setAttribute('d', dAttr);
     el.setAttribute('fill', fill);
     el.setAttribute('fill-opacity', fillOp);
     el.setAttribute('stroke', strokeCol);
     el.setAttribute('stroke-width', strokeW);
   });
+  if(restyle) worldStyledVersion = styleVersion;
 }
 
 // Kategori/filtre değişmediği sürece her ülke için aynı sonucu veren hesaplamaları
 // önbelleğe alır — hem şekiller hem işaretçiler aynı önbelleği kullanır, kare başına
 // iki kez tekrar hesaplama yapılmaz.
 let displayCache = null;
-function invalidateDisplayCache(){ displayCache = null; }
+// Stil sürümü: fill/stroke/class gibi kareler arasında DEĞİŞMEYEN stiller artık
+// her karede değil, sadece bu sayaç arttığında (filtre/hedef değişince) yazılır.
+// ~200 path × 6 öznitelik × 60fps gereksiz DOM yazımını ortadan kaldırır.
+let styleVersion = 0, worldStyledVersion = -1, markerStyledVersion = -1;
+function invalidateDisplayCache(){ displayCache = null; styleVersion++; needsRender = true; }
 function getDisplayCache(){
   if(displayCache) return displayCache;
   displayCache = {};
@@ -2223,18 +2265,24 @@ function getDisplayCache(){
 function updateMarkers(){
   const cache = getDisplayCache();
   const targetIds = getTargetIdsCache();
+  // Performans: renkler ve is-target sınıfı yalnızca filtre/hedef değişince yazılır;
+  // her karede sadece konum (transform) ve görünürlük (opacity) güncellenir.
+  const restyle = markerStyledVersion !== styleVersion;
   COUNTRIES.forEach(c=>{
     const p = toXY(c.lat, c.lon);
     const { passes, color } = cache[c.id];
-    const col = passes ? color : '#5a6172';
     const op = p.visible ? (passes ? 1 : 0.35) : 0;
     const m = markerEls[c.id];
     m.g.setAttribute('style', `opacity:${op}`);
     m.g.setAttribute('transform', `translate(${p.x.toFixed(1)},${p.y.toFixed(1)})`);
-    m.ring.setAttribute('stroke', col);
-    m.dot.setAttribute('fill', col);
-    m.g.classList.toggle('is-target', targetIds.has(c.id));
+    if(restyle){
+      const col = passes ? color : '#5a6172';
+      m.ring.setAttribute('stroke', col);
+      m.dot.setAttribute('fill', col);
+      m.g.classList.toggle('is-target', targetIds.has(c.id));
+    }
   });
+  if(restyle) markerStyledVersion = styleVersion;
   const t = toXY(38.96, 35.24);
   const tm = markerEls['turkey'];
   tm.g.setAttribute('style', `opacity:${t.visible?1:0}`);
@@ -2403,7 +2451,14 @@ document.getElementById('zoomOutBtn').addEventListener('click', ()=>{
   zoomLevel = Math.max(0.6, zoomLevel - 0.25); applyZoom();
 });
 
-function tick(){
+// Otomatik dönüş artık ZAMANA bağlı (kare sayısına değil) — cihaz 30fps'e
+// düşse bile küre aynı hızda döner. Eski kod her karede sabit 0.0016 rad
+// ekliyordu; FPS düşünce dönüş de yarı hıza iniyordu ("kasıyor" hissinin nedeni).
+const AUTO_ROTATE_SPEED = 0.096; // rad/sn (eski 0.0016 rad/kare × 60fps'e denk)
+let lastTickTs = 0;
+function tick(ts){
+  const dt = lastTickTs ? Math.min((ts - lastTickTs) / 1000, 0.1) : 1/60;
+  lastTickTs = ts;
   if(momentumActive){
     rotY += velRotY;
     tiltX = Math.max(-0.9, Math.min(0.9, tiltX + velTiltX));
@@ -2415,7 +2470,7 @@ function tick(){
       isInteracting = false; // tam detaylı çizime geri dön
     }
   } else if(autoRotate){
-    rotY += 0.0016; needsRender = true;
+    rotY += AUTO_ROTATE_SPEED * dt; needsRender = true;
   }
   if(needsRender){ render(); needsRender = false; }
   requestAnimationFrame(tick);
@@ -2758,6 +2813,13 @@ hoverCard.addEventListener('click', (e)=>{
     hideHoverCard();
     openCountry(hoverCardCountry);
   }
+  // Mobilde Türkiye'ye dokununca özet kart açılıyor ama (normal ülkelerin aksine)
+  // kartta "Detaya Git" butonu yoktu — yani Türkiye sayfasını açmanın hiçbir yolu
+  // kalmıyordu. Artık Türkiye kartındaki buton da tam sayfayı açıyor.
+  if(e.target && e.target.id === 'hcTurkeyDetailBtn'){
+    hideHoverCard();
+    renderTurkeyPage();
+  }
 });
 function showTurkeyCard(e){
   const t = TURKEY_PROFILE;
@@ -2781,6 +2843,7 @@ function showTurkeyCard(e){
       <div class="hc-supplier-list">${t.exportDestinations.slice(0,5).map(s=>`<span>${s.c} %${s.v}</span>`).join('')}</div>
     </div>
     <div class="hc-footer"><span>Türkiye'nin ihracat kaynağı</span><span>—</span></div>
+    <button class="hc-detail-btn" id="hcTurkeyDetailBtn">Detaya Git →</button>
   `;
   hoverCard.classList.add('show');
   positionHoverCard(e);
@@ -2869,11 +2932,22 @@ function showHoverCard(baseCountry, e){
       <div class="hc-item"><span class="hc-label">Türkiyeden Mobilya İthalatı${(()=>{const ti=getTurkeyImportInfo(c); return ti.level==='real' ? (' <span style="color:var(--teal); font-size:8px;">✓ '+(ti.isTotal?'Bakanlık (toplam)':'ITC')+'</span>') : ti.level==='estimated' ? ' <span style="color:var(--text-2); font-size:8px; opacity:0.7;">~ tahmini</span>' : '';})()}</span><span class="hc-value">${getTurkeyImportInfo(c).display}</span></div>
       <div class="hc-item"><span class="hc-label">Mobilya Üreticisi mi? <span style="color:var(--teal);font-size:8px;">✓</span></span><span class="hc-value">${manufacturerTierLabel(c.iso) ? 'Evet — ' + manufacturerTierLabel(c.iso) : 'Hayır'}</span></div>
     </div>
-    <div class="hc-suppliers">
+    ${(()=>{
+      const tier = turkeyShareTier(c);
+      if(tier === 'unknown' || !c.suppliers){
+        // Doğrulanmış/tahmini hiçbir tedarikçi verisi yok — rastgele bir rakam göstermek
+        // yerine dürüstçe "Bilinmiyor" gösterilir.
+        return `<div class="hc-suppliers">
       <span class="hc-label">İthalatta Tedarikçi Payları</span>
+      <div class="hc-value" style="color:var(--text-2); font-size:12px; padding:6px 0;">Bilinmiyor — bu ülke için doğrulanmış tedarikçi verisi yok</div>
+    </div>`;
+      }
+      return `<div class="hc-suppliers">
+      <span class="hc-label">İthalatta Tedarikçi Payları ${tier==='real' ? '<span style="color:var(--teal);font-size:8px;">✓</span>' : '<span style="color:var(--text-2);font-size:8px;opacity:0.7;">~ tahmini</span>'}</span>
       <div class="hc-bar">${c.suppliers.map(s=>`<span style="flex:${s.v}" class="${s.c==='Türkiye'?'seg-tr':'seg-other'}" title="${s.c} %${s.v}"></span>`).join('')}</div>
       <div class="hc-supplier-list">${c.suppliers.slice(0,4).map(s=>`<span class="${s.c==='Türkiye'?'tr-hl':''}">${s.c} %${s.v}</span>`).join('')}</div>
-    </div>
+    </div>`;
+    })()}
     <div class="hc-footer" style="margin-bottom:2px;"><span>${c.ports}</span></div>
     <button class="hc-detail-btn" id="hcDetailBtn">Detaya Git →</button>
   `;
@@ -3113,13 +3187,16 @@ function renderCountryPage(baseCountry){
     ['İlk üç adım', '1) Küçük hacimli test siparişiyle pazara giriş, 2) yerel sertifikasyon/gümrük süreçlerini tamamlama, 3) 2-3 potansiyel distribütör/alıcı ile görüşme.'],
   ];
 
-  const supplierBars = c.suppliers.map(s=>`
+  const suppliersUnknown = !c.suppliers || turkeyShareTier(c) === 'unknown';
+  const supplierBars = suppliersUnknown
+    ? `<div class="footnote" style="padding:10px 0;">Bilinmiyor — bu ülke için doğrulanmış tedarikçi verisi henüz yok.</div>`
+    : c.suppliers.map(s=>`
     <div class="sup-row">
       <span class="sup-name">${s.c}</span>
       <div class="sup-bar-wrap"><div class="sup-bar" style="width:${s.v}%; background:${s.c==='Türkiye'?'#3fd0c0':'#c9a961'}"></div></div>
       <span class="sup-val">%${s.v}</span>
     </div>`).join('');
-  const turkeyRank = [...c.suppliers].sort((a,b)=>b.v-a.v).findIndex(s=>s.c==='Türkiye') + 1;
+  const turkeyRank = suppliersUnknown ? null : [...c.suppliers].sort((a,b)=>b.v-a.v).findIndex(s=>s.c==='Türkiye') + 1;
 
   document.getElementById('dashBody').innerHTML = `
     ${renderCountryHero(baseCountry, c)}
@@ -3208,7 +3285,7 @@ function renderCountryPage(baseCountry){
         <div class="card ${dqCardClass(getTurkeyImportInfo(c).level==='real'?'real':getTurkeyImportInfo(c).level==='estimated'?'estimated':'unknown')}"><div class="card-label">Türkiyeden Mobilya İthalatı${dqBadge(getTurkeyImportInfo(c).level==='real'?'real':getTurkeyImportInfo(c).level==='estimated'?'estimated':'unknown')}${getTurkeyImportInfo(c).isTotal ? ' <span class="footnote" style="margin:0;">(tüm kategoriler)</span>' : ''}</div><div class="card-value">${getTurkeyImportInfo(c).display}</div></div>
         <div class="card ${dqCardClass(turkeyShareTier(c))}"><div class="card-label">Türkiye Pazar Payı${dqBadge(turkeyShareTier(c))}</div><div class="card-value">${turkeyShareDisplay(c)}</div></div>
         <div class="card ${dqCardClass('estimated')}"><div class="card-label">Pazar Büyüklüğü${dqBadge('estimated')}</div><div class="card-value">${c.marketSize}</div></div>
-        <div class="card ${dqCardClass(getTurkeyImportInfo(c).growthPct!==null?'real':'estimated')}"><div class="card-label">Türkiye İhracat Büyümesi${dqBadge(getTurkeyImportInfo(c).growthPct!==null?'real':'estimated')}</div><div class="card-value ${(()=>{const g=getTurkeyImportInfo(c).growthPct; return g!==null && g<0 ? 'down' : 'up';})()}">${(()=>{const g=getTurkeyImportInfo(c).growthPct; if(g!==null) return (g>=0?'+':'')+g+'%'; return c.turkeyGrowth;})()}</div></div>
+        <div class="card ${dqCardClass(getTurkeyImportInfo(c).growthPct!==null?'real':(c.turkeyGrowth==='Bilinmiyor'?'unknown':'estimated'))}"><div class="card-label">Türkiye İhracat Büyümesi${dqBadge(getTurkeyImportInfo(c).growthPct!==null?'real':(c.turkeyGrowth==='Bilinmiyor'?'unknown':'estimated'))}</div><div class="card-value ${(()=>{const g=getTurkeyImportInfo(c).growthPct; if(g!==null) return g<0?'down':'up'; return c.turkeyGrowth==='Bilinmiyor'?'':'up';})()}">${(()=>{const g=getTurkeyImportInfo(c).growthPct; if(g!==null) return (g>=0?'+':'')+g+'%'; return c.turkeyGrowth;})()}</div></div>
       </div>
       <div class="footnote" style="margin-top:10px;">${(()=>{const ti=getTurkeyImportInfo(c); if(ti.level==='real') return '✓ '+ti.note; if(ti.level==='estimated') return '~ '+ti.note; return '⚠ Bu ülke için Türkiye\'ye özel doğrulanmış ticaret verisi bulunamadı — rakamlar örnek/tahminidir.';})()}</div>
       <div class="footnote" style="margin-top:4px;">${dqBadge('estimated')} Pazar Büyüklüğü ve ülkenin toplam ithalat büyüme oranı (bkz. İlgili Kaynaklar) için henüz tek bir kapsamlı, ücretsiz gerçek veri kaynağı bulunamadı — model tahminidir.</div>
@@ -3218,14 +3295,17 @@ function renderCountryPage(baseCountry){
       <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="var(--amber)" stroke="none"/></svg><span class="num">04</span> Rekabet</h3>
       <div class="two-col">
         <div>
-          <div class="card-label" style="margin-bottom:12px;">Ana Tedarikçi Ülkeler${dqBadge(c.suppliersVerified ? 'real' : 'estimated')}</div>
+          <div class="card-label" style="margin-bottom:12px;">Ana Tedarikçi Ülkeler${dqBadge(suppliersUnknown ? 'unknown' : (c.suppliersVerified ? 'real' : 'estimated'))}</div>
           ${supplierBars}
           ${c.importDataSource ? `<div class="footnote" style="margin-top:10px;">Veri yılı: ${c.importDataSource}.</div>` : ''}
         </div>
         <div class="card" style="align-self:start;">
           <div class="card-label">Türkiye'nin Konumu</div>
-          <div class="card-value" style="font-size:26px; margin:8px 0;">${turkeyRank}. sıra</div>
-          <div class="footnote" style="margin:0;">${c.suppliers.length} tedarikçi arasında, %${(c.suppliers.find(s=>s.c==='Türkiye')||{v:0}).v} pazar payıyla.</div>
+          ${suppliersUnknown
+            ? `<div class="card-value" style="font-size:20px; margin:8px 0; color:var(--text-2);">Bilinmiyor</div>
+          <div class="footnote" style="margin:0;">Doğrulanmış tedarikçi verisi olmadan sıralama hesaplanamaz.</div>`
+            : `<div class="card-value" style="font-size:26px; margin:8px 0;">${turkeyRank}. sıra</div>
+          <div class="footnote" style="margin:0;">${c.suppliers.length} tedarikçi arasında, %${(c.suppliers.find(s=>s.c==='Türkiye')||{v:0}).v} pazar payıyla.</div>`}
         </div>
       </div>
     </div>
@@ -4923,27 +5003,34 @@ document.getElementById('mkt-count').textContent = COUNTRIES.length;
 
 // ---------- SEYREK IŞIK ROTASI: Türkiye'den rastgele bir ülkeye, aralıklarla ----------
 (function scheduleRoutePulses(){
-  function pickTarget(){
-    const candidates = COUNTRIES.filter(c => c.id !== 'turkey');
+  // ESKİ SORUN: hedef ülke tamamen rastgele seçiliyordu; hem Türkiye hem hedef aynı
+  // anda görünür yarımkürede olmadıkça çizgi opacity:0'da kalıyordu. Sonuç: pulse'lar
+  // çoğunlukla kürenin ARKA yüzünde "boşa" ateşleniyor ve kullanıcı hiç görmüyordu.
+  // YENİ: pulse yalnızca Türkiye görünürken ateşlenir ve hedef, O AN görünür ülkeler
+  // arasından seçilir. Uygun an yoksa döngü boşa harcanmaz — birkaç saniye sonra
+  // tekrar denenir. "Seyrek" karakteri korunur ama artık her pulse gerçekten görülür.
+  function pickVisibleTarget(){
+    const candidates = COUNTRIES.filter(c => c.id !== 'turkey' && toXY(c.lat, c.lon).z > 0.25);
     if(!candidates.length) return null;
     return candidates[Math.floor(Math.random() * candidates.length)];
   }
   function firePulse(){
-    if(routePulseLineEl){
-      const target = pickTarget();
-      if(target){
-        activeRoutePulseId = target.id;
-        needsRender = true;
-        routePulseLineEl.classList.add('show');
-        setTimeout(()=>{
-          routePulseLineEl.classList.remove('show');
-          setTimeout(()=>{ activeRoutePulseId = null; }, 1300);
-        }, 3000);
-      }
+    const turkeyVisible = toXY(38.96, 35.24).z > 0.25;
+    const target = (routePulseLineEl && turkeyVisible) ? pickVisibleTarget() : null;
+    if(target){
+      activeRoutePulseId = target.id;
+      needsRender = true;
+      routePulseLineEl.classList.add('show');
+      setTimeout(()=>{
+        routePulseLineEl.classList.remove('show');
+        setTimeout(()=>{ activeRoutePulseId = null; }, 1300);
+      }, 4000);
+      setTimeout(firePulse, 14000 + Math.random() * 12000); // ~14–26 sn arayla, seyrek
+    } else {
+      setTimeout(firePulse, 2500 + Math.random() * 2500); // uygun an değil — kısa süre sonra tekrar dene
     }
-    setTimeout(firePulse, 18000 + Math.random() * 16000); // ~18–34 sn arayla, seyrek
   }
-  setTimeout(firePulse, 9000 + Math.random() * 6000); // ilk gösterim biraz gecikmeli
+  setTimeout(firePulse, 6000 + Math.random() * 4000); // ilk gösterim biraz gecikmeli
 })();
 
 // ---------- POPÜLER PAZARLAR: hızlı erişim çipleri ----------
@@ -4973,13 +5060,10 @@ document.querySelectorAll('.footer-link').forEach(a=>{
 // Kurucu/Standart üyelere açık. Hem link tıklamasında hem doğrudan URL ile
 // gelindiğinde (bkz. applyHistoryState) bu kısıtlama uygulanır.
 const PREMIUM_ONLY_MODALS = new Set(['reports', 'research']);
-// "Küresel Raporlar" gerçek içeriğe sahip — kendi modalını açar.
-document.getElementById('globalReportsLink').addEventListener('click', (e)=>{
-  e.preventDefault();
-  if(!isPremiumUser()){ showPremiumModal(); return; }
-  document.getElementById('globalReportsModal').classList.add('open');
-  pushHistoryState();
-});
+// "Küresel Raporlar" — kullanıcı isteğiyle devre dışı: footer'daki bağlantıya
+// tıklamak artık HİÇBİR sayfa/modal açmaz (yukarıdaki genel .footer-link
+// preventDefault'u tıklamayı sessizce yutar). Modal HTML'i ve kapatma düğmesi
+// ileride tekrar aktifleştirilebilsin diye yerinde bırakıldı.
 document.getElementById('closeGlobalReports').addEventListener('click', ()=>{
   document.getElementById('globalReportsModal').classList.remove('open');
   pushHistoryState();
@@ -5191,7 +5275,10 @@ function applyHistoryState(state){
     }
 
     closeTrackedModals();
-    const modalName = state && state.modal;
+    let modalName = state && state.modal;
+    // "Küresel Raporlar" devre dışı — eski paylaşılan linklerle (/kuresel-raporlar
+    // veya ?modal=reports) gelinse bile artık hiçbir modal açılmaz.
+    if(modalName === 'reports') modalName = null;
     if(modalName && PREMIUM_ONLY_MODALS.has(modalName) && !isPremiumUser()){
       document.getElementById('premiumModal').classList.add('open');
     } else if(modalName && TRACKED_MODALS[modalName]){

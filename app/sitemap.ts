@@ -21,7 +21,6 @@ const STATIC_PATHS: {
   { path: "/haberler", priority: 0.6, changeFrequency: "daily" },
   { path: "/fuarlar", priority: 0.6, changeFrequency: "weekly" },
   { path: "/seyahat-planla", priority: 0.5, changeFrequency: "monthly" },
-  { path: "/kuresel-raporlar", priority: 0.5, changeFrequency: "weekly" },
   { path: "/atlas-research", priority: 0.5, changeFrequency: "monthly" },
   { path: "/hakkimizda", priority: 0.4, changeFrequency: "yearly" },
   { path: "/iletisim", priority: 0.4, changeFrequency: "yearly" },
