@@ -1,4 +1,4 @@
-console.log('%cFurniture Atlas build: checkbox-fix-v7-defense', 'color:#c9a961; font-weight:bold;');
+console.log('%cFurniture Atlas build: checkbox-fix-v8-delegated', 'color:#c9a961; font-weight:bold;');
 /* =========================================================
    ÖRNEK VERİ SETİ — tamamı gösterim amaçlıdır
    ========================================================= */
@@ -2794,47 +2794,51 @@ function renderListTable(){
   }
   tbody.innerHTML = rows.map(({base,cd})=> {
     const xf = generateExtraFields(cd);
-    const openAttr = `onclick="handleListRowClick(event, '${base.id}')" style="cursor:pointer;"`;
-    const dataCells = listColumnOrder.map(key => getColumnCellHtml(key, cd, xf).replace('<td', `<td ${openAttr}`)).join('');
+    // NOT: hücrelerde artık HİÇBİR inline onclick yok. Satır açma, aşağıdaki tek
+    // belge-seviyesi delege dinleyicisinden yapılır — checkbox bölgesi orada
+    // kategorik olarak navigasyondan muaftır.
+    const dataCells = listColumnOrder.map(key => getColumnCellHtml(key, cd, xf)).join('');
     return `
     <tr data-id="${base.id}">
       <td class="td-check"><label class="td-check-label"><input type="checkbox" class="compare-check" data-id="${base.id}" ${compareIds.includes(base.id)?'checked':''}></label></td>
       ${dataCells}
-      <td ${openAttr}><span class="row-open">Aç →</span></td>
+      <td><span class="row-open">Aç →</span></td>
     </tr>`;
   }).join('');
 }
-// Satır açma davranışı YALNIZCA checkbox DIŞINDAKİ her hücrenin kendi onclick
-// özniteliğine ayrı ayrı eklenir — <tr> üzerinde artık hiç onclick yok.
-// Checkbox artık bir <label> ile sarmalı: tüm hücreye tıklamak native olarak
-// checkbox'ı işaretler/kaldırır (ekstra JS toggle mantığı gerekmiyor — bu da
-// eski "iki kez tetiklenme" riskini ortadan kaldırıyor). Checkbox hücresine
-// yapılan HER tıklama, CAPTURE aşamasında durdurulur — böylece hiçbir koşulda
-// checkbox'a tıklamak ülke sayfasını açamaz.
-const countryTableBodyEl = document.getElementById('countryTableBody');
-if(countryTableBodyEl){
-  countryTableBodyEl.addEventListener('click', (e)=>{
-    if(e.target.closest('.td-check')){ lastCheckboxInteractionTs = Date.now(); e.stopPropagation(); }
-  }, true);
-  countryTableBodyEl.addEventListener('change', (e)=>{
-    const chk = e.target.closest('input.compare-check');
-    if(chk) handleListCheckboxChange(chk);
-  });
-}
-// SAVUNMA KATMANLARI — "checkbox'a tıklayınca ülke sayfası açılıyor" hatası bazı
-// tarayıcılarda (özellikle mobilde) hayalet tıklama / olay sıralaması farklarından
-// tekrar edebiliyordu. Artık satır açma üç ayrı katmanla korunuyor:
-// 1) Tıklamanın hedefi checkbox hücresi/etiketi/inputuysa satır AÇILMAZ.
-// 2) Son 400ms içinde herhangi bir checkbox etkileşimi olduysa satır AÇILMAZ
-//    (mobil tarayıcıların dokunuş sonrası gönderdiği gecikmeli "hayalet" click'ler için).
-// 3) Mevcut capture-aşaması stopPropagation koruması da yerinde duruyor.
+/* CHECKBOX / SATIR AÇMA — NİHAİ MİMARİ
+   Önceki yaklaşımların hepsi (satır onclick'i, hücre onclick'leri, tbody'ye bağlı
+   capture koruması) bazı gerçek tarayıcılarda checkbox tıklamasının ülke sayfasını
+   da açmasına yol açan yollar bırakıyordu. Yeni tasarım bunu yapısal olarak imkânsız kılar:
+   — Hücrelerde HİÇBİR inline onclick yok; navigasyonu yapabilecek TEK kod aşağıdaki
+     delege dinleyicisi ve o, checkbox bölgesindeki (.td-check ve içindekiler)
+     tıklamalarda navigasyona hiç girmeden çıkar. "Hem işaretle hem aç" fiziksel
+     olarak mümkün değil, art arda seçim serbest.
+   — Dinleyiciler tbody'ye değil DOCUMENT'a bağlı: tablo her yeniden çizildiğinde
+     (filtre, sıralama, arama) ya da dış bir etken DOM'u değiştirse bile çalışmaya
+     devam ederler.
+   — Checkbox etkileşiminden sonraki 400ms içindeki satır tıklamaları yok sayılır
+     (mobil tarayıcıların gecikmeli "hayalet" click'lerine karşı). */
 let lastCheckboxInteractionTs = 0;
-function handleListRowClick(ev, id){
-  if(ev && ev.target && ev.target.closest && ev.target.closest('.td-check, input, label')) return;
-  if(Date.now() - lastCheckboxInteractionTs < 400) return;
-  const c = COUNTRIES.find(x=>x.id===id);
+document.addEventListener('click', (e)=>{
+  const t = e.target;
+  if(!t || !t.closest) return;
+  const inCheckZone = t.closest('#countryTableBody .td-check');
+  if(inCheckZone){
+    // Checkbox bölgesi: sadece işaretleme (label native yapar) — navigasyon YASAK.
+    lastCheckboxInteractionTs = Date.now();
+    return;
+  }
+  const tr = t.closest('#countryTableBody tr[data-id]');
+  if(!tr) return;
+  if(Date.now() - lastCheckboxInteractionTs < 400) return; // hayalet click koruması
+  const c = COUNTRIES.find(x=>x.id===tr.getAttribute('data-id'));
   if(c) openDashboard(c);
-}
+});
+document.addEventListener('change', (e)=>{
+  const chk = e.target && e.target.closest && e.target.closest('#countryTableBody input.compare-check');
+  if(chk) handleListCheckboxChange(chk);
+});
 function handleListCheckboxChange(chk){
   lastCheckboxInteractionTs = Date.now();
   const id = chk.getAttribute('data-id');
@@ -3741,8 +3745,9 @@ function canCompareFree(){
     return true;
   }catch(e){ return true; }
 }
-// PDF / Yazdır — Başlangıç (ücretsiz) üyelikte de yok, sadece Kurucu/Standart'a özel.
-const PREMIUM_GATED_SELECTOR = '#printBtn';
+// PDF / Yazdır ve ülke sayfasındaki Karşılaştır — Başlangıç (ücretsiz) üyelikte de yok,
+// sadece Kurucu/Standart'a özel. İkisi de aynı kilit görünümü ve kapı mantığını paylaşır.
+const PREMIUM_GATED_SELECTOR = '#printBtn, #addCompareBtn';
 document.addEventListener('click', function(e){
   const gated = e.target.closest(PREMIUM_GATED_SELECTOR);
   if(gated && !isPremiumUser()){
@@ -3759,6 +3764,7 @@ function updatePremiumUI(){
   const lockTooltip = isFreeMember() ? 'ÜYELİĞİNİZİ YÜKSELTİN' : 'ÜYELERE ÖZEL';
   [
     ['printBtn', '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1"/><path d="M6 17v4h12v-4"/></svg>Yazdır / PDF'],
+    ['addCompareBtn', '+ Karşılaştır'],
   ].forEach(([id, plainLabel])=>{
     const el = document.getElementById(id);
     if(!el) return;
@@ -3868,7 +3874,26 @@ document.getElementById('brandLogo').addEventListener('click', ()=>{
   searchInput.value = '';
 });
 document.getElementById('addCompareBtn').addEventListener('click', ()=>{
-  if(currentBaseCountry) addToCompare(currentBaseCountry.id);
+  // ESKİ SORUN: buton ülkeyi sessizce listeye ekliyordu ama karşılaştırma tepsisi
+  // ülke sayfası modalının altında kaldığı için kullanıcı hiçbir şey olmadığını
+  // sanıyordu ("çalışmıyor"). YENİ AKIŞ: ülke eklenir, sayfa kapanır ve kullanıcı
+  // ya doğrudan karşılaştırma ekranına (2+ ülke seçiliyse) ya da ikinci ülkeyi
+  // işaretleyebileceği listeye yönlendirilir. (Üyelik kapısı, PDF butonuyla aynı
+  // capture-aşaması dinleyicide — üye olmayanlar buraya hiç ulaşmaz.)
+  if(!currentBaseCountry) return;
+  const added = currentBaseCountry;
+  addToCompare(added.id);
+  if(!compareIds.includes(added.id)) return; // limit reddi — toast zaten gösterildi
+  closeCountry();
+  if(compareIds.length >= 2){
+    renderCompareModal();
+    document.getElementById('compareModal').classList.add('open');
+  } else {
+    renderListTable();
+    showView('list');
+    pushHistoryState();
+    showToast(`${added.flag} ${added.name} karşılaştırmaya eklendi — karşılaştırılacak ülkeyi soldaki kutucuktan işaretleyin.`);
+  }
 });
 document.getElementById('printBtn').addEventListener('click', ()=> window.print());
 const BUSINESS_MAP_CATEGORIES = [
