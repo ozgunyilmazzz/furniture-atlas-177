@@ -1189,6 +1189,15 @@ const SECTOR_NEWS = [
   { date:'2026-01-01', title:'Sektörün 2030 hedefi: $12 milyar ihracat',
     body:'MOSFED Başkanı Ahmet Güleç, Türk mobilya sektörünün 200 ülkeye ihracat yaptığını ve dünya mobilya ticaretinden %2 pay aldığını belirtti. 2026 hedefi $5 milyarın üzeri, 2030 hedefi ise $12 milyar ihracat.',
     source:'Anadolu Ajansı' },
+  { date:'2026-07-17', title:'EİB ilk yarıda 459 milyon dolarlık ihracatla geçen yılki seviyesini korudu',
+    body:'Ege Mobilya Kağıt ve Orman Ürünleri İhracatçıları Birliği (EİB) Başkanı Ali Fuat Gürle, 2026\'nın ilk altı ayında küresel ticaretteki belirsizlik ve artan üretim maliyetlerine rağmen 459 milyon dolarlık ihracat gerçekleştirdiklerini açıkladı. Alt kalemlerde kağıt ve kağıt mamulleri 266 milyon dolar, mobilya 94 milyon dolar, odun dışı orman ürünleri ise %34 büyümeyle 81 milyon dolar oldu. Birlik, yılın ikinci yarısında Ekim\'de İngiltere (Londra) ve Aralık\'ta Sırbistan-Macaristan\'a sektörel ticaret heyetleri düzenlemeyi planlıyor.',
+    source:'Ticaret Gazetesi' },
+  { date:'2026-07-21', title:'MOSFED Başkanı Güleç: Sektörün yeni rekabet alanı üretim değil, nitelikli insan kaynağı',
+    body:'Mobilya Dernekleri Federasyonu (MOSFED) Başkanı Ahmet Güleç, Türkiye\'nin dünya mobilya ihracatından aldığı payı binde 3 seviyesinden yaklaşık %2\'ye çıkardığını belirterek, sektörün son çeyrek asırda üretim, tasarım, lojistik ve markalaşma alanlarında önemli bir dönüşüm geçirdiğini söyledi. Güleç, küresel talepteki daralma ve finansmana erişim güçlüklerine karşın sektörün önündeki en büyük yapısal sorununun; tasarım geliştirecek, sürdürülebilirlik regülasyonlarını yönetecek ve marka değeri oluşturacak nitelikli insan kaynağına erişim olduğunu vurguladı.',
+    source:'Ekonomim' },
+  { date:'2026-07-21', title:'Mobilya sanayii 500 bin istihdam ve 14 milyar dolarlık üretim hacmiyle lokomotif sektörler arasında',
+    body:'Türkiye mobilya sanayii, yaklaşık 500 bin kişilik istihdamı, 14 milyar dolar değerindeki üretim hacmi ve 5 milyar dolara yaklaşan ihracatıyla dünyanın en büyük 10 mobilya üreticisi ve ihracatçısı arasında yer alıyor. Sektör; üretim kapasitesi, tasarım gücü, lojistik altyapı ve markalaşma yatırımlarıyla büyümesini sürdürürken, en kritik sorunlardan biri olarak nitelikli insan kaynağı eksikliği öne çıkıyor.',
+    source:'Ticaret Gazetesi' },
 ];
 
 const FURNITURE_FAIRS = [
@@ -4582,7 +4591,11 @@ function updateFavButton(){
   const btn = document.getElementById('favBtn');
   if(!currentBaseCountry) return;
   const user = getCurrentUser();
-  btn.textContent = (user && isTarget(user, currentBaseCountry.id)) ? '★' : '☆';
+  const active = !!(user && isTarget(user, currentBaseCountry.id));
+  btn.classList.toggle('is-active', active);
+  const label = active ? 'Hedeflerimde — kaldırmak için tıkla' : 'Hedef pazar olarak işaretle';
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
 }
 document.getElementById('favBtn').addEventListener('click', ()=>{
   if(!currentBaseCountry) return;
@@ -4590,7 +4603,10 @@ document.getElementById('favBtn').addEventListener('click', ()=>{
   if(!user){ openLoginModal(); return; }
   const btn = document.getElementById('favBtn');
   const nowTarget = toggleTarget(user, currentBaseCountry.id);
-  btn.textContent = nowTarget ? '★' : '☆';
+  btn.classList.toggle('is-active', nowTarget);
+  const label = nowTarget ? 'Hedeflerimde — kaldırmak için tıkla' : 'Hedef pazar olarak işaretle';
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
   refreshMyTargetsBadge();
   invalidateTargetIdsCache();
 });
@@ -5048,16 +5064,22 @@ function requestReportMailto(country, kind){
 function renderTargetsPanel(){
   const body = document.getElementById('targetsBody');
   const user = getCurrentUser();
+  const introBanner = `
+    <div class="fn-prompt-box" style="margin-bottom:18px;">
+      <div class="fn-prompt-title">Hedeflerine eklediğin ülkeler haritada altın renkli bir işaretle görünür.</div>
+      <div class="footnote" style="margin:0;">Böylece küreyi her açtığında takip ettiğin pazarları tek bakışta görürsün. Bir ülke sayfasında sağ üstteki <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 2.5l2.9 6.6 7.1.7-5.4 4.8 1.6 7-6.2-3.7-6.2 3.7 1.6-7-5.4-4.8 7.1-.7z"/></svg> yıldız butonuna tıklayarak hedeflerine ekleyebilirsin.</div>
+    </div>
+  `;
   if(!user){
-    body.innerHTML = `<div class="footnote">Hedef ülke eklemek için önce giriş yapmalısın.</div>`;
+    body.innerHTML = introBanner + `<div class="footnote">Hedef ülke eklemek için önce giriş yapmalısın.</div>`;
     return;
   }
   const ids = getTargets(user);
   if(!ids.length){
-    body.innerHTML = `<div class="footnote">Henüz hedef ülke eklemedin. Bir ülke sayfasında ☆ ikonuna tıklayarak hedeflerine ekleyebilirsin.</div>`;
+    body.innerHTML = introBanner + `<div class="footnote">Henüz hedef ülke eklemedin. Bir ülke sayfasında ★ butonuna tıklayarak ilk hedefini ekle.</div>`;
     return;
   }
-  body.innerHTML = `
+  body.innerHTML = introBanner + `
     <div class="footnote" style="margin-bottom:16px;">⚠ Rapor/abonelik talepleri şu an e-posta taslağı oluşturur — ödeme ve otomatik gönderim altyapısı henüz bağlı değil.</div>
     ${ids.map(id=>{
       const c = COUNTRIES.find(x=>x.id===id);

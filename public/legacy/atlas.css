@@ -548,14 +548,19 @@
   .ticker-toggle-btn{
     font-family:var(--mono); font-size:11px; letter-spacing:0.5px; color:var(--text-2);
     background:transparent; border:none; border-radius:100px; padding:7px 16px; cursor:pointer;
-    transition:all 0.15s ease; display:inline-flex; align-items:center; gap:7px;
+    transition:all 0.3s ease-in-out; display:inline-flex; align-items:center; gap:7px;
   }
+  .ticker-toggle-icon{ flex:0 0 auto; opacity:0.85; transition:opacity 0.3s ease-in-out; }
   .ticker-toggle-dot{
     width:6px; height:6px; border-radius:50%; background:var(--text-2); flex:0 0 auto;
     transition:background 0.2s ease;
   }
   .ticker-toggle-btn.active{ background:rgba(63,208,192,0.15); color:var(--teal); }
   .ticker-toggle-btn.active .ticker-toggle-dot{ background:var(--teal); animation:atlas-pulse 2.2s ease-in-out infinite; }
+  #atlas-ticker-toggle-label{
+    display:inline-block; max-width:130px; opacity:1; overflow:hidden; white-space:nowrap;
+    transition:max-width 0.3s ease-in-out, opacity 0.25s ease-in-out, margin-left 0.3s ease-in-out;
+  }
   .country-chip{
     display:inline-flex; align-items:center; gap:8px; font-family:var(--body); font-size:12.5px;
     background:rgba(63,208,192,0.14); color:var(--teal); border:none; border-radius:100px; padding:7px 8px 7px 14px; cursor:pointer;
@@ -565,6 +570,14 @@
     border-radius:50%; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center;
   }
   .country-chip .chip-x:hover{ background:var(--red); color:#fff; }
+
+  /* Ülke Arama her zaman öncelikli olsun: dar ekranlarda / yer kısıtlı olduğunda
+     "Sektör Nabzı" metni yumuşakça kaybolur, buton ikon+nokta'dan oluşan kompakt bir
+     rozete dönüşür (tamamen gizlenmez — tıklanınca yine aynı şeridi açar). */
+  @media(max-width:900px){
+    .ticker-toggle-btn{ padding:7px 10px; gap:5px; }
+    #atlas-ticker-toggle-label{ max-width:0; opacity:0; margin-left:-5px; }
+  }
 
   /* ---------- COUNTRY PAGE SECTIONS (new simplified structure) ---------- */
   .cp-section{ padding:48px 0; border-bottom:1px solid var(--border-soft); }
@@ -1588,9 +1601,14 @@
   .note-text{ font-size:13.5px; color:var(--text-0); line-height:1.6; white-space:pre-wrap; }
   .note-meta{ font-family:var(--mono); font-size:9.5px; color:var(--text-2); margin-top:8px; }
   .fav-btn{
-    background:transparent; border:none; font-size:24px; color:var(--amber); cursor:pointer;
-    line-height:1; padding:0 2px;
+    background:rgba(255,255,255,0.04); border:1px solid var(--border-soft); color:var(--text-1);
+    width:38px; height:38px; border-radius:50%; cursor:pointer; flex:0 0 auto;
+    display:inline-flex; align-items:center; justify-content:center;
+    transition:all 0.2s ease;
   }
+  .fav-btn:hover{ border-color:var(--amber); color:var(--amber); background:rgba(201,169,97,0.1); transform:scale(1.06); }
+  .fav-btn.is-active{ background:rgba(201,169,97,0.16); border-color:var(--amber); color:var(--amber); }
+  .fav-btn.is-active svg{ fill:var(--amber); }
 
   .link-popover-wrap{ position:relative; }
   .link-popover{
@@ -1742,8 +1760,8 @@
     .search-wrap{ min-width:0; max-width:none; width:100%; flex:0 0 100%; order:1; display:block; }
     .search-input{ padding:7px 14px 7px 32px; font-size:12.5px; }
     .view-toggle{ order:2; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    .view-toggle .view-btn, .view-toggle .ticker-toggle-btn, .view-toggle .country-chip{ white-space:nowrap; flex-shrink:0; padding:5px 12px; }
-    .ticker-toggle-btn{ display:none; }
+    .view-toggle .view-btn, .view-toggle .country-chip{ white-space:nowrap; flex-shrink:0; padding:5px 12px; }
+    .view-toggle .ticker-toggle-btn{ white-space:nowrap; flex-shrink:0; padding:7px 9px; }
     .category-toggle{ order:3; width:auto; margin-left:0; flex-wrap:nowrap; flex-shrink:1; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; }
     .category-toggle::-webkit-scrollbar{ height:0; }
     .category-label{ display:none; }
@@ -1760,6 +1778,13 @@
     .globe-stage{ width:94vw; height:94vw; }
     .list-view{ padding-left:14px; padding-right:14px; padding-bottom:60px; }
     .dashboard{ padding-bottom:60px; }
+
+    /* Pazara İlk Bakış kartı: TR–uçak–ülke satırı dar kartta sola yaslı kalınca
+       dengesiz duruyordu — mobilde tüm rota bloğunu ortalıyoruz. */
+    .hero-route{ text-align:center; }
+    .hero-route-visual{ max-width:none; width:100%; justify-content:center; margin-left:auto; margin-right:auto; }
+    .hero-route-line{ max-width:120px; }
+    .hero-route-stats{ justify-content:center; }
 
     .dash-header{ position:static; border-radius:0; padding:18px 16px; }
     .dashboard-inner{ padding:0; }
@@ -1868,8 +1893,9 @@
   .fn-prompt-q{
     font-family:var(--body); font-size:12px; color:var(--text-1);
     background:rgba(255,255,255,0.04); border:1px solid var(--border-soft); border-radius:20px;
-    padding:6px 12px;
+    padding:6px 12px; display:inline-flex; align-items:center; gap:6px;
   }
+  .fn-prompt-q svg{ flex:0 0 auto; opacity:0.75; color:var(--teal); }
   @media(max-width:640px){
     .fn-head-row{ align-items:flex-start; }
     .fn-card{ padding:16px; }
