@@ -1,12 +1,5 @@
 const BUILD_TAG = 'print-report-v9';
 console.log('%cFurniture Atlas build: ' + BUILD_TAG, 'color:#c9a961; font-weight:bold;');
-// Yayındaki sürümü konsol açmadan doğrulayabilmek için footer'a küçük bir sürüm
-// etiketi basılır — "deploy gerçekten yayında mı?" sorusunu kökten çözer.
-document.addEventListener('DOMContentLoaded', ()=>{
-  const el = document.getElementById('buildTagSlot');
-  if(el) el.textContent = 'build: ' + BUILD_TAG;
-});
-(function(){ const el = document.getElementById('buildTagSlot'); if(el) el.textContent = 'build: ' + BUILD_TAG; })();
 /* =========================================================
    ÖRNEK VERİ SETİ — tamamı gösterim amaçlıdır
    ========================================================= */
@@ -3459,9 +3452,16 @@ function renderCountryPage(baseCountry){
       </div>
 
     </div>
+
+    <div class="cp-section" style="border-bottom:none;">
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="num">12</span> Saha Notları</h3>
+      <div class="footnote" style="margin-bottom:18px;">Furniture Atlas üyelerinin ${c.name} ile ilgili gerçek ticari ve seyahat deneyimleri. Her paylaşım yayına alınmadan önce incelenir.</div>
+      ${renderFieldNotesSectionHTML(c)}
+    </div>
     </div>
   `;
 
+  loadFieldNotes(baseCountry);
   fillNotes(baseCountry);
   applyContentGate();
   animateFillBars();
@@ -4207,6 +4207,233 @@ document.getElementById('mapsSearchBtn').addEventListener('click', ()=>{
 document.getElementById('closeMaps').addEventListener('click', ()=>{
   document.getElementById('mapsModal').classList.remove('open');
 });
+
+/* =========================================================
+   SAHA NOTLARI (Field Notes) — topluluk deneyim paylaşımları.
+   Veri modeli Supabase'de: field_notes (status: pending/approved/rejected)
+   + field_note_votes ("Faydalı Bulundu"). Onay admin tarafından verilir
+   (bkz. supabase/field_notes.sql). İleride bir AI özet fonksiyonu bu
+   tabloyu doğrudan okuyup ülke/kategori bazında özet üretebilir —
+   şema buna göre (country_id, category, status='approved') tasarlandı.
+   ========================================================= */
+let fieldNoteTargetCountry = null; // modal açıkken hangi ülkeye not eklendiği
+let fieldNoteVotedIds = new Set(); // bu oturumda kullanıcının oy verdiği not id'leri
+let isAppAdminCache = null; // null=henüz kontrol edilmedi, true/false=sonuç
+
+function fieldNoteTimeAgo(dateStr){
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diffMs / 86400000);
+  if(days <= 0) return 'Bugün';
+  if(days === 1) return 'Dün';
+  if(days < 30) return `${days} gün önce`;
+  const months = Math.floor(days/30);
+  if(months < 12) return `${months} ay önce`;
+  return `${Math.floor(months/12)} yıl önce`;
+}
+
+function fieldNoteEscape(str){
+  return String(str||'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function renderFieldNotesSectionHTML(c){
+  return `
+    <div class="fn-head-row">
+      <span class="fn-count-pill" id="fnCountPill">Yükleniyor…</span>
+      <div class="fn-actions">
+        <span class="fn-admin-link" id="fnAdminLink" style="display:none;" onclick="openFieldNoteAdminModal()">Onay bekleyenleri gör</span>
+        <button class="tray-btn tray-btn-primary" id="fnAddBtn" style="padding:9px 18px; font-size:12px;" onclick="openFieldNoteModal('${c.id}','${fieldNoteEscape(c.name)}')">+ Saha Notu Ekle</button>
+      </div>
+    </div>
+    <div class="fn-grid" id="fnGrid">
+      <div class="fn-empty">Saha notları yükleniyor…</div>
+    </div>
+  `;
+}
+
+function renderFieldNoteCard(note){
+  const badgeClass = note.author_tier === 'founding' ? 'founding' : (note.author_tier === 'standard' ? 'standard' : '');
+  const badgeLabel = note.author_tier === 'founding' ? 'Kurucu Üye' : (note.author_tier === 'standard' ? 'Üye' : 'Üye');
+  const voted = fieldNoteVotedIds.has(note.id);
+  return `
+    <div class="fn-card" data-note-id="${note.id}">
+      <div class="fn-card-top">
+        <div class="fn-user-row">
+          <span class="fn-user-name">${fieldNoteEscape(note.author_name)}</span>
+          <span class="fn-user-badge ${badgeClass}">${badgeLabel}</span>
+        </div>
+        <span class="fn-date">${fieldNoteTimeAgo(note.created_at)}</span>
+      </div>
+      <div class="fn-tags">
+        <span class="fn-tag fn-tag-cat">${fieldNoteEscape(note.category)}</span>
+        ${note.city ? `<span class="fn-tag fn-tag-city">📍 ${fieldNoteEscape(note.city)}</span>` : ''}
+      </div>
+      <div class="fn-title">${fieldNoteEscape(note.title)}</div>
+      <div class="fn-body">${fieldNoteEscape(note.body)}</div>
+      <div class="fn-footer">
+        <button class="fn-helpful-btn ${voted ? 'voted' : ''}" onclick="toggleFieldNoteHelpful(${note.id}, this)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v10H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1h3zm0 0l5-9a2.5 2.5 0 0 1 4.5 2l-1 5H19a2 2 0 0 1 2 2.2l-1.2 7A2 2 0 0 1 17.8 21H7"/></svg>
+          <span class="fn-helpful-count">${note.helpful_count||0}</span> Bu bilgi faydalı oldu
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+async function loadFieldNotes(baseCountry){
+  const grid = document.getElementById('fnGrid');
+  const countPill = document.getElementById('fnCountPill');
+  if(!grid || !countPill) return;
+  try{
+    const { data, error, count } = await sb
+      .from('field_notes')
+      .select('id, title, body, city, category, created_at, helpful_count, user_id', { count: 'exact' })
+      .eq('country_id', baseCountry.id)
+      .eq('status', 'approved')
+      .order('created_at', { ascending:false })
+      .limit(50);
+    if(error) throw error;
+
+    countPill.innerHTML = `<b>${count || 0}</b> saha notu paylaşıldı`;
+
+    if(!data || data.length === 0){
+      grid.innerHTML = `<div class="fn-empty">Bu ülke için henüz bir saha notu paylaşılmamış. İlk paylaşımı sen yap.</div>`;
+    } else {
+      // Yazar isimleri gizlilik/basitlik için "Furniture Atlas Üyesi #ID" formatında gösterilir.
+      const notesWithAuthor = data.map(n => ({
+        ...n,
+        author_name: `Furniture Atlas Üyesi #${String(n.user_id).slice(0,4).toUpperCase()}`,
+        author_tier: null,
+      }));
+
+      // Kullanıcının bu notlardan hangilerine oy verdiğini çek (giriş yapmışsa).
+      try{
+        const { data: sessionData } = await sb.auth.getSession();
+        const user = sessionData && sessionData.session && sessionData.session.user;
+        if(user){
+          const ids = notesWithAuthor.map(n=>n.id);
+          const { data: votes } = await sb.from('field_note_votes').select('note_id').in('note_id', ids);
+          fieldNoteVotedIds = new Set((votes||[]).map(v=>v.note_id));
+        }
+      }catch(e){ /* oy bilgisi alınamazsa sessizce yoksay */ }
+
+      grid.innerHTML = notesWithAuthor.map(renderFieldNoteCard).join('');
+    }
+  }catch(e){
+    console.error('Saha notları yüklenemedi:', e);
+    grid.innerHTML = `<div class="fn-empty">Saha notları şu an yüklenemedi.</div>`;
+    countPill.textContent = '';
+  }
+
+  // Admin ise "onay bekleyenler" linkini göster.
+  const adminLink = document.getElementById('fnAdminLink');
+  if(adminLink){
+    const isAdmin = await checkIsAppAdmin();
+    adminLink.style.display = isAdmin ? '' : 'none';
+  }
+}
+
+function openFieldNoteModal(countryId, countryName){
+  if(isVisitor()){
+    showToast('Saha notu paylaşmak için giriş yapmalısın.');
+    openLoginModal();
+    return;
+  }
+  fieldNoteTargetCountry = { id: countryId, name: countryName };
+  document.getElementById('fieldNoteCountryLabel').textContent =
+    `${countryName} ile ilgili gerçek bir ticari veya seyahat deneyimini paylaş. Paylaşımın, yayınlanmadan önce ekibimiz tarafından incelenir.`;
+  document.getElementById('fieldNoteModal').classList.add('open');
+}
+
+async function checkIsAppAdmin(){
+  if(isAppAdminCache !== null) return isAppAdminCache;
+  if(isVisitor()){ isAppAdminCache = false; return false; }
+  try{
+    const { data, error } = await sb.rpc('is_app_admin');
+    isAppAdminCache = !error && data === true;
+  }catch(e){ isAppAdminCache = false; }
+  return isAppAdminCache;
+}
+
+async function toggleFieldNoteHelpful(noteId, btnEl){
+  if(isVisitor()){
+    showToast('Oy verebilmek için giriş yapmalısın.');
+    openLoginModal();
+    return;
+  }
+  btnEl.disabled = true;
+  try{
+    const { data, error } = await sb.rpc('toggle_field_note_helpful', { note_id_input: noteId });
+    if(error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    if(row){
+      btnEl.querySelector('.fn-helpful-count').textContent = row.new_count;
+      btnEl.classList.toggle('voted', row.voted);
+      if(row.voted) fieldNoteVotedIds.add(noteId); else fieldNoteVotedIds.delete(noteId);
+    }
+  }catch(e){
+    console.error('Oy işlemi başarısız:', e);
+    showToast('Oy kaydedilemedi, tekrar dene.');
+  }
+  btnEl.disabled = false;
+}
+
+async function openFieldNoteAdminModal(){
+  document.getElementById('fieldNoteAdminModal').classList.add('open');
+  await loadPendingFieldNotes();
+}
+
+async function loadPendingFieldNotes(){
+  const body = document.getElementById('fieldNoteAdminBody');
+  body.innerHTML = 'Yükleniyor…';
+  try{
+    const { data, error } = await sb
+      .from('field_notes')
+      .select('id, title, body, city, category, country_id, created_at')
+      .eq('status', 'pending')
+      .order('created_at', { ascending:true });
+    if(error) throw error;
+    if(!data || data.length === 0){
+      body.innerHTML = `<div class="fn-empty">Onay bekleyen saha notu yok.</div>`;
+      return;
+    }
+    body.innerHTML = data.map(n => `
+      <div class="fn-admin-row" data-note-id="${n.id}">
+        <div class="fn-tags">
+          <span class="fn-tag fn-tag-cat">${fieldNoteEscape(n.category)}</span>
+          <span class="fn-tag">${fieldNoteEscape(n.country_id)}</span>
+          ${n.city ? `<span class="fn-tag fn-tag-city">📍 ${fieldNoteEscape(n.city)}</span>` : ''}
+        </div>
+        <div class="fn-title">${fieldNoteEscape(n.title)}</div>
+        <div class="fn-body" style="margin-bottom:0;">${fieldNoteEscape(n.body)}</div>
+        <div class="fn-admin-actions">
+          <button class="tray-btn tray-btn-primary" onclick="reviewFieldNote(${n.id}, 'approved', this)">Onayla</button>
+          <button class="tray-btn" onclick="reviewFieldNote(${n.id}, 'rejected', this)">Reddet</button>
+        </div>
+      </div>
+    `).join('');
+  }catch(e){
+    console.error('Onay bekleyen notlar yüklenemedi:', e);
+    body.innerHTML = `<div class="fn-empty">Liste yüklenemedi.</div>`;
+  }
+}
+
+async function reviewFieldNote(noteId, newStatus, btnEl){
+  const row = btnEl.closest('.fn-admin-row');
+  row.style.opacity = '0.5';
+  try{
+    const patch = { status: newStatus };
+    if(newStatus === 'approved') patch.approved_at = new Date().toISOString();
+    const { error } = await sb.from('field_notes').update(patch).eq('id', noteId);
+    if(error) throw error;
+    row.remove();
+    showToast(newStatus === 'approved' ? 'Not onaylandı ve yayınlandı.' : 'Not reddedildi.');
+    if(currentBaseCountry) loadFieldNotes(currentBaseCountry);
+  }catch(e){
+    console.error('İşlem başarısız:', e);
+    showToast('İşlem tamamlanamadı, tekrar dene.');
+    row.style.opacity = '1';
+  }
+}
 
 function fillNotes(baseCountry){
   const body = document.getElementById('relatedNotesBody');
@@ -5050,6 +5277,61 @@ document.getElementById('reportThanksCloseBtn').addEventListener('click', ()=>{
   document.getElementById('reportModal').classList.remove('open');
   document.getElementById('reportThanksWrap').style.display = 'none';
   document.getElementById('reportFormWrap').style.display = 'block';
+});
+
+document.getElementById('closeFieldNote').addEventListener('click', ()=>{
+  document.getElementById('fieldNoteModal').classList.remove('open');
+  document.getElementById('fieldNoteThanksWrap').style.display = 'none';
+  document.getElementById('fieldNoteFormWrap').style.display = 'block';
+});
+document.getElementById('fieldNoteThanksCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('fieldNoteModal').classList.remove('open');
+  document.getElementById('fieldNoteThanksWrap').style.display = 'none';
+  document.getElementById('fieldNoteFormWrap').style.display = 'block';
+});
+document.getElementById('fieldNoteSubmitBtn').addEventListener('click', async ()=>{
+  const title = document.getElementById('fieldNoteTitleInput').value.trim();
+  const category = document.getElementById('fieldNoteCategorySelect').value;
+  const city = document.getElementById('fieldNoteCityInput').value.trim();
+  const bodyText = document.getElementById('fieldNoteBodyInput').value.trim();
+
+  if(!fieldNoteTargetCountry){ showToast('Ülke bilgisi bulunamadı, sayfayı yenileyip tekrar deneyin.'); return; }
+  if(!title || title.length < 3){ alert('Lütfen en az 3 karakterlik bir başlık yazın.'); return; }
+  if(!category){ alert('Lütfen bir kategori seçin.'); return; }
+  if(!bodyText || bodyText.length < 20){ alert('Deneyim metni en az 20 karakter olmalı.'); return; }
+
+  const btn = document.getElementById('fieldNoteSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Gönderiliyor…';
+  try{
+    const { data: sessionData } = await sb.auth.getSession();
+    const user = sessionData && sessionData.session && sessionData.session.user;
+    if(!user) throw new Error('not_authenticated');
+
+    const { error } = await sb.from('field_notes').insert({
+      user_id: user.id,
+      country_id: fieldNoteTargetCountry.id,
+      city: city || null,
+      category,
+      title,
+      body: bodyText,
+      status: 'pending',
+    });
+    if(error) throw error;
+
+    document.getElementById('fieldNoteTitleInput').value = '';
+    document.getElementById('fieldNoteCategorySelect').value = '';
+    document.getElementById('fieldNoteCityInput').value = '';
+    document.getElementById('fieldNoteBodyInput').value = '';
+    document.getElementById('fieldNoteFormWrap').style.display = 'none';
+    document.getElementById('fieldNoteThanksWrap').style.display = 'block';
+  }catch(e){
+    console.error('Saha notu gönderilemedi:', e);
+    alert('Gönderim başarısız oldu, lütfen tekrar deneyin.');
+  }
+  btn.disabled = false; btn.textContent = 'Onaya Gönder';
+});
+document.getElementById('closeFieldNoteAdmin').addEventListener('click', ()=>{
+  document.getElementById('fieldNoteAdminModal').classList.remove('open');
 });
 
 document.getElementById('newsBtn').addEventListener('click', ()=>{
