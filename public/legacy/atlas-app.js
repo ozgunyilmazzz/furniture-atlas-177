@@ -3452,16 +3452,9 @@ function renderCountryPage(baseCountry){
       </div>
 
     </div>
-
-    <div class="cp-section" style="border-bottom:none;">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="num">12</span> Saha Notları</h3>
-      <div class="footnote" style="margin-bottom:18px;">Furniture Atlas üyelerinin ${c.name} ile ilgili gerçek ticari ve seyahat deneyimleri. Her paylaşım yayına alınmadan önce incelenir.</div>
-      ${renderFieldNotesSectionHTML(c)}
-    </div>
     </div>
   `;
 
-  loadFieldNotes(baseCountry);
   fillNotes(baseCountry);
   applyContentGate();
   animateFillBars();
@@ -4235,21 +4228,6 @@ function fieldNoteEscape(str){
   return String(str||'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 
-function renderFieldNotesSectionHTML(c){
-  return `
-    <div class="fn-head-row">
-      <span class="fn-count-pill" id="fnCountPill">Yükleniyor…</span>
-      <div class="fn-actions">
-        <span class="fn-admin-link" id="fnAdminLink" style="display:none;" onclick="openFieldNoteAdminModal()">Onay bekleyenleri gör</span>
-        <button class="tray-btn tray-btn-primary" id="fnAddBtn" style="padding:9px 18px; font-size:12px;" onclick="openFieldNoteModal('${c.id}','${fieldNoteEscape(c.name)}')">+ Saha Notu Ekle</button>
-      </div>
-    </div>
-    <div class="fn-grid" id="fnGrid">
-      <div class="fn-empty">Saha notları yükleniyor…</div>
-    </div>
-  `;
-}
-
 function renderFieldNoteCard(note){
   const badgeClass = note.author_tier === 'founding' ? 'founding' : (note.author_tier === 'standard' ? 'standard' : '');
   const badgeLabel = note.author_tier === 'founding' ? 'Kurucu Üye' : (note.author_tier === 'standard' ? 'Üye' : 'Üye');
@@ -4293,6 +4271,7 @@ async function loadFieldNotes(baseCountry){
       .limit(50);
     if(error) throw error;
 
+    countPill.style.display = '';
     countPill.innerHTML = `<b>${count || 0}</b> saha notu paylaşıldı`;
 
     if(!data || data.length === 0){
@@ -4321,7 +4300,7 @@ async function loadFieldNotes(baseCountry){
   }catch(e){
     console.error('Saha notları yüklenemedi:', e);
     grid.innerHTML = `<div class="fn-empty">Saha notları şu an yüklenemedi.</div>`;
-    countPill.textContent = '';
+    countPill.style.display = 'none';
   }
 
   // Admin ise "onay bekleyenler" linkini göster.
@@ -5277,6 +5256,24 @@ document.getElementById('reportThanksCloseBtn').addEventListener('click', ()=>{
   document.getElementById('reportModal').classList.remove('open');
   document.getElementById('reportThanksWrap').style.display = 'none';
   document.getElementById('reportFormWrap').style.display = 'block';
+});
+
+document.getElementById('fieldNotesBtn').addEventListener('click', ()=>{
+  if(!currentBaseCountry) return;
+  document.getElementById('fieldNotesModalCountry').textContent = '— ' + currentBaseCountry.name;
+  document.getElementById('fieldNotesModal').classList.add('open');
+  loadFieldNotes(currentBaseCountry);
+});
+document.getElementById('closeFieldNotesModal').addEventListener('click', ()=>{
+  document.getElementById('fieldNotesModal').classList.remove('open');
+});
+document.getElementById('fnAdminLink').addEventListener('click', ()=>{
+  openFieldNoteAdminModal();
+});
+document.getElementById('fnAddBtn').addEventListener('click', ()=>{
+  if(!currentBaseCountry) return;
+  document.getElementById('fieldNotesModal').classList.remove('open');
+  openFieldNoteModal(currentBaseCountry.id, currentBaseCountry.name);
 });
 
 document.getElementById('closeFieldNote').addEventListener('click', ()=>{
