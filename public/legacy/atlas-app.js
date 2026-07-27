@@ -4707,11 +4707,25 @@ document.getElementById('closeCompare').addEventListener('click', ()=>{
    GİRİŞ (kullanıcı adı — localStorage) & HEDEF ÜLKELERİM
    ========================================================= */
 function openLoginModal(){ document.getElementById('loginModal').classList.add('open'); }
+const FIELD_NOTES_BTN_CONTENT = '<span class="fn-pulse-dot"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Saha Notları';
+function updateFieldNotesBtnLock(){
+  const btn = document.getElementById('fieldNotesBtn');
+  if(!btn) return;
+  const locked = isVisitor();
+  btn.classList.toggle('is-locked', locked);
+  if(locked){
+    btn.innerHTML = ICON_LOCK + 'Saha Notları';
+    btn.setAttribute('data-lock-tooltip', 'ÜYELERE ÖZEL');
+  } else {
+    btn.innerHTML = FIELD_NOTES_BTN_CONTENT;
+    btn.removeAttribute('data-lock-tooltip');
+  }
+}
 function updateLoginUI(){
   const user = getCurrentUser();
   const loginBtn = document.getElementById('loginBtn');
   const targetsBtn = document.getElementById('myTargetsBtn');
-  const gatedBtns = ['newsBtn','fairsBtn','travelPlanBtn','reportIssueBtn','fieldNotesBtn'].map(id=>document.getElementById(id));
+  const gatedBtns = ['newsBtn','fairsBtn','travelPlanBtn','reportIssueBtn'].map(id=>document.getElementById(id));
   const eyebrowEl = document.getElementById('heroEyebrow');
   const titleEl = document.getElementById('heroTitle');
   const subEl = document.getElementById('heroSub');
@@ -4737,6 +4751,7 @@ function updateLoginUI(){
     if(popularMarketsEl) popularMarketsEl.style.display = 'none';
   }
   refreshMyTargetsBadge();
+  updateFieldNotesBtnLock();
 }
 function refreshMyTargetsBadge(){
   const user = getCurrentUser();
