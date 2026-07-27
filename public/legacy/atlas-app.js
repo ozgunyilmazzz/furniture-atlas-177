@@ -1,4 +1,4 @@
-console.log('%cFurniture Atlas build: checkbox-fix-v6', 'color:#c9a961; font-weight:bold;');
+console.log('%cFurniture Atlas build: checkbox-fix-v7-defense', 'color:#c9a961; font-weight:bold;');
 /* =========================================================
    ÖRNEK VERİ SETİ — tamamı gösterim amaçlıdır
    ========================================================= */
@@ -2794,7 +2794,7 @@ function renderListTable(){
   }
   tbody.innerHTML = rows.map(({base,cd})=> {
     const xf = generateExtraFields(cd);
-    const openAttr = `onclick="handleListRowClick('${base.id}')" style="cursor:pointer;"`;
+    const openAttr = `onclick="handleListRowClick(event, '${base.id}')" style="cursor:pointer;"`;
     const dataCells = listColumnOrder.map(key => getColumnCellHtml(key, cd, xf).replace('<td', `<td ${openAttr}`)).join('');
     return `
     <tr data-id="${base.id}">
@@ -2814,20 +2814,34 @@ function renderListTable(){
 const countryTableBodyEl = document.getElementById('countryTableBody');
 if(countryTableBodyEl){
   countryTableBodyEl.addEventListener('click', (e)=>{
-    if(e.target.closest('.td-check')) e.stopPropagation();
+    if(e.target.closest('.td-check')){ lastCheckboxInteractionTs = Date.now(); e.stopPropagation(); }
   }, true);
   countryTableBodyEl.addEventListener('change', (e)=>{
     const chk = e.target.closest('input.compare-check');
     if(chk) handleListCheckboxChange(chk);
   });
 }
-function handleListRowClick(id){
+// SAVUNMA KATMANLARI — "checkbox'a tıklayınca ülke sayfası açılıyor" hatası bazı
+// tarayıcılarda (özellikle mobilde) hayalet tıklama / olay sıralaması farklarından
+// tekrar edebiliyordu. Artık satır açma üç ayrı katmanla korunuyor:
+// 1) Tıklamanın hedefi checkbox hücresi/etiketi/inputuysa satır AÇILMAZ.
+// 2) Son 400ms içinde herhangi bir checkbox etkileşimi olduysa satır AÇILMAZ
+//    (mobil tarayıcıların dokunuş sonrası gönderdiği gecikmeli "hayalet" click'ler için).
+// 3) Mevcut capture-aşaması stopPropagation koruması da yerinde duruyor.
+let lastCheckboxInteractionTs = 0;
+function handleListRowClick(ev, id){
+  if(ev && ev.target && ev.target.closest && ev.target.closest('.td-check, input, label')) return;
+  if(Date.now() - lastCheckboxInteractionTs < 400) return;
   const c = COUNTRIES.find(x=>x.id===id);
   if(c) openDashboard(c);
 }
 function handleListCheckboxChange(chk){
+  lastCheckboxInteractionTs = Date.now();
   const id = chk.getAttribute('data-id');
   if(chk.checked) addToCompare(id); else removeFromCompare(id);
+  // Limit dolduysa addToCompare eklemeyi reddeder — checkbox'ın görünümü gerçek
+  // listeyle senkron kalsın (eskiden işaretli kalıp yanıltıyordu).
+  chk.checked = compareIds.includes(id);
 }
 // arama kutusu liste görünümünü de filtrelesin
 searchInput.addEventListener('input', ()=>{
@@ -4067,7 +4081,12 @@ let compareIds = [];
 function addToCompare(id){
   if(compareIds.includes(id)) return;
   const maxCompare = isPremiumUser() ? 4 : 2;
-  if(compareIds.length >= maxCompare){ alert(`En fazla ${maxCompare} pazar karşılaştırabilirsin.`); return; }
+  if(compareIds.length >= maxCompare){
+    // alert() yerine toast: alert, checkbox'ın change olayı sırasında senkron bloklayarak
+    // mobilde işaretçi/tıklama sırasını bozabiliyordu — toast engellemez.
+    showToast(`En fazla ${maxCompare} pazar karşılaştırabilirsin.`);
+    return;
+  }
   compareIds.push(id);
   renderCompareTray();
 }
