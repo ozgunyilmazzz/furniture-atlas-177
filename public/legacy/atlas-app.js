@@ -1,4 +1,12 @@
-console.log('%cFurniture Atlas build: checkbox-fix-v8-delegated', 'color:#c9a961; font-weight:bold;');
+const BUILD_TAG = 'checkbox-fix-v8-delegated';
+console.log('%cFurniture Atlas build: ' + BUILD_TAG, 'color:#c9a961; font-weight:bold;');
+// Yayındaki sürümü konsol açmadan doğrulayabilmek için footer'a küçük bir sürüm
+// etiketi basılır — "deploy gerçekten yayında mı?" sorusunu kökten çözer.
+document.addEventListener('DOMContentLoaded', ()=>{
+  const el = document.getElementById('buildTagSlot');
+  if(el) el.textContent = 'build: ' + BUILD_TAG;
+});
+(function(){ const el = document.getElementById('buildTagSlot'); if(el) el.textContent = 'build: ' + BUILD_TAG; })();
 /* =========================================================
    ÖRNEK VERİ SETİ — tamamı gösterim amaçlıdır
    ========================================================= */

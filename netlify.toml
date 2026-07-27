@@ -6,3 +6,10 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# /legacy altındaki JS/CSS her istekte yeniden doğrulanır — tarayıcı veya CDN'in
+# eski atlas-app.js sunması (checkbox hatasının hortlama nedeni) imkânsız hale gelir.
+[[headers]]
+  for = "/legacy/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
