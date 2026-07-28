@@ -1756,19 +1756,19 @@
       width:auto !important; max-height:75vh; overflow-y:auto;
     }
 
-    .toolbar-inner{ padding:6px 14px; gap:4px; }
+    .toolbar-inner{ padding:10px 14px; gap:9px; }
     .search-wrap{ min-width:0; max-width:none; width:100%; flex:0 0 100%; order:1; display:block; }
     .search-input{ padding:7px 14px 7px 32px; font-size:12.5px; }
     .view-toggle{ order:2; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    .view-toggle .view-btn, .view-toggle .country-chip{ white-space:nowrap; flex-shrink:0; padding:5px 12px; }
+    .view-toggle .view-btn, .view-toggle .country-chip{ white-space:nowrap; flex-shrink:0; padding:6px 13px; font-size:11px; }
     .view-toggle .ticker-toggle-btn{ white-space:nowrap; flex-shrink:0; padding:7px 9px; }
-    .category-toggle{ order:3; width:auto; margin-left:0; flex-wrap:nowrap; flex-shrink:1; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; }
+    .category-toggle{ order:3; width:auto; margin-left:0; flex-wrap:nowrap; flex-shrink:1; gap:7px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; }
     .category-toggle::-webkit-scrollbar{ height:0; }
     .category-label{ display:none; }
-    .cat-btn{ flex-shrink:0; white-space:nowrap; padding:5px 10px; font-size:11px; }
+    .cat-btn{ flex-shrink:0; white-space:nowrap; padding:7px 14px; font-size:11px; border-radius:100px; }
     .cat-btn small{ display:none; }
     .filter-wrap{ order:3; flex-shrink:0; }
-    .filter-btn{ padding:6px 12px; font-size:10px; }
+    .filter-btn{ padding:7px 15px; font-size:11px; }
     .filter-panel{
       position:fixed; top:var(--chrome-h, 220px); left:14px; right:14px; width:auto;
       max-height:70vh; overflow-y:auto;
@@ -1873,7 +1873,7 @@
   }
   .fn-nav-btn:hover{ border-color:var(--teal); color:var(--teal); background:rgba(63,208,192,0.16); }
   .fn-nav-btn.is-locked{
-    border-color:var(--border-soft); color:var(--text-2); background:transparent;
+    border-color:var(--border-soft); color:var(--text-1); background:transparent;
   }
   .fn-nav-btn.is-locked:hover{ border-color:var(--amber); color:var(--amber-bright); background:rgba(201,169,97,0.08); }
   .fn-pulse-dot{
