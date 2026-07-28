@@ -4195,9 +4195,8 @@ const BUSINESS_MAP_CATEGORIES = [
   { group:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:6px; opacity:0.85;"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/></svg>Hospitality', items:['Hotels','Resorts','Restaurants'] },
   { group:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:6px; opacity:0.85;"><rect x="5" y="3" width="9" height="18" rx="1"/><path d="M14 8h5v13h-5M8 7h1M8 11h1M8 15h1"/></svg>Office', items:['Office Furniture Dealers','Workspace Designers'] },
 ];
-document.getElementById('mapsSearchBtn').addEventListener('click', ()=>{
-  if(!currentBaseCountry) return;
-  const c = currentBaseCountry;
+function openBusinessMapModal(c){
+  if(!c) return;
   document.getElementById('mapsModalTitle').innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:7px; opacity:0.9;"><path d="M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>İş Haritası — ${c.name}`;
   document.getElementById('mapsModalBody').innerHTML = `
     <div class="footnote" style="margin-bottom:16px;">${c.flag} ${c.name} sınırlarında aramak istediğin iş kategorilerini işaretle, ardından "Aramaları Oluştur"a bas — her biri için ayrı bir Google Haritalar bağlantısı üretilir.</div>
@@ -4233,9 +4232,15 @@ document.getElementById('mapsSearchBtn').addEventListener('click', ()=>{
       </a>`;
     }).join('');
   });
+}
+document.getElementById('mapsSearchBtn').addEventListener('click', ()=>{
+  if(!currentBaseCountry) return;
+  openBusinessMapModal(currentBaseCountry);
+  pushHistoryState();
 });
 document.getElementById('closeMaps').addEventListener('click', ()=>{
   document.getElementById('mapsModal').classList.remove('open');
+  pushHistoryState();
 });
 
 /* =========================================================
@@ -5297,11 +5302,13 @@ document.getElementById('closeFairs').addEventListener('click', ()=>{
 });
 document.getElementById('reportIssueBtn').addEventListener('click', ()=>{
   document.getElementById('reportModal').classList.add('open');
+  pushHistoryState();
 });
 document.getElementById('closeReport').addEventListener('click', ()=>{
   document.getElementById('reportModal').classList.remove('open');
   document.getElementById('reportThanksWrap').style.display = 'none';
   document.getElementById('reportFormWrap').style.display = 'block';
+  pushHistoryState();
 });
 document.getElementById('reportSubmitBtn').addEventListener('click', async ()=>{
   const country = document.getElementById('reportCountryInput').value.trim();
@@ -5338,21 +5345,28 @@ document.getElementById('reportThanksCloseBtn').addEventListener('click', ()=>{
   document.getElementById('reportModal').classList.remove('open');
   document.getElementById('reportThanksWrap').style.display = 'none';
   document.getElementById('reportFormWrap').style.display = 'block';
+  pushHistoryState();
 });
 
-document.getElementById('fieldNotesBtn').addEventListener('click', ()=>{
-  if(!currentBaseCountry) return;
+function openFieldNotesFor(c){
+  if(!c) return false;
   if(isVisitor()){
     showToast('Saha notlarını görüntülemek için giriş yapmalısın.');
     openLoginModal();
-    return;
+    return false;
   }
-  document.getElementById('fieldNotesModalCountry').textContent = '— ' + currentBaseCountry.name;
+  document.getElementById('fieldNotesModalCountry').textContent = '— ' + c.name;
   document.getElementById('fieldNotesModal').classList.add('open');
-  loadFieldNotes(currentBaseCountry);
+  loadFieldNotes(c);
+  return true;
+}
+document.getElementById('fieldNotesBtn').addEventListener('click', ()=>{
+  if(!currentBaseCountry) return;
+  if(openFieldNotesFor(currentBaseCountry)) pushHistoryState();
 });
 document.getElementById('closeFieldNotesModal').addEventListener('click', ()=>{
   document.getElementById('fieldNotesModal').classList.remove('open');
+  pushHistoryState();
 });
 document.getElementById('fnAdminLink').addEventListener('click', ()=>{
   openFieldNoteAdminModal();
@@ -5809,6 +5823,7 @@ document.getElementById('closeCookiePolicy').addEventListener('click', ()=>{
   ['partnersLink', 'partnersModal', 'closePartners'],
   ['contactLink', 'contactModal', 'closeContact'],
   ['aboutLink', 'aboutModal', 'closeAbout'],
+  ['turkiyeLink', 'turkiyeModal', 'closeTurkiye'],
 ].forEach(([linkId, modalId, closeId])=>{
   document.getElementById(linkId).addEventListener('click', (e)=>{
     e.preventDefault();
@@ -5819,6 +5834,18 @@ document.getElementById('closeCookiePolicy').addEventListener('click', ()=>{
     document.getElementById(modalId).classList.remove('open');
     pushHistoryState();
   });
+});
+document.getElementById('turkiyeNewsBtn').addEventListener('click', ()=>{
+  document.getElementById('turkiyeModal').classList.remove('open');
+  renderNews();
+  document.getElementById('newsModal').classList.add('open');
+  pushHistoryState();
+});
+document.getElementById('turkiyeExploreBtn').addEventListener('click', ()=>{
+  document.getElementById('turkiyeModal').classList.remove('open');
+  closeTrackedModals();
+  showView('globe');
+  pushHistoryState();
 });
 
 /* =========================================================
@@ -5833,7 +5860,7 @@ document.getElementById('closeCookiePolicy').addEventListener('click', ()=>{
    bir app-state kalmadığında) tarayıcı normal şekilde siteden
    çıkar; burada buna müdahale edilmez.
    ========================================================= */
-const TRACKED_MODALS = { news:'newsModal', fairs:'fairsModal', targets:'targetsModal', travel:'travelModal', premium:'premiumModal', reports:'globalReportsModal', research:'atlasResearchModal', cookies:'cookiePolicyModal', terms:'termsModal', privacy:'privacyPolicyModal', help:'helpCenterModal', partners:'partnersModal', contact:'contactModal', about:'aboutModal' };
+const TRACKED_MODALS = { news:'newsModal', fairs:'fairsModal', targets:'targetsModal', travel:'travelModal', premium:'premiumModal', reports:'globalReportsModal', research:'atlasResearchModal', cookies:'cookiePolicyModal', terms:'termsModal', privacy:'privacyPolicyModal', help:'helpCenterModal', partners:'partnersModal', contact:'contactModal', about:'aboutModal', report:'reportModal', turkey:'turkiyeModal' };
 function getOpenModalName(){
   for(const name in TRACKED_MODALS){
     const el = document.getElementById(TRACKED_MODALS[name]);
@@ -5848,13 +5875,22 @@ function closeTrackedModals(){
   });
 }
 
+function getOpenCountrySubpage(){
+  const fn = document.getElementById('fieldNotesModal');
+  const mm = document.getElementById('mapsModal');
+  if(fn && fn.classList.contains('open')) return 'fieldNotes';
+  if(mm && mm.classList.contains('open')) return 'businessMap';
+  return null;
+}
+
 function currentAppState(){
   return {
     view: dashboard.classList.contains('open') ? 'country' : (listView.classList.contains('show') ? 'list' : 'globe'),
     countryId: openCountryId || null,
     cat: activeCategory,
     filters: Object.assign({}, activeFilters),
-    modal: getOpenModalName()
+    modal: getOpenModalName(),
+    countrySubpage: getOpenCountrySubpage()
   };
 }
 
@@ -5864,6 +5900,15 @@ function currentAppState(){
 const CATEGORY_SLUGS = { wood: 'ahsap-mobilya' };
 const CATEGORY_SLUGS_REVERSE = Object.fromEntries(
   Object.entries(CATEGORY_SLUGS).map(([cat, slug]) => [slug, cat])
+);
+
+// Faz 6: bir ülkeye özel Saha Notları ve İş Haritası da artık kendi bağımsız,
+// paylaşılabilir URL'lerine sahip — /country/<slug>/saha-notlari, /country/<slug>/is-haritasi.
+// Bunlar kategori segmentiyle aynı konumu paylaşır ama kategoriden farklı bir şeyi
+// (aktif kategori değil, açık bir alt-modal) temsil eder; bu yüzden ayrı bir haritalama.
+const COUNTRY_SUBPAGE_SLUGS = { fieldNotes: 'saha-notlari', businessMap: 'is-haritasi' };
+const COUNTRY_SUBPAGE_SLUGS_REVERSE = Object.fromEntries(
+  Object.entries(COUNTRY_SUBPAGE_SLUGS).map(([key, slug]) => [slug, key])
 );
 
 // Faz 5: haberler/fuarlar/hedef ülkelerim ve footer'daki tüm sabit sayfalar
@@ -5885,6 +5930,8 @@ const MODAL_SLUGS = {
   partners: 'is-ortaklari',
   contact: 'iletisim',
   about: 'hakkimizda',
+  report: 'hata-bildir',
+  turkey: 'turkiye',
 };
 const MODAL_SLUGS_REVERSE = Object.fromEntries(
   Object.entries(MODAL_SLUGS).map(([name, slug]) => [slug, name])
@@ -5905,7 +5952,12 @@ function stateToUrl(state){
   const qs = params.toString();
 
   if(state.view === 'country' && state.countryId){
-    return '/country/' + state.countryId + (catSlug ? '/' + catSlug : '') + (qs ? ('?' + qs) : '');
+    // Saha Notları / İş Haritası açıkken kategori segmenti yerine bu alt-sayfanın
+    // kendi slug'ı kullanılır (ikisi aynı URL konumunu paylaşır, birbirini ezmez).
+    const subpageSlug = state.countrySubpage && COUNTRY_SUBPAGE_SLUGS[state.countrySubpage]
+      ? COUNTRY_SUBPAGE_SLUGS[state.countrySubpage] : null;
+    const segment = subpageSlug || catSlug;
+    return '/country/' + state.countryId + (segment ? '/' + segment : '') + (qs ? ('?' + qs) : '');
   }
 
   if(state.view === 'list'){
@@ -5962,6 +6014,8 @@ function applyHistoryState(state){
     needsRender = true;
 
     const view = state && state.view;
+    document.getElementById('fieldNotesModal').classList.remove('open');
+    document.getElementById('mapsModal').classList.remove('open');
     if(view === 'country' && state.countryId){
       const c = COUNTRIES.find(x=> x.id === state.countryId);
       if(c){
@@ -5970,6 +6024,11 @@ function applyHistoryState(state){
         renderCountryPage(c);
         renderCountryChip(c);
         showView('country');
+        if(state.countrySubpage === 'fieldNotes'){
+          openFieldNotesFor(c);
+        } else if(state.countrySubpage === 'businessMap'){
+          openBusinessMapModal(c);
+        }
       } else {
         openCountryId = null;
         currentBaseCountry = null;
@@ -6043,11 +6102,17 @@ window.addEventListener('popstate', (e)=>{
   let view = 'globe';
   let countryId = null;
   let catSlug = null;
+  let subpageSlug = null;
 
   if(countryMatch){
     view = 'country';
     countryId = countryMatch[1];
-    catSlug = countryMatch[2] || null;
+    const secondSegment = countryMatch[2] || null;
+    if(secondSegment && COUNTRY_SUBPAGE_SLUGS_REVERSE[secondSegment]){
+      subpageSlug = secondSegment;
+    } else {
+      catSlug = secondSegment;
+    }
   } else if(listMatch){
     view = 'list';
     catSlug = listMatch[1] || null;
@@ -6061,6 +6126,7 @@ window.addEventListener('popstate', (e)=>{
   if(view === 'globe' && params.get('view') === 'list') view = 'list';
 
   const catFromPath = catSlug ? (CATEGORY_SLUGS_REVERSE[catSlug] || null) : null;
+  const countrySubpage = subpageSlug ? COUNTRY_SUBPAGE_SLUGS_REVERSE[subpageSlug] : null;
   const modalName = modalFromPath || (TRACKED_MODALS[params.get('modal')] ? params.get('modal') : null);
   const initialState = {
     view,
@@ -6070,14 +6136,15 @@ window.addEventListener('popstate', (e)=>{
       try{ return params.get('filters') ? JSON.parse(params.get('filters')) : {}; }
       catch(e){ return {}; }
     })(),
-    modal: modalName
+    modal: modalName,
+    countrySubpage
   };
   try{
     history.replaceState(initialState, '', stateToUrl(initialState));
   }catch(e){
     // srcdoc/sandboxed önizleme ortamlarında URL güncellenemeyebilir — state'i yine de uygula.
   }
-  if(initialState.view !== 'globe' || Object.keys(initialState.filters).length || initialState.cat !== 'seating' || initialState.modal){
+  if(initialState.view !== 'globe' || Object.keys(initialState.filters).length || initialState.cat !== 'seating' || initialState.modal || initialState.countrySubpage){
     applyHistoryState(initialState);
   }
 })();

@@ -26,6 +26,8 @@ const STATIC_PATHS: {
   { path: "/iletisim", priority: 0.4, changeFrequency: "yearly" },
   { path: "/is-ortaklari", priority: 0.4, changeFrequency: "yearly" },
   { path: "/yardim-merkezi", priority: 0.4, changeFrequency: "monthly" },
+  { path: "/hata-bildir", priority: 0.3, changeFrequency: "yearly" },
+  { path: "/turkiye", priority: 0.7, changeFrequency: "weekly" },
   { path: "/gizlilik-politikasi", priority: 0.3, changeFrequency: "yearly" },
   { path: "/kullanim-sartlari", priority: 0.3, changeFrequency: "yearly" },
   { path: "/cerez-politikasi", priority: 0.3, changeFrequency: "yearly" },
@@ -56,6 +58,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/country/${c.id}/saha-notlari`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/country/${c.id}/is-haritasi`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
     },
   ]);
 
