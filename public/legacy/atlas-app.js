@@ -227,65 +227,193 @@ const COUNTRIES = [
    kullanılır — asla veri uydurulmaz. Her ülkenin bileşen dökümü, Fırsat Skoru'nun
    yanındaki ⓘ panelinde şeffaf şekilde gösterilir.
    ========================================================= */
+function getTurkeyGrowthSeries(countryId, categoryKey){
+  const table = categoryKey === 'wood' ? TURKEY_GROWTH_WOOD : TURKEY_GROWTH_SEATING;
+  return table[countryId] || null;
+}
+// Yıllık ortalama büyüme oranı (CAGR) — serideki ilk ve son GERÇEK (null olmayan) veri
+// noktaları arasında hesaplanır. Aradaki boşluklar (tek bir yılın eksik olması gibi)
+// grafiği etkilemez ama CAGR yalnızca uçlardaki gerçek değerleri kullanır.
+function computeGrowthCAGR(series){
+  if(!series) return null;
+  let firstIdx = -1, lastIdx = -1;
+  for(let i=0;i<series.length;i++){
+    if(series[i] != null){ if(firstIdx === -1) firstIdx = i; lastIdx = i; }
+  }
+  if(firstIdx === -1 || lastIdx === firstIdx) return null;
+  const first = series[firstIdx], last = series[lastIdx];
+  if(first <= 0) return null; // sıfırdan başlıyorsa büyüme oranı tanımsız
+  const yearsSpan = lastIdx - firstIdx;
+  const cagr = (Math.pow(last / first, 1 / yearsSpan) - 1) * 100;
+  return Math.round(cagr * 10) / 10;
+}
+// Türkiye'nin 2017-2025 ihracat trendini gösteren, sitenin tasarım diline uygun,
+// premium bir SVG çizgi grafiği. Veri yoksa dürüstçe "Bilinmiyor" gösterir.
+function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
+  const series = getTurkeyGrowthSeries(countryId, categoryKey);
+  if(!series || series.every(v => v == null)){
+    return `
+      <div class="cp-section" style="border-bottom:none; padding-top:0;">
+        <h3 class="cp-section-title" style="font-size:19px; margin-bottom:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Türkiye İhracat Trendi (2017–2025)</h3>
+        <div class="footnote">Bilinmiyor — bu ülke/kategori için 2017-2025 yıllık ihracat trend verisi henüz yok.</div>
+      </div>`;
+  }
+  const W = 680, H = 190, padL = 8, padR = 8, padT = 14, padB = 26;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const n = series.length;
+  const vals = series.filter(v => v != null);
+  const maxV = Math.max(...vals);
+  const minV = Math.min(0, Math.min(...vals));
+  const range = (maxV - minV) || 1;
+  const xFor = i => padL + (i / (n - 1)) * plotW;
+  const yFor = v => padT + plotH - ((v - minV) / range) * plotH;
+
+  let pathD = '';
+  const dots = [];
+  let started = false;
+  series.forEach((v, i) => {
+    if(v == null){ started = false; return; }
+    const x = xFor(i), y = yFor(v);
+    pathD += (started ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+    started = true;
+    dots.push({ x, y, v, i });
+  });
+  const baseline = (padT + plotH).toFixed(1);
+  const areaD = dots.length ? `${pathD}L${dots[dots.length-1].x.toFixed(1)},${baseline} L${dots[0].x.toFixed(1)},${baseline} Z` : '';
+  const gradId = 'tgGrad-' + countryId + '-' + categoryKey;
+  const lastDot = dots[dots.length - 1];
+  const cagr = computeGrowthCAGR(series);
+  const yearLabels = TURKEY_GROWTH_YEARS.map((y, i) =>
+    (i === 0 || i === n - 1 || i === Math.floor((n-1)/2))
+      ? `<text x="${xFor(i).toFixed(1)}" y="${H-8}" font-size="10" fill="var(--text-2)" text-anchor="${i===0?'start':i===n-1?'end':'middle'}">${y}</text>`
+      : ''
+  ).join('');
+
+  return `
+    <div class="cp-section" style="border-bottom:none; padding-top:0;">
+      <h3 class="cp-section-title" style="font-size:19px; margin-bottom:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Türkiye İhracat Trendi (2017–2025)</h3>
+      <div class="footnote" style="margin-bottom:14px;">${categoryLabel} kategorisinde Türkiye'den bu ülkeye yıllık ihracat, milyon $ (ITC Trade Map, gerçek veri).</div>
+      <div class="tg-chart-card">
+        <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="overflow:visible; display:block;">
+          <defs>
+            <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--teal)" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="var(--teal)" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="${areaD}" fill="url(#${gradId})" stroke="none"/>
+          <path d="${pathD}" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          ${dots.map(d => `<circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="${d.i===lastDot.i?4.5:2.5}" fill="${d.i===lastDot.i?'var(--amber-bright)':'var(--teal)'}"/>`).join('')}
+          ${yearLabels}
+        </svg>
+      </div>
+      <div class="tg-chart-footer">
+        <span class="footnote" style="margin:0;">${lastDot ? `${TURKEY_GROWTH_YEARS[lastDot.i]}: $${lastDot.v}M` : ''}</span>
+        ${cagr !== null ? `<span class="tg-chart-cagr ${cagr>=0?'up':'down'}">Yıllık ortalama büyüme (CAGR): ${cagr>=0?'+':''}${cagr}%</span>` : ''}
+      </div>
+    </div>`;
+}
+
 function opScoreParseNum(s){
   if(s == null || s === 'Bilinmiyor') return null;
   const m = String(s).replace(/,/g,'').match(/-?[\d.]+/);
   return m ? parseFloat(m[0]) : null;
 }
+// Fırsat Skoru formülünün ortak (kategori-bağımsız) çekirdeği. Hem Döşemeli Oturma
+// Grubu (varsayılan, computeOpportunityScores) hem de Ahşap Mobilya (buildWoodVariant,
+// WOOD_OPPORTUNITY_SCORES üzerinden) TAM OLARAK AYNI 6 bileşenli, gerçek-veri formülünü
+// kullanır — sadece girdi alanları kategoriye göre değişir. Önceden ahşap kategorisi çok
+// daha eski, ayrı bir formül kullanıyordu; bu artık düzeltilmiştir.
+function buildScoreRanges(fieldsArr){
+  function computeRange(key, logScale){
+    const vals = fieldsArr.map(f=>f[key]).filter(v=>v!=null && !isNaN(v) && (!logScale || v>0));
+    return { min: Math.min(...vals), max: Math.max(...vals) };
+  }
+  return {
+    annualImports: computeRange('annualImports', true),
+    derivedTurkeyValue: computeRange('derivedTurkeyValue', true),
+    growthCAGR: computeRange('growthCAGR', false),
+    importGrowth: computeRange('importGrowth', false),
+    customsDuty: computeRange('customsDuty', false),
+    topSupplierShare: computeRange('topSupplierShare', false),
+  };
+}
+function normalizeScoreField(v, range, invert, logScale){
+  if(v == null || isNaN(v) || (logScale && v<=0)) return null;
+  let vv = v, mn = range.min, mx = range.max;
+  if(logScale){ vv = Math.log10(v); mn = Math.log10(range.min); mx = Math.log10(range.max); }
+  let score = mx>mn ? (vv-mn)/(mx-mn)*100 : 50;
+  if(invert) score = 100 - score;
+  return Math.max(0, Math.min(100, score));
+}
+function computeScoreFromFields(f, ranges){
+  const marketSize = normalizeScoreField(f.annualImports, ranges.annualImports, false, true) ?? 40;
+  const traction = normalizeScoreField(f.derivedTurkeyValue, ranges.derivedTurkeyValue, false, true) ?? 20;
+  const momentum = normalizeScoreField(f.growthCAGR, ranges.growthCAGR, false, false) ?? 50;
+  const marketGrowth = normalizeScoreField(f.importGrowth, ranges.importGrowth, false, false) ?? 50;
+  const easeOfEntry = normalizeScoreField(f.customsDuty, ranges.customsDuty, true, false) ?? 50;
+  const competition = normalizeScoreField(f.topSupplierShare, ranges.topSupplierShare, true, false) ?? 50;
+  const overall = Math.round(
+    0.20*marketSize + 0.30*traction + 0.10*momentum + 0.10*marketGrowth + 0.15*easeOfEntry + 0.15*competition
+  );
+  return {
+    marketSize, traction, momentum, marketGrowth, easeOfEntry, competition,
+    derivedTurkeyValue: f.derivedTurkeyValue,
+    overall: Math.max(5, Math.min(97, overall)),
+  };
+}
+// Ahşap Mobilya kategorisi için hesaplanmış Fırsat Skorları — buildWoodVariant() bunu okur.
+const WOOD_OPPORTUNITY_SCORES = {};
+
 function computeOpportunityScores(countries){
-  function extractFields(c){
+  function extractSeatingFields(c){
     const annualImports = opScoreParseNum(c.annualImports);
     const turkeyShare = opScoreParseNum(c.turkeyShare);
-    const turkeyGrowth = opScoreParseNum(c.turkeyGrowth);
     const importGrowth = opScoreParseNum(c.importGrowth);
     const customsDuty = opScoreParseNum(c.customsDuty);
     const topSupplierShare = (c.suppliers && c.suppliers.length)
       ? Math.max(...c.suppliers.filter(s=>s.c!=='Türkiye').map(s=>s.v))
       : null;
     const derivedTurkeyValue = (annualImports!=null && turkeyShare!=null) ? annualImports*turkeyShare/100 : null;
-    return {annualImports, turkeyShare, turkeyGrowth, importGrowth, customsDuty, topSupplierShare, derivedTurkeyValue};
+    const growthCAGR = computeGrowthCAGR(TURKEY_GROWTH_SEATING[c.id] || null);
+    return {annualImports, derivedTurkeyValue, growthCAGR, importGrowth, customsDuty, topSupplierShare};
   }
-  const rows = countries.map(c=>({ c, f: extractFields(c) }));
+  // Giriş Kolaylığı: yalnızca customsDuty kullanılır (gerçek veri sadece Avrupa için var,
+  // %0 Gümrük Birliği). eodb alanı kasıtlı olarak KULLANILMIYOR — bu alan sadece 10 elle
+  // hazırlanan ülkede gerçek, geri kalan ~167 ülkede hâlâ tamamen rastgele üretiliyor ve
+  // hiçbir gerçek veriyle düzeltilmiyor; formülde kullanmak "gerçek veri" ilkesini bozar.
+  const seatingFieldsArr = countries.map(extractSeatingFields);
+  const seatingRanges = buildScoreRanges(seatingFieldsArr);
+  countries.forEach((c,i)=>{
+    const result = computeScoreFromFields(seatingFieldsArr[i], seatingRanges);
+    c.scores.overall = result.overall;
+    c._scoreBreakdown = result;
+  });
 
-  function computeRange(key, logScale){
-    const vals = rows.map(r=>r.f[key]).filter(v=>v!=null && !isNaN(v) && (!logScale || v>0));
-    return { min: Math.min(...vals), max: Math.max(...vals) };
+  // AHŞAP MOBİLYA — aynı 6 bileşenli formül, bu sefer ahşap kategorisine özel gerçek
+  // verilerle (REAL_SUPPLIERS_WOOD, REAL_IMPORT_GROWTH_WOOD, TURKEY_GROWTH_WOOD).
+  function extractWoodFields(c){
+    const real = REAL_SUPPLIERS_WOOD[c.id] || null;
+    const annualImports = real ? real.totalValueM : null;
+    const turkeyShare = real ? real.turkeyShare : null;
+    const derivedTurkeyValue = (annualImports!=null && turkeyShare!=null) ? annualImports*turkeyShare/100 : null;
+    const growthCAGR = computeGrowthCAGR(TURKEY_GROWTH_WOOD[c.id] || null);
+    const importGrowthEntry = REAL_IMPORT_GROWTH_WOOD[c.id];
+    const importGrowth = importGrowthEntry ? importGrowthEntry.growthPct : null;
+    const isEuropeFree = (REGION_MAP[c.iso] || 'other') === 'europe';
+    const woodOverride = WOOD_TAX_OVERRIDES[c.id];
+    let customsDuty = null;
+    if(woodOverride) customsDuty = opScoreParseNum(woodOverride.customsDuty);
+    else if(isEuropeFree) customsDuty = 0;
+    const topSupplierShare = (real && real.suppliers && real.suppliers.length)
+      ? Math.max(...real.suppliers.filter(s=>s.c!=='Türkiye').map(s=>s.v), 0)
+      : null;
+    return {annualImports, derivedTurkeyValue, growthCAGR, importGrowth, customsDuty, topSupplierShare};
   }
-  function normalize(v, range, invert, logScale){
-    if(v == null || isNaN(v) || (logScale && v<=0)) return null;
-    let vv = v, mn = range.min, mx = range.max;
-    if(logScale){ vv = Math.log10(v); mn = Math.log10(range.min); mx = Math.log10(range.max); }
-    let score = mx>mn ? (vv-mn)/(mx-mn)*100 : 50;
-    if(invert) score = 100 - score;
-    return Math.max(0, Math.min(100, score));
-  }
-
-  const ranges = {
-    annualImports: computeRange('annualImports', true),
-    derivedTurkeyValue: computeRange('derivedTurkeyValue', true),
-    turkeyGrowth: computeRange('turkeyGrowth', false),
-    importGrowth: computeRange('importGrowth', false),
-    customsDuty: computeRange('customsDuty', false),
-    topSupplierShare: computeRange('topSupplierShare', false),
-  };
-
-  rows.forEach(({c, f})=>{
-    const marketSize = normalize(f.annualImports, ranges.annualImports, false, true) ?? 40;
-    const traction = normalize(f.derivedTurkeyValue, ranges.derivedTurkeyValue, false, true) ?? 20;
-    const momentum = normalize(f.turkeyGrowth, ranges.turkeyGrowth, false, false) ?? 50;
-    const marketGrowth = normalize(f.importGrowth, ranges.importGrowth, false, false) ?? 50;
-    // Giriş Kolaylığı: yalnızca customsDuty kullanılır (gerçek veri sadece Avrupa için var,
-    // %0 Gümrük Birliği). eodb alanı kasıtlı olarak KULLANILMIYOR — bu alan sadece 10 elle
-    // hazırlanan ülkede gerçek, geri kalan ~167 ülkede hâlâ tamamen rastgele üretiliyor ve
-    // hiçbir gerçek veriyle düzeltilmiyor; formülde kullanmak "gerçek veri" ilkesini bozar.
-    const easeOfEntry = normalize(f.customsDuty, ranges.customsDuty, true, false) ?? 50;
-    const competition = normalize(f.topSupplierShare, ranges.topSupplierShare, true, false) ?? 50;
-
-    const overall = Math.round(
-      0.20*marketSize + 0.30*traction + 0.10*momentum + 0.10*marketGrowth + 0.15*easeOfEntry + 0.15*competition
-    );
-    c.scores.overall = Math.max(5, Math.min(97, overall));
-    c._scoreBreakdown = { marketSize, traction, momentum, marketGrowth, easeOfEntry, competition, derivedTurkeyValue: f.derivedTurkeyValue };
+  const woodFieldsArr = countries.map(extractWoodFields);
+  const woodRanges = buildScoreRanges(woodFieldsArr);
+  countries.forEach((c,i)=>{
+    WOOD_OPPORTUNITY_SCORES[c.id] = computeScoreFromFields(woodFieldsArr[i], woodRanges);
   });
 }
 // (computeOpportunityScores tanımlandı; gerçek 167 ülke verisi ve tüm gerçek-veri
@@ -330,6 +458,54 @@ const REAL_IMPORT_GROWTH_WOOD = {"usa":{"v2024K":7199691,"v2025K":6433593,"growt
 // TÜİK Dış Ticaret İstatistikleri (2024, GTİP 940360). woodGrowthPct, bu iki gerçek kaynağın
 // karşılaştırılmasıyla hesaplanan gerçek yıllık büyüme oranıdır (2024 -> 2025).
 const TURKEY_EXPORT_REAL = {"tanzania":{"seating2025M":1.185,"wood2025M":1.792,"wood2024M":1.54,"woodGrowthPct":16.4},"canada":{"seating2025M":4.452,"wood2025M":3.33,"wood2024M":4.248,"woodGrowthPct":-21.6},"usa":{"seating2025M":23.289,"wood2025M":47.367,"wood2024M":51.381,"woodGrowthPct":-7.8},"kazakhstan":{"seating2025M":4.56,"wood2025M":5.203,"wood2024M":6.62,"woodGrowthPct":-21.4},"uzbekistan":{"seating2025M":4.377,"wood2025M":5.259,"wood2024M":7.379,"woodGrowthPct":-28.7},"papua-new-guinea":{"wood2025M":0.001,"wood2024M":0.001,"woodGrowthPct":0.0},"indonesia":{"seating2025M":0.024},"argentina":{"seating2025M":0.024,"wood2025M":0.142,"wood2024M":0.026,"woodGrowthPct":446.2},"chile":{"seating2025M":0.002,"wood2025M":0.339,"wood2024M":0.081,"woodGrowthPct":318.5},"dem-rep-congo":{"seating2025M":0.918,"wood2025M":1.159,"wood2024M":1.824,"woodGrowthPct":-36.5},"somalia":{"seating2025M":2.46,"wood2025M":2.198,"wood2024M":1.489,"woodGrowthPct":47.6},"kenya":{"seating2025M":0.503,"wood2025M":0.799,"wood2024M":0.835,"woodGrowthPct":-4.3},"sudan":{"seating2025M":0.159,"wood2025M":0.191,"wood2024M":0.191,"woodGrowthPct":0.0},"chad":{"seating2025M":0.81,"wood2025M":0.601,"wood2024M":0.382,"woodGrowthPct":57.3},"dominican-rep":{"seating2025M":0.336,"wood2025M":0.169,"wood2024M":0.185,"woodGrowthPct":-8.6},"russia":{"seating2025M":2.133,"wood2025M":5.109,"wood2024M":6.64,"woodGrowthPct":-23.1},"bahamas":{"wood2025M":0.386,"wood2024M":0.032,"woodGrowthPct":1106.2},"norway":{"seating2025M":0.547,"wood2025M":0.887,"wood2024M":0.531,"woodGrowthPct":67.0},"timor-leste":{"seating2025M":0.008,"wood2025M":0.041,"wood2024M":0.006,"woodGrowthPct":583.3},"southafrica":{"seating2025M":0.609,"wood2025M":1.463,"wood2024M":1.976,"woodGrowthPct":-26.0},"mexico":{"seating2025M":0.231,"wood2025M":0.303,"wood2024M":0.147,"woodGrowthPct":106.1},"uruguay":{"wood2025M":0.011,"wood2024M":0.012,"woodGrowthPct":-8.3},"brazil":{"seating2025M":0.011,"wood2025M":0.182,"wood2024M":0.062,"woodGrowthPct":193.5},"peru":{"seating2025M":0.139,"wood2025M":0.115,"wood2024M":0.088,"woodGrowthPct":30.7},"colombia":{"seating2025M":0.043,"wood2025M":0.228,"wood2024M":0.095,"woodGrowthPct":140.0},"panama":{"seating2025M":0.539,"wood2025M":0.645,"wood2024M":0.288,"woodGrowthPct":124.0},"costa-rica":{"seating2025M":0.007,"wood2025M":0.048,"wood2024M":0.005,"woodGrowthPct":860.0},"honduras":{"wood2025M":0.001,"wood2024M":0.002,"woodGrowthPct":-50.0},"el-salvador":{"seating2025M":0.021,"wood2025M":0.01,"wood2024M":0.0},"guatemala":{"seating2025M":0.224,"wood2025M":0.122,"wood2024M":0.187,"woodGrowthPct":-34.8},"venezuela":{"seating2025M":0.363,"wood2025M":0.504,"wood2024M":0.258,"woodGrowthPct":95.3},"guyana":{"seating2025M":0.104,"wood2025M":0.143,"wood2024M":0.001,"woodGrowthPct":14200.0},"suriname":{"seating2025M":0.053,"wood2025M":0.088,"wood2024M":0.131,"woodGrowthPct":-32.8},"france":{"seating2025M":26.207,"wood2025M":33.563,"wood2024M":26.353,"woodGrowthPct":27.4},"ecuador":{"seating2025M":0.039},"jamaica":{"wood2025M":0.039,"wood2024M":0.02,"woodGrowthPct":95.0},"cuba":{"seating2025M":0.004,"wood2025M":0.002,"wood2024M":0.01,"woodGrowthPct":-80.0},"zimbabwe":{"seating2025M":0.127,"wood2025M":0.221,"wood2024M":0.24,"woodGrowthPct":-7.9},"botswana":{"wood2025M":0.002,"wood2024M":0.003,"woodGrowthPct":-33.3},"namibia":{"wood2025M":0.004,"wood2024M":0.011,"woodGrowthPct":-63.6},"senegal":{"seating2025M":1.862,"wood2025M":2.155,"wood2024M":2.984,"woodGrowthPct":-27.8},"mali":{"seating2025M":0.928,"wood2025M":0.929,"wood2024M":0.789,"woodGrowthPct":17.7},"mauritania":{"seating2025M":0.135,"wood2025M":0.617,"wood2024M":0.436,"woodGrowthPct":41.5},"benin":{"seating2025M":0.104,"wood2025M":0.113,"wood2024M":0.164,"woodGrowthPct":-31.1},"nigeria":{"seating2025M":0.223,"wood2025M":0.252,"wood2024M":10.719,"woodGrowthPct":-97.6},"cameroon":{"seating2025M":0.405,"wood2025M":0.715,"wood2024M":0.791,"woodGrowthPct":-9.6},"togo":{"seating2025M":0.289,"wood2025M":0.325,"wood2024M":0.506,"woodGrowthPct":-35.8},"ghana":{"seating2025M":2.894,"wood2025M":3.134,"wood2024M":2.717,"woodGrowthPct":15.3},"cote-d-ivoire":{"seating2025M":1.384,"wood2025M":1.484,"wood2024M":1.477,"woodGrowthPct":0.5},"guinea":{"seating2025M":2.938,"wood2025M":3.096,"wood2024M":1.832,"woodGrowthPct":69.0},"guinea-bissau":{"seating2025M":0.015,"wood2025M":0.584,"wood2024M":0.015,"woodGrowthPct":3793.3},"liberia":{"seating2025M":0.479,"wood2025M":0.439,"wood2024M":0.39,"woodGrowthPct":12.6},"sierra-leone":{"seating2025M":0.443,"wood2025M":0.499,"wood2024M":0.608,"woodGrowthPct":-17.9},"burkina-faso":{"seating2025M":0.162,"wood2025M":0.15,"wood2024M":0.265,"woodGrowthPct":-43.4},"central-african-rep":{"seating2025M":0.013,"wood2025M":0.025,"wood2024M":0.006,"woodGrowthPct":316.7},"congo":{"seating2025M":0.814,"wood2025M":1.628,"wood2024M":1.572,"woodGrowthPct":3.6},"gabon":{"seating2025M":0.911,"wood2025M":1.007,"wood2024M":0.586,"woodGrowthPct":71.8},"eq-guinea":{"seating2025M":0.133,"wood2025M":0.117,"wood2024M":0.083,"woodGrowthPct":41.0},"zambia":{"seating2025M":0.123,"wood2025M":0.118,"wood2024M":0.127,"woodGrowthPct":-7.1},"malawi":{"seating2025M":0.057,"wood2025M":0.036,"wood2024M":0.033,"woodGrowthPct":9.1},"mozambique":{"seating2025M":0.108,"wood2025M":0.231,"wood2024M":0.394,"woodGrowthPct":-41.4},"eswatini":{"seating2025M":0.006,"wood2025M":0.344,"wood2024M":0.0},"angola":{"seating2025M":1.341,"wood2025M":0.769,"wood2024M":0.629,"woodGrowthPct":22.3},"burundi":{"seating2025M":0.003,"wood2025M":0.002,"wood2024M":0.004,"woodGrowthPct":-50.0},"lebanon":{"seating2025M":1.955,"wood2025M":2.579,"wood2024M":1.723,"woodGrowthPct":49.7},"madagascar":{"seating2025M":0.005,"wood2025M":0.034,"wood2024M":0.058,"woodGrowthPct":-41.4},"palestine":{"seating2025M":1.361,"wood2025M":4.256,"wood2024M":6.245,"woodGrowthPct":-31.8},"gambia":{"seating2025M":0.397,"wood2025M":0.663,"wood2024M":0.712,"woodGrowthPct":-6.9},"tunisia":{"seating2025M":0.6,"wood2025M":0.561,"wood2024M":0.39,"woodGrowthPct":43.8},"algeria":{"seating2025M":0.815,"wood2025M":1.114,"wood2024M":1.538,"woodGrowthPct":-27.6},"jordan":{"seating2025M":9.359,"wood2025M":9.133,"wood2024M":3.371,"woodGrowthPct":170.9},"uae":{"seating2025M":14.576,"wood2025M":12.87,"wood2024M":14.673,"woodGrowthPct":-12.3},"qatar":{"seating2025M":5.416,"wood2025M":6.169,"wood2024M":8.102,"woodGrowthPct":-23.9},"kuwait":{"seating2025M":1.493,"wood2025M":1.956,"wood2024M":4.283,"woodGrowthPct":-54.3},"iraq":{"seating2025M":118.534,"wood2025M":102.43,"wood2024M":82.955,"woodGrowthPct":23.5},"oman":{"seating2025M":2.972,"wood2025M":1.244,"wood2024M":2.498,"woodGrowthPct":-50.2},"cambodia":{"seating2025M":0.056,"wood2025M":0.058,"wood2024M":0.016,"woodGrowthPct":262.5},"thailand":{"seating2025M":0.045,"wood2025M":0.02,"wood2024M":0.026,"woodGrowthPct":-23.1},"laos":{"seating2025M":0.001},"vietnam":{"seating2025M":0.007,"wood2025M":0.009,"wood2024M":0.049,"woodGrowthPct":-81.6},"south-korea":{"seating2025M":0.06,"wood2025M":0.067,"wood2024M":0.095,"woodGrowthPct":-29.5},"mongolia":{"seating2025M":0.251,"wood2025M":0.32,"wood2024M":0.507,"woodGrowthPct":-36.9},"india":{"seating2025M":1.976,"wood2025M":0.928,"wood2024M":1.94,"woodGrowthPct":-52.2},"bangladesh":{"seating2025M":0.027,"wood2025M":0.002,"wood2024M":0.123,"woodGrowthPct":-98.4},"nepal":{"seating2025M":0.014,"wood2025M":0.011,"wood2024M":0.006,"woodGrowthPct":83.3},"pakistan":{"seating2025M":0.35,"wood2025M":0.423,"wood2024M":0.474,"woodGrowthPct":-10.8},"afghanistan":{"seating2025M":0.04,"wood2025M":0.034,"wood2024M":0.027,"woodGrowthPct":25.9},"tajikistan":{"seating2025M":1.569,"wood2025M":0.98,"wood2024M":1.483,"woodGrowthPct":-33.9},"kyrgyzstan":{"seating2025M":1.299,"wood2025M":1.487,"wood2024M":1.291,"woodGrowthPct":15.2},"turkmenistan":{"seating2025M":2.84,"wood2025M":5.27,"wood2024M":7.775,"woodGrowthPct":-32.2},"iran":{"seating2025M":1.177,"wood2025M":1.663,"wood2024M":1.405,"woodGrowthPct":18.4},"syria":{"seating2025M":1.54,"wood2025M":1.446,"wood2024M":0.806,"woodGrowthPct":79.4},"sweden":{"seating2025M":2.976,"wood2025M":4.355,"wood2024M":3.797,"woodGrowthPct":14.7},"belarus":{"seating2025M":7.554,"wood2025M":5.521,"wood2024M":4.469,"woodGrowthPct":23.5},"ukraine":{"seating2025M":0.392,"wood2025M":1.308,"wood2024M":0.631,"woodGrowthPct":107.3},"poland":{"seating2025M":1.939,"wood2025M":3.042,"wood2024M":2.123,"woodGrowthPct":43.3},"austria":{"seating2025M":8.145,"wood2025M":7.824,"wood2024M":6.642,"woodGrowthPct":17.8},"hungary":{"seating2025M":1.239,"wood2025M":1.686,"wood2024M":1.206,"woodGrowthPct":39.8},"moldova":{"seating2025M":0.731,"wood2025M":1.778,"wood2024M":1.743,"woodGrowthPct":2.0},"romania":{"seating2025M":11.283,"wood2025M":14.772,"wood2024M":16.869,"woodGrowthPct":-12.4},"lithuania":{"seating2025M":0.616,"wood2025M":1.158,"wood2024M":1.151,"woodGrowthPct":0.6},"latvia":{"seating2025M":0.245,"wood2025M":0.288,"wood2024M":0.429,"woodGrowthPct":-32.9},"estonia":{"seating2025M":0.181,"wood2025M":0.442,"wood2024M":0.369,"woodGrowthPct":19.8},"germany":{"seating2025M":25.351,"wood2025M":42.012,"wood2024M":37.331,"woodGrowthPct":12.5},"bulgaria":{"seating2025M":7.7,"wood2025M":8.599,"wood2024M":7.311,"woodGrowthPct":17.6},"greece":{"seating2025M":6.923,"wood2025M":10.661,"wood2024M":8.617,"woodGrowthPct":23.7},"albania":{"seating2025M":1.239,"wood2025M":2.343,"wood2024M":2.396,"woodGrowthPct":-2.2},"croatia":{"seating2025M":1.791,"wood2025M":3.74,"wood2024M":3.305,"woodGrowthPct":13.2},"switzerland":{"seating2025M":5.001,"wood2025M":6.746,"wood2024M":6.861,"woodGrowthPct":-1.7},"luxembourg":{"seating2025M":0.063,"wood2025M":0.082,"wood2024M":0.109,"woodGrowthPct":-24.8},"belgium":{"seating2025M":7.177,"wood2025M":7.763,"wood2024M":4.166,"woodGrowthPct":86.3},"netherlands":{"seating2025M":11.055,"wood2025M":16.962,"wood2024M":13.382,"woodGrowthPct":26.8},"portugal":{"seating2025M":0.594,"wood2025M":0.535,"wood2024M":0.472,"woodGrowthPct":13.3},"spain":{"seating2025M":1.513,"wood2025M":6.497,"wood2024M":5.286,"woodGrowthPct":22.9},"ireland":{"seating2025M":0.538,"wood2025M":0.797,"wood2024M":0.523,"woodGrowthPct":52.4},"new-zealand":{"seating2025M":0.04,"wood2025M":0.123,"wood2024M":0.313,"woodGrowthPct":-60.7},"australia":{"seating2025M":0.858,"wood2025M":0.849,"wood2024M":1.032,"woodGrowthPct":-17.7},"sri-lanka":{"seating2025M":0.096,"wood2025M":0.101,"wood2024M":0.04,"woodGrowthPct":152.5},"china":{"seating2025M":0.196,"wood2025M":0.132,"wood2024M":0.143,"woodGrowthPct":-7.7},"italy":{"seating2025M":4.648,"wood2025M":8.356,"wood2024M":6.656,"woodGrowthPct":25.5},"denmark":{"seating2025M":2.48,"wood2025M":5.101,"wood2024M":2.366,"woodGrowthPct":115.6},"uk":{"seating2025M":13.221,"wood2025M":31.727,"wood2024M":19.467,"woodGrowthPct":63.0},"iceland":{"seating2025M":0.03,"wood2025M":0.01,"wood2024M":0.044,"woodGrowthPct":-77.3},"azerbaijan":{"seating2025M":5.581,"wood2025M":10.965,"wood2024M":14.308,"woodGrowthPct":-23.4},"georgia":{"seating2025M":15.955,"wood2025M":20.632,"wood2024M":12.056,"woodGrowthPct":71.1},"philippines":{"seating2025M":0.012,"wood2025M":0.017,"wood2024M":0.016,"woodGrowthPct":6.3},"malaysia":{"seating2025M":0.073,"wood2025M":0.057,"wood2024M":0.156,"woodGrowthPct":-63.5},"slovenia":{"seating2025M":0.157,"wood2025M":0.432,"wood2024M":0.756,"woodGrowthPct":-42.9},"finland":{"seating2025M":0.339,"wood2025M":0.848,"wood2024M":0.52,"woodGrowthPct":63.1},"slovakia":{"seating2025M":0.509,"wood2025M":1.828,"wood2024M":1.602,"woodGrowthPct":14.1},"czechia":{"seating2025M":0.985,"wood2025M":4.424,"wood2024M":3.08,"woodGrowthPct":43.6},"eritrea":{"seating2025M":0.001,"wood2025M":0.001,"wood2024M":0.003,"woodGrowthPct":-66.7},"japan":{"seating2025M":0.011,"wood2025M":0.105,"wood2024M":0.519,"woodGrowthPct":-79.8},"paraguay":{"seating2025M":0.023,"wood2025M":0.049,"wood2024M":0.031,"woodGrowthPct":58.1},"yemen":{"seating2025M":0.17,"wood2025M":0.181,"wood2024M":0.594,"woodGrowthPct":-69.5},"saudi-arabia":{"seating2025M":14.839,"wood2025M":21.223,"wood2024M":19.287,"woodGrowthPct":10.0},"cyprus":{"seating2025M":6.094,"wood2025M":12.671},"morocco":{"seating2025M":4.682,"wood2025M":10.3,"wood2024M":9.627,"woodGrowthPct":7.0},"egypt":{"seating2025M":0.528,"wood2025M":0.909,"wood2024M":0.655,"woodGrowthPct":38.8},"libya":{"seating2025M":15.508,"wood2025M":22.994,"wood2024M":21.074,"woodGrowthPct":9.1},"ethiopia":{"seating2025M":0.202,"wood2025M":0.501,"wood2024M":0.859,"woodGrowthPct":-41.7},"djibouti":{"seating2025M":0.154,"wood2025M":0.359,"wood2024M":0.316,"woodGrowthPct":13.6},"uganda":{"seating2025M":0.809,"wood2025M":0.9,"wood2024M":0.478,"woodGrowthPct":88.3},"rwanda":{"seating2025M":0.185,"wood2025M":0.159,"wood2024M":0.545,"woodGrowthPct":-70.8},"bosnia-and-herz":{"seating2025M":2.535,"wood2025M":3.213,"wood2024M":2.96,"woodGrowthPct":8.5},"north-macedonia":{"seating2025M":2.374,"wood2025M":3.787,"wood2024M":3.857,"woodGrowthPct":-1.8},"serbia":{"seating2025M":11.536,"wood2025M":11.678,"wood2024M":5.887,"woodGrowthPct":98.4},"montenegro":{"seating2025M":1.773,"wood2025M":4.211,"wood2024M":3.693,"woodGrowthPct":14.0},"trinidad-and-tobago":{"seating2025M":0.016,"wood2025M":0.026,"wood2024M":0.102,"woodGrowthPct":-74.5},"malta":{"seating2025M":1.29,"wood2025M":2.591},"singapore":{"seating2025M":0.0,"wood2025M":0.0},"bahrain":{"seating2025M":0.561,"wood2025M":1.083},"israel":{"seating2025M":6.8,"wood2025M":8.5},"kosovo":{"seating2025M":6.393,"wood2025M":4.065}};
+
+// =========================================================
+// TÜRKİYE'NİN YILLIK İHRACAT TRENDİ (2017-2025) — GERÇEK VERİ
+// Kaynak: ITC Trade Map, Türkiye (792) -> Dünya, ülke bazlı, HS 940161
+// (döşemeli oturma grubu) ve HS 940360 (ahşap mobilya). Kullanıcı tarafından
+// sağlanan resmi Trade Map raporlarından derlenmiştir. Değerler milyon $.
+// Veri olmayan yıl/ülke için null (ekranda/hesaplamada 'Bilinmiyor' muamelesi görür).
+// =========================================================
+const TURKEY_GROWTH_YEARS = [2017,2018,2019,2020,2021,2022,2023,2024,2025];
+const TURKEY_GROWTH_SEATING = {"afghanistan":[0.18,0.13,0.21,0.07,0.14,0.01,0.04,0.02,0.04],"albania":[0.43,0.75,0.74,0.59,1.2,1.9,1.3,1.2,1.2],"algeria":[1.6,1.6,0.6,0.45,0.6,0.36,0.44,0.76,0.81],"angola":[0.13,0.22,0.14,0.35,0.69,0.85,0.65,0.7,1.3],"argentina":[0,0,0,0,0,0,0,0,0.02],"australia":[0.23,0.21,0.33,0.32,1.2,1.1,0.71,0.69,0.86],"austria":[2,2.2,2.9,4.1,4.3,5.8,6.2,7.6,8.1],"azerbaijan":[3.3,4,5.4,4.5,6.7,6.1,6.9,6.9,5.6],"bahamas":[0,0.06,0,0,0.09,0,0.07,0.02,0],"bahrain":[1.8,1.4,2.6,2.4,3.4,3.7,2.9,1.3,0.58],"bangladesh":[0,0.01,0.08,0.07,0.07,0.2,0.17,0.04,0.03],"belarus":[0.41,0.58,0.72,1.8,4.9,4.5,8.8,6.3,7.6],"belgium":[1,1.7,2.2,4.2,6,5.5,5.7,5.1,7.2],"belize":[0,0,0,0,0,0.01,0.01,0.02,0],"benin":[0.06,0.03,0.02,0.05,0.14,0.93,0.85,0.09,0.1],"bolivia":[0.01,0.01,0.02,0,0,0,0,0,0],"bosnia-and-herz":[0.38,0.93,1.5,1.3,2.4,2.7,3,3.1,2.5],"botswana":[0,0,0,0,0,0,0,0,0],"brazil":[0,0,0,0,0,0.01,0,0.01,0.01],"brunei":[0,0,0,0,0,0.01,0.04,0,0],"bulgaria":[2.8,3,3.6,3.5,4.8,5.8,7.4,7.3,7.7],"burkina-faso":[0.04,0.04,0.02,0.12,0.18,0.63,0.37,0.24,0.16],"burundi":[0,0,0.04,0.03,0.04,0,0.03,0,0],"cambodia":[0.02,0,0.11,0.11,0.05,0.02,0.04,0.11,0.06],"cameroon":[0.06,0.1,0.3,0.15,0.44,0.75,0.48,0.26,0.41],"canada":[0.25,0.31,0.79,1.2,4.7,6.6,5.6,4.6,4.5],"central-african-rep":[0,0,0,0.01,0,0.17,0,0.01,0.01],"chad":[0.11,0.1,0.26,0.27,0.36,0.51,0.56,0.68,0.81],"chile":[0.04,0.06,0.02,0.01,0.14,0.04,0.01,0.02,0],"china":[0.15,0.23,0.21,0.1,0.06,0.25,0.11,0.56,0.2],"colombia":[0.02,0.03,0.03,0.13,0.04,0.11,0.06,0.06,0.04],"congo":[0.02,0.06,0.18,0.09,0.44,0.78,1,0.92,0.81],"costa-rica":[0.09,0,0,0.02,0.03,0.01,0.02,0.04,0.01],"cote-d-ivoire":[0.37,0.47,0.82,1.2,2.3,2.8,1.8,1.1,1.4],"croatia":[0.01,0.29,0.49,0.6,1,1.1,1.4,1.4,1.8],"cuba":[0,0,0,0,0.01,0,0.01,0.03,0],"cyprus":[2.1,2.6,2.3,2,2.1,3.3,3.9,4.6,6.1],"czechia":[0.06,0.32,0.38,0.31,0.63,0.49,0.86,1.1,0.98],"dem-rep-congo":[0.01,0.07,0.28,0.32,0.4,1.2,1.3,0.7,0.92],"denmark":[0.46,0.41,0.51,0.82,1.3,1,1.3,1.7,2.5],"djibouti":[0.05,0.1,0.3,0.28,0.41,0.3,0.38,0.3,0.15],"dominican-rep":[0,0.04,0.06,0.15,0.06,0.43,0.07,0.06,0.34],"ecuador":[0,0,0,0.03,0,0,0,0,0.04],"egypt":[0.85,0.9,0.92,1.1,0.9,0.38,1.5,0.19,0.53],"el-salvador":[0,0,0,0,0,0,0.06,0.01,0.02],"eq-guinea":[0.01,0.03,0.04,0.06,0.1,0.09,0.09,0.1,0.13],"eritrea":[0,0,0,0,0,0,0.01,0.02,0],"estonia":[0.05,0.07,0.07,0.19,0.34,0.07,0.15,0.17,0.18],"eswatini":[0,0,0,0,0,0,0,0,0.01],"ethiopia":[0.01,0.11,0.37,0.35,0.71,0.89,0.17,0.33,0.2],"fiji":[0,0,0,0,0,0,0.01,0,0],"finland":[0.05,0.14,0.09,0.14,0.15,0.23,0.31,0.33,0.34],"france":[4.8,5.9,7.8,11,19,19,23,25,26],"gabon":[0.04,0.06,0.04,0.15,0.33,0.42,0.54,0.6,0.91],"gambia":[0.1,0.18,0.19,0.19,0.28,0.29,0.49,0.33,0.4],"georgia":[3.4,4.4,4.8,4.1,4.3,6.9,6.6,12,16],"germany":[6.6,7.8,13,19,23,24,29,27,25],"ghana":[0.63,0.86,0.9,1.5,3,2.8,3,2.9,2.9],"greece":[1.7,1.6,2,2.4,3.9,3.9,5,6.8,6.9],"guatemala":[0,0,0,0,0.29,0.21,0.27,0.14,0.22],"guinea":[0.17,0.34,0.2,0.41,0.93,1.2,1.3,1.4,2.9],"guinea-bissau":[0,0,0.01,0.05,0.04,0.07,0.03,0.01,0.01],"guyana":[0,0,0,0,0,0,0,0,0.1],"haiti":[0,0,0.03,0,0,0,0,0,0],"honduras":[0,0,0,0,0,0,0.01,0,0],"hungary":[0.37,0.28,0.77,0.18,0.52,1,0.91,1.2,1.2],"iceland":[0.01,0.1,0.06,0.03,0.04,0.05,0.04,0.04,0.03],"india":[1.4,1.8,2.5,2.5,4.4,5.6,4.3,2.9,2],"indonesia":[0,0,0.06,0,0.04,0.01,0.03,0.1,0.02],"iran":[4.8,3.1,0.91,0.67,1.2,1.4,1.3,0.72,1.2],"iraq":[68,72,85,75,90,91,89,103,119],"ireland":[0.01,0.04,0.4,0.13,0.54,1.3,0.87,0.61,0.54],"israel":[14,21,25,27,40,36,23,5.9,0],"italy":[0.45,0.67,0.88,1.5,1.4,2.6,3.2,3.2,4.6],"jamaica":[0,0,0,0,0,0,0,0,0],"japan":[0.03,0.01,0.02,0.11,0.06,0.03,0.04,0.01,0.01],"jordan":[1.8,2,2.2,2.6,3.9,4.4,3.7,3,9.4],"kazakhstan":[2.1,1.9,2.7,4.7,4.9,6,7.2,5.6,4.6],"kenya":[0.22,0.18,0.7,0.57,0.78,1.1,0.92,0.78,0.5],"kuwait":[1.8,2.1,2.1,2.1,3.3,4.2,4.4,3.4,1.5],"kyrgyzstan":[0.17,0.29,0.23,0.33,0.65,1.1,1.8,1.4,1.3],"laos":[0,0,0,0,0,0,0,0,0],"latvia":[0.16,0.02,0.03,0.02,0,0.28,0.33,0.27,0.24],"lebanon":[3.9,4.6,4.1,1.2,2.2,3.2,1.8,1.4,2],"liberia":[0.04,0.12,0.05,0.2,0.39,0.5,0.21,0.64,0.48],"libya":[4.6,9.3,20,12,19,17,17,17,16],"lithuania":[0.08,0.17,0.17,0.41,0.56,0.68,0.6,1,0.62],"luxembourg":[0.02,0,0,0.01,0.01,0.01,0.08,0.06,0.06],"madagascar":[0,0.01,0.14,0.03,0,0,0.02,0.01,0.01],"malawi":[0.01,0,0.03,0.04,0.1,0.06,0.03,0.08,0.06],"malaysia":[0.01,0,0.01,0.01,0.02,0.04,0.07,0.12,0.07],"mali":[0.13,0.15,0.24,0.21,0.75,0.51,0.72,0.68,0.93],"malta":[0.21,0.25,0.28,0.33,0.49,0.89,1.5,1.3,1.4],"mauritania":[0.02,0.1,0.2,0.06,0.16,0.31,0.25,0.35,0.14],"mexico":[0.13,0.03,0.06,0.03,0.03,0.18,0.18,0.07,0.23],"moldova":[0.11,0.18,0.15,0.14,0.38,0.48,0.73,0.64,0.73],"mongolia":[0.03,0.13,0.31,0.45,0.88,1.5,1.1,0.64,0.25],"montenegro":[0.1,0.25,1.3,1.2,0.81,1.4,1.6,2.3,1.8],"morocco":[1.9,2.5,3,3.2,4.6,4.8,5.9,4.9,4.7],"mozambique":[0.03,0,0.04,0.1,0.25,0.18,0.09,0.09,0.11],"myanmar":[0,0,0,0.01,0,0,0,0,0],"namibia":[0,0,0,0,0,0.01,0.06,0.01,0],"nepal":[0,0,0,0,0,0,0.04,0.01,0.01],"netherlands":[4.4,5.2,5.3,6.1,9.9,12,13,12,11],"new-zealand":[0.03,0.08,0.06,0.05,0.14,0.08,0.07,0.03,0.04],"nicaragua":[0.01,0,0,0,0,0,0.01,0,0],"niger":[0.06,0.1,0.59,0.39,0.56,0.52,0.24,0.07,0.22],"nigeria":[1.7,2.1,4,5,7.8,8.7,9.6,11,12],"north-macedonia":[1.3,1.8,2.2,1.9,3.2,2.7,2.4,2.2,2.4],"norway":[0.07,0.1,0.07,0.13,0.43,0.72,0.57,0.68,0.55],"oman":[3.3,3.2,5.1,4.6,6.2,6.3,6.7,4.1,3],"pakistan":[0.21,0.31,0.38,0.67,0.61,0.79,0.36,0.26,0.35],"palestine":[0.13,0.05,0.05,0,0.01,0.16,0.47,6.3,1.4],"panama":[0.12,0.1,0.18,0.14,0.22,0.51,0.3,0.42,0.54],"papua-new-guinea":[0,0,0,0,0,0,0,0,0],"paraguay":[0,0,0,0.02,0,0,0.04,0.08,0.02],"peru":[0.02,0.01,0.01,0,0,0.03,0.14,0.09,0.14],"philippines":[0.08,0,0.09,0,0.03,0.04,0.04,0.03,0.01],"poland":[0.12,0.22,0.1,0.25,0.51,0.82,0.75,1.7,1.9],"portugal":[0.31,0.79,1,0.68,2.4,0.92,0.86,0.65,0.59],"qatar":[5.6,10,14,12,18,30,13,8.6,5.4],"romania":[0.91,2.1,3.1,4.9,7.7,10,11,13,11],"russia":[0.49,0.98,1.7,1.4,2.9,6.1,4.1,2,2.1],"rwanda":[0.01,0,0,0.06,0.17,0.3,0.26,0.54,0.18],"saudi-arabia":[19,18,21,23,0.61,4.2,16,18,15],"senegal":[0.29,0.43,0.26,0.7,1.8,2.7,2.4,1.7,1.9],"serbia":[1.9,3.1,4.3,4.6,8.7,9.6,9.9,11,12],"sierra-leone":[0,0.03,0.07,0.03,0.1,0.36,0.54,0.41,0.44],"singapore":[0.1,0.12,0.2,0.1,0.26,0.3,0.23,0.28,0.38],"slovakia":[0.07,0.05,0.12,0.33,0.39,0.4,0.49,0.58,0.51],"slovenia":[0.02,0,0.02,0.03,0.07,0.11,0.05,0.21,0.16],"somalia":[0.17,0.22,0.69,1.1,2.9,3.5,2.8,1.7,2.5],"south-korea":[0.03,0.04,0.07,0.07,0,0.01,0.04,0.07,0.06],"southafrica":[0.41,0.42,0.83,0.46,0.6,0.87,0.67,0.73,0.61],"spain":[0.91,1.7,1.3,1.3,2.3,2.2,2.1,2,1.5],"sri-lanka":[0,0.07,0.03,0.04,0.01,0,0.09,0.04,0.1],"sudan":[0.8,0.68,0.45,0.84,0.76,1.5,0.71,0.23,0.16],"suriname":[0.01,0,0,0,0.02,0.04,0.09,0.07,0.05],"sweden":[0.42,0.61,0.72,2.1,3.8,3.3,3.2,3.5,3],"switzerland":[0.87,0.98,1.5,3,3.4,3.6,4.1,4,5],"syria":[0.25,0.41,0.21,0.14,0.36,0.42,0.34,0.17,1.5],"taiwan":[0.01,0.04,0.08,0.02,0.01,0.05,0.01,0,0],"tajikistan":[0.52,0.91,0.97,0.85,1.2,1.4,1.6,0.92,1.6],"tanzania":[0.2,0.1,0.12,0.06,0.29,0.3,0.55,1,1.2],"thailand":[0.01,0.01,0.03,0.05,0.07,0.11,0.08,0.03,0.04],"timor-leste":[0,0,0,0,0,0.08,0,0.01,0.01],"togo":[0.03,0.02,0.02,0.02,0.17,0.28,0.31,0.22,0.29],"trinidad-and-tobago":[0,0,0,0,0,0,0.53,0.3,0.02],"tunisia":[0.08,0.14,0.23,0.38,0.63,0.99,1,0.56,0.6],"turkmenistan":[2,1.6,1.5,2.2,3.8,2.9,2.5,2.5,2.8],"uae":[8.9,10,15,15,21,23,25,19,15],"uganda":[0.12,0.07,0.11,0.13,0.17,0.44,0.43,0.39,0.81],"uk":[2.6,2.8,3.2,3.7,9.5,11,11,11,13],"ukraine":[0.14,0.2,0.19,0.2,0.81,0.51,0.44,0.3,0.39],"uruguay":[0,0.01,0,0,0,0,0,0,0],"usa":[4.8,4.8,8.2,12,27,26,25,25,23],"uzbekistan":[0.74,1.3,2.7,1.9,4.6,6.2,5.4,4.2,4.4],"vanuatu":[0,0,0,0.02,0.02,0,0,0,0],"venezuela":[0,0,0,0.01,0.35,0.33,0.09,0.18,0.36],"vietnam":[0.03,0.1,0.03,0.01,0.01,0.06,null,0,0.01],"yemen":[0.12,0.12,0.14,0.22,0.43,0.44,0.31,0.31,0.17],"zambia":[0,0.21,0.06,0,0.16,0.08,0.09,0.15,0.12],"zimbabwe":[0,0.01,0.02,0.08,0.01,0.04,0.24,0.03,0.13]};
+const TURKEY_GROWTH_WOOD = {"afghanistan":[0.08,0.23,0.14,0.09,0.14,0.01,0.04,0.03,0.03],"albania":[1.1,1.2,1.4,1.7,2.9,3.8,2.8,2.8,2.3],"algeria":[6.6,7.7,3.5,2.2,2.5,2.9,3.1,1.6,1.1],"angola":[0.25,0.49,0.37,0.36,0.54,1.1,0.69,0.63,0.77],"argentina":[0,0.11,0.02,0.1,0.01,0.02,0.01,0.06,0.14],"australia":[0.6,0.44,0.64,0.49,2.1,2.4,1.2,1.1,0.85],"austria":[2.2,3.2,3,4.2,4.3,5.5,6.6,7.7,7.8],"azerbaijan":[11,11,12,9.4,12,13,17,16,11],"bahamas":[0,0,0,0,0.1,0.32,0.2,0.04,0.39],"bahrain":[1.1,1.8,2.6,2.2,2.4,2.8,2,2,1.1],"bangladesh":[0.01,0.14,0.26,0.06,0.04,0.12,0.14,0.12,0],"belarus":[0.88,0.7,0.73,1.7,4,3.6,7.3,4.6,5.5],"belgium":[2.6,2.5,2.7,4.8,6.5,6.3,6.5,5,7.8],"belize":[0,0,0,0.01,0,0.03,0.01,0.01,0],"benin":[0.11,0.41,0.17,0.06,0.08,1.7,0.34,0.17,0.11],"bhutan":[0,0,0,0,0,0,0,0,0],"bolivia":[0.01,0.02,0.03,0,0,0,0,0,0],"bosnia-and-herz":[0.85,1.8,1.8,1.7,2.7,3.4,3.2,3.4,3.2],"botswana":[0.03,0,0,0,0.01,0,0,0,0],"brazil":[0.14,0.13,0.07,0,0,0.01,0.03,0.06,0.18],"brunei":[0,0,0,0.02,0.02,0.03,0.05,0,0],"bulgaria":[3.6,4.4,4.5,4.9,6.4,7.2,7,8.4,8.6],"burkina-faso":[0.11,0.07,0.06,0.16,0.44,1,0.65,0.29,0.15],"burundi":[0,0.01,0.01,0,0,0.03,0.05,0,0],"cambodia":[0,0,0.01,0.01,0.01,0.11,0.06,0.02,0.06],"cameroon":[0.2,0.29,0.61,0.57,0.82,1.4,0.69,0.81,0.71],"canada":[0.41,0.61,1.1,1.3,3.3,5.8,4.4,4.3,3.3],"central-african-rep":[0,0,0.02,0.02,0.04,0.12,0,0.01,0.03],"chad":[0.11,0.1,0.12,0.33,0.39,0.56,0.45,0.4,0.6],"chile":[0.02,0.41,0.54,0.24,0.61,0.1,0.06,0.2,0.34],"china":[0.2,0.16,0.17,0.06,0.03,0.3,0.16,0.14,0.13],"colombia":[0.02,0.04,0.02,0.04,0.03,0.14,0.03,0.1,0.23],"congo":[0.08,0.15,0.24,0.2,0.73,1.5,1.4,1.6,1.6],"costa-rica":[0.04,0.01,0.01,0,0.01,0.04,0.13,0.01,0.05],"cote-d-ivoire":[0.75,0.93,1,1.7,2.5,4.2,3.1,1.7,1.5],"croatia":[0.76,1.3,1.3,1.6,1.6,2.1,3.8,3.5,3.7],"cuba":[0,0.01,0,0.07,0,0,0.01,0.01,0],"cyprus":[6.7,5.3,3.4,2.5,3.3,6.4,6.3,9.8,13],"czechia":[0.23,0.48,0.9,1.3,2,3.2,3.9,3.3,4.4],"dem-rep-congo":[0.02,0.22,0.38,0.47,1.1,1.8,2.3,2.1,1.2],"denmark":[0.95,0.43,1.3,1.5,2.4,3.6,2.6,2.5,5.1],"djibouti":[0.08,0.23,0.29,0.43,0.94,0.98,0.71,0.34,0.36],"dominican-rep":[0.01,0.06,0.03,0.13,0.17,0.59,0.2,0.19,0.17],"ecuador":[0,0.01,0.01,0.03,0.07,0.06,0.04,0.05,0],"egypt":[0.84,0.78,1.6,1.1,1.4,1.6,6.6,0.75,0.91],"el-salvador":[0,0.02,0,0,0,0,0.04,0,0.01],"eq-guinea":[0.03,0.03,0.43,0.06,0.22,0.24,0.2,0.08,0.12],"eritrea":[0,0,0,0,0,0.01,0.01,0,0],"estonia":[0.1,0.06,0.11,0.07,0.12,0.2,0.27,0.37,0.44],"eswatini":[0,0,0,0,0,0,0,0,0.34],"ethiopia":[0.78,0.15,0.2,0.41,0.77,1.2,0.77,0.89,0.5],"fiji":[0,0,0,0,0,0,0.02,0,0],"finland":[0.07,0.2,0.18,0.16,0.24,0.33,0.42,0.52,0.85],"france":[7.3,9.7,13,19,29,27,32,32,34],"gabon":[0.05,0.07,0.09,0.09,0.46,0.49,0.63,0.63,1],"gambia":[0.13,0.49,0.24,0.25,0.4,0.53,0.93,0.72,0.66],"georgia":[6,7.1,7.7,6.1,5.6,9.7,10,13,21],"germany":[12,15,19,24,36,42,44,43,42],"ghana":[1.6,1.2,1.7,2.4,4.2,3.9,3,3,3.1],"greece":[2.6,3.3,3.1,2.9,7.2,7.1,7.6,9.2,11],"guatemala":[0,0,0,0,0.1,0.09,0.25,0.19,0.12],"guinea":[0.61,0.9,0.83,0.91,1.4,1.5,1.4,1.8,3.1],"guinea-bissau":[0.02,0.01,0.01,0.02,0.04,0.19,0.02,0.01,0.58],"guyana":[0,0,0,0.08,0.03,0.04,0.02,0,0.14],"haiti":[0,0,0.02,0,0.01,0.02,0.01,0,0],"honduras":[0,0.02,0,0,0,0,0,0,0],"hungary":[0.22,0.48,2.4,0.73,1.3,1.9,2.3,1.6,1.7],"iceland":[0,0.04,0.02,0,0.02,0.13,0.04,0.05,0.01],"india":[0.97,1.4,1.6,1.4,1.7,2.4,2.6,1.9,0.93],"indonesia":[0,0.03,0.08,0.04,0.04,0.01,0.01,0.07,null],"iran":[7.1,5.4,1.5,1,1.4,1.8,1.4,1.6,1.7],"iraq":[53,61,64,56,72,67,66,86,102],"ireland":[0.35,0.73,1,0.93,1.3,1.6,1.3,1,0.8],"israel":[14,17,22,28,41,40,29,8.8,0],"italy":[3.5,3.4,3.5,4.3,4.8,6.6,5.9,7.5,8.4],"jamaica":[0,0.04,0.05,0,0.05,0.01,0.04,0.05,0.04],"japan":[0.01,0.01,0.04,0.02,0.04,0.07,0.03,0.52,0.1],"jordan":[4.7,4.7,4.3,4.4,6,5.9,4,3.5,9.1],"kazakhstan":[8.2,3.5,4.3,6.6,7.9,8.2,10,8.3,5.2],"kenya":[0.55,1.2,1.1,0.94,1.7,3.7,1.8,0.9,0.8],"kuwait":[2.6,5.4,5.4,5.9,9,8.3,6.6,4.5,2],"kyrgyzstan":[0.76,0.8,0.74,0.46,0.73,1.3,2.1,1.4,1.5],"laos":[0,0,0,0,0,0,0,0,0],"latvia":[0.17,0.11,0.09,0.08,0.02,0.48,0.42,0.45,0.29],"lebanon":[4.1,3.9,3.6,1,3.4,5.1,2.8,2,2.6],"lesotho":[0,0,0.01,0,0,0,0,0.01,0],"liberia":[0.09,0.17,0.14,0.19,0.38,0.31,0.18,0.39,0.44],"libya":[9,20,30,18,30,29,23,22,23],"lithuania":[0.11,0.29,0.29,0.76,0.66,0.75,0.97,1.2,1.2],"luxembourg":[0.01,0.01,0.15,0.01,0.06,0.06,0.09,0.13,0.08],"madagascar":[0.01,0.03,0.67,0.01,0.03,0.01,0.09,0.11,0.03],"malawi":[0,0.03,0.02,0.02,0.04,0.2,0.11,0.03,0.04],"malaysia":[0.01,0.06,0.01,0.01,0.06,0.05,0.18,0.16,0.06],"mali":[1.6,0.28,0.43,0.47,1.4,1.1,1.4,0.84,0.93],"malta":[0.83,1.1,1.6,1.7,1.6,1.8,4.3,4.2,2.9],"mauritania":[0.18,0.31,0.28,0.3,0.65,0.83,0.55,0.5,0.62],"mexico":[0.11,0.12,0.19,0.15,1.2,0.38,0.18,0.15,0.3],"moldova":[0.21,0.52,0.6,0.76,1.1,2.3,2.1,2.1,1.8],"mongolia":[0.06,0.33,0.32,0.25,0.41,1.5,0.66,0.54,0.32],"montenegro":[0.2,0.91,4.4,4.2,1.7,2.5,4.6,3.8,4.2],"morocco":[6.7,5.9,7,9.2,12,13,13,11,10],"mozambique":[0.06,0.27,0.44,0.52,0.42,0.23,0.27,0.4,0.23],"myanmar":[0,0.03,0.02,0.01,0,0,0,0,0],"namibia":[0,0,0.01,0,0.01,0.06,0.05,0.01,0],"nepal":[0,0,0,0,0,0,0.06,0.01,0.01],"netherlands":[4.3,3.2,3.8,3.8,7.6,13,14,15,17],"new-caledonia":[0.02,0,0,0,0,0,0,0.01,0],"new-zealand":[0.09,0.21,0.24,0.23,0.69,0.31,0.34,0.31,0.12],"nicaragua":[0,0,0,0,0.01,0.01,0,0,0],"niger":[0.19,0.39,1.2,0.57,0.85,0.77,0.4,0.21,0.25],"nigeria":[1.8,3.2,7.3,7.8,9.8,14,13,11,12],"north-macedonia":[2,2.9,3.3,2.4,3.9,4.2,4,4.3,3.8],"norway":[0.33,0.35,0.54,0.46,0.8,1.1,0.75,0.87,0.89],"oman":[2.4,3.1,3.7,3.7,4.5,4.9,4.7,2.5,1.2],"pakistan":[0.91,0.92,0.73,0.9,0.88,0.67,0.44,0.49,0.42],"palestine":[0.11,0.12,0.08,0.04,0.15,0.19,0.24,6.4,4.3],"panama":[0.15,0.19,0.14,0.23,0.48,0.35,0.28,0.4,0.65],"papua-new-guinea":[0.01,0.01,0,0.16,0.01,0,0,0,0],"paraguay":[0.03,0,0.03,0.55,0.03,0,0.02,0.04,0.05],"peru":[0.02,0.04,0.03,0,0.04,0.04,0.13,0.09,0.12],"philippines":[0.09,0.1,0.15,0.01,0.08,0.1,0.07,0.02,0.02],"poland":[0.73,0.51,0.5,1.1,2.6,2.4,2.6,3,3],"portugal":[0.06,0.13,0.12,0.2,2.3,0.77,0.52,0.56,0.54],"qatar":[9.6,18,23,21,23,41,15,8.5,6.2],"romania":[4.1,7.7,6.3,8.1,12,13,13,18,15],"russia":[2.1,4.6,3.5,3.9,8.6,9.7,15,8.1,5.1],"rwanda":[0.1,0,0.08,0.13,0.26,0.27,0.57,0.55,0.16],"saudi-arabia":[34,33,37,41,1.6,7.9,20,20,21],"senegal":[0.99,1.6,0.85,1,3.4,5.3,3.7,3.2,2.2],"serbia":[3.7,4.2,4.7,4.5,9.6,12,9.8,10,12],"sierra-leone":[0.03,0.09,0.06,0.05,0.32,1.1,0.56,0.71,0.5],"singapore":[0.05,0.07,0.18,0.15,0.14,0.17,0.22,0.1,0.09],"slovakia":[0.13,0.12,0.17,0.2,0.58,0.64,1,1.8,1.8],"slovenia":[0.27,0.2,0.38,0.11,0.28,0.38,0.07,0.8,0.43],"somalia":[0.36,0.71,0.81,1,2.2,2.6,2.5,1.5,2.2],"south-korea":[0.01,0.02,0.07,0.11,0.01,0.02,0.05,0.1,0.07],"southafrica":[0.35,0.8,1.5,1,2,1.4,1.2,2,1.5],"spain":[1.4,0.94,1.4,2,4.3,6.8,5.6,5.9,6.5],"sri-lanka":[0.01,0.21,0.83,0.37,0.01,0,0.15,0.04,0.1],"sudan":[0.93,1.1,0.86,1.2,1.4,2.9,1.4,0.52,0.19],"suriname":[0.03,0.07,0.08,0.08,0.19,0.57,0.14,0.13,0.09],"sweden":[0.79,0.8,1.6,2.7,4.5,5.9,6.7,4.3,4.4],"switzerland":[1.7,1.8,2.7,3.6,4.3,6.5,6.2,7.4,6.7],"syria":[0.38,0.6,0.33,0.27,0.6,0.58,0.84,0.82,1.4],"taiwan":[0,0.01,0,null,0,0.01,0.03,0.01,0.02],"tajikistan":[0.61,0.86,0.59,0.56,1.4,1.9,1.9,1.5,0.98],"tanzania":[0.27,0.27,0.38,0.17,0.65,0.85,0.81,1.5,1.8],"thailand":[0.02,0.15,0.03,0.04,0.01,0.03,0.02,0.03,0.02],"timor-leste":[0,0,0,0,0,0.02,0.04,0.01,0.04],"togo":[0.09,0.12,0.1,0.28,0.4,0.42,0.34,0.52,0.33],"trinidad-and-tobago":[0.01,0.01,0.03,0,0.01,0,0.19,0.1,0.03],"tunisia":[0.89,0.71,0.99,0.56,0.87,0.86,0.78,0.43,0.56],"turkmenistan":[7.3,3.6,2.8,7.4,9.9,6.2,4.5,8.2,5.3],"uae":[12,16,16,12,21,21,19,16,13],"uganda":[0.1,0.29,0.13,0.32,0.5,0.81,0.45,0.48,0.9],"uk":[21,19,20,20,32,30,32,27,32],"ukraine":[0.96,1,1.2,1.2,3.3,0.8,0.68,1.1,1.3],"uruguay":[0.01,0.01,0,0,0.02,0,0,0.01,0.01],"usa":[5.7,8.7,12,25,43,57,61,56,47],"uzbekistan":[1.4,2.8,6,3,6.2,18,8,7.9,5.3],"vanuatu":[0,0,0,0,0.05,0,0,0,0],"venezuela":[0,0,0,0.03,0.86,0.28,0.76,0.29,0.5],"vietnam":[0.01,0.06,0.04,0.03,0.05,0.01,0.05,0.05,0.01],"yemen":[0.26,0.25,0.54,0.58,0.85,1.5,0.84,0.74,0.18],"zambia":[0.06,0.47,0.28,0.1,0.3,0.66,0.19,0.13,0.12],"zimbabwe":[0,0.11,0.01,0.12,0.04,0.23,0.23,0.24,0.22]};
+
+// =========================================================
+// TÜRKİYE'NİN SERBEST TİCARET ANLAŞMALARI (STA) — T.C. Ticaret Bakanlığı
+// kaynaklı gerçek veri (kullanıcı tarafından sağlanmıştır).
+// =========================================================
+const STA_IN_EFFECT = new Set([
+  'switzerland','norway','iceland', // EFTA
+  'uk','north-macedonia','bosnia-and-herz','albania','georgia','montenegro','serbia','moldova','kosovo',
+  'palestine','tunisia','morocco','egypt','uae','qatar','israel',
+  'south-korea','malaysia','singapore','chile','venezuela'
+]);
+const STA_PENDING = new Set(['lebanon','sudan','ukraine']);
+const STA_NEGOTIATING = new Set(['japan','mexico','thailand','saudi-arabia','kuwait','bahrain','oman']);
+function getSTAStatus(countryId, isEU, isEuropeFree){
+  if(isEU) return { status:'customs-union', label:'AB-Türkiye Gümrük Birliği' };
+  if(isEuropeFree) return { status:'active', label:'Yürürlükte (Avrupa STA ağı)' };
+  if(countryId === 'israel') return { status:'suspended', label:"STA yürürlükte — ticaret 2024'ten beri fiilen durdu" };
+  if(STA_IN_EFFECT.has(countryId)) return { status:'active', label:'Yürürlükte' };
+  if(STA_PENDING.has(countryId)) return { status:'pending', label:'İmzalandı, onay bekliyor' };
+  if(STA_NEGOTIATING.has(countryId)) return { status:'negotiating', label:'Müzakere sürüyor' };
+  return { status:'none', label:'STA yok / MFN tarife' };
+}
+
+// =========================================================
+// COFACE ÜLKE RİSKİ VE İŞ ORTAMI DEĞERLENDİRMESİ — gerçek, kullanıcı
+// tarafından sağlanan Coface verisi (154/177 ülke). Ölçek: A1 (en iyi) →
+// A2 → A3 → A4 → B → C → D → E (en kötü). Veri yoksa "Bilinmiyor" gösterilir,
+// asla bir not uydurulmaz.
+// =========================================================
+const COFACE_RISK = {"albania":{"countryRisk":"B","businessClimate":"B"},"algeria":{"countryRisk":"C","businessClimate":"C"},"angola":{"countryRisk":"C","businessClimate":"D"},"argentina":{"countryRisk":"D","businessClimate":"B"},"armenia":{"countryRisk":"B","businessClimate":"B"},"australia":{"countryRisk":"A2","businessClimate":"A1"},"austria":{"countryRisk":"A3","businessClimate":"A1"},"azerbaijan":{"countryRisk":"B","businessClimate":"C"},"bahamas":{"countryRisk":"B","businessClimate":"A4"},"bahrain":{"countryRisk":"C","businessClimate":"A4"},"bangladesh":{"countryRisk":"D","businessClimate":"C"},"belarus":{"countryRisk":"D","businessClimate":"D"},"belgium":{"countryRisk":"A2","businessClimate":"A1"},"belize":{"countryRisk":"C","businessClimate":"C"},"benin":{"countryRisk":"B","businessClimate":"C"},"bolivia":{"countryRisk":"D","businessClimate":"B"},"bosnia-and-herz":{"countryRisk":"C","businessClimate":"B"},"botswana":{"countryRisk":"B","businessClimate":"A4"},"brazil":{"countryRisk":"B","businessClimate":"A4"},"bulgaria":{"countryRisk":"B","businessClimate":"A3"},"burkina-faso":{"countryRisk":"D","businessClimate":"D"},"burundi":{"countryRisk":"D","businessClimate":"D"},"cambodia":{"countryRisk":"D","businessClimate":"B"},"cameroon":{"countryRisk":"C","businessClimate":"D"},"canada":{"countryRisk":"A3","businessClimate":"A1"},"central-african-rep":{"countryRisk":"D","businessClimate":"E"},"chad":{"countryRisk":"D","businessClimate":"D"},"chile":{"countryRisk":"A3","businessClimate":"A3"},"china":{"countryRisk":"B","businessClimate":"B"},"colombia":{"countryRisk":"C","businessClimate":"A4"},"congo":{"countryRisk":"C","businessClimate":"D"},"costa-rica":{"countryRisk":"A4","businessClimate":"A3"},"cote-d-ivoire":{"countryRisk":"B","businessClimate":"B"},"croatia":{"countryRisk":"A3","businessClimate":"A2"},"cuba":{"countryRisk":"E","businessClimate":"E"},"cyprus":{"countryRisk":"A3","businessClimate":"A3"},"czechia":{"countryRisk":"A3","businessClimate":"A2"},"dem-rep-congo":{"countryRisk":"D","businessClimate":"D"},"denmark":{"countryRisk":"A1","businessClimate":"A1"},"djibouti":{"countryRisk":"C","businessClimate":"C"},"dominican-rep":{"countryRisk":"B","businessClimate":"B"},"ecuador":{"countryRisk":"C","businessClimate":"B"},"egypt":{"countryRisk":"C","businessClimate":"C"},"el-salvador":{"countryRisk":"D","businessClimate":"B"},"estonia":{"countryRisk":"A3","businessClimate":"A1"},"eswatini":{"countryRisk":"D","businessClimate":"C"},"ethiopia":{"countryRisk":"C","businessClimate":"D"},"fiji":{"countryRisk":"C","businessClimate":"A4"},"finland":{"countryRisk":"A3","businessClimate":"A1"},"france":{"countryRisk":"A3","businessClimate":"A1"},"gabon":{"countryRisk":"C","businessClimate":"D"},"gambia":{"countryRisk":"C","businessClimate":"C"},"georgia":{"countryRisk":"B","businessClimate":"A3"},"germany":{"countryRisk":"A3","businessClimate":"A1"},"ghana":{"countryRisk":"C","businessClimate":"B"},"greece":{"countryRisk":"A4","businessClimate":"A2"},"guatemala":{"countryRisk":"C","businessClimate":"C"},"guinea":{"countryRisk":"C","businessClimate":"D"},"guyana":{"countryRisk":"B","businessClimate":"C"},"honduras":{"countryRisk":"C","businessClimate":"C"},"hungary":{"countryRisk":"A4","businessClimate":"A3"},"iceland":{"countryRisk":"A3","businessClimate":"A1"},"india":{"countryRisk":"B","businessClimate":"A4"},"indonesia":{"countryRisk":"B","businessClimate":"A4"},"iran":{"countryRisk":"E","businessClimate":"E"},"iraq":{"countryRisk":"E","businessClimate":"E"},"ireland":{"countryRisk":"A3","businessClimate":"A1"},"israel":{"countryRisk":"A4","businessClimate":"A3"},"italy":{"countryRisk":"B","businessClimate":"A2"},"jamaica":{"countryRisk":"C","businessClimate":"A4"},"japan":{"countryRisk":"A2","businessClimate":"A1"},"jordan":{"countryRisk":"C","businessClimate":"B"},"kazakhstan":{"countryRisk":"B","businessClimate":"B"},"kenya":{"countryRisk":"C","businessClimate":"A4"},"kuwait":{"countryRisk":"B","businessClimate":"A3"},"kyrgyzstan":{"countryRisk":"C","businessClimate":"D"},"laos":{"countryRisk":"D","businessClimate":"D"},"latvia":{"countryRisk":"A4","businessClimate":"A1"},"lebanon":{"countryRisk":"D","businessClimate":"D"},"lesotho":{"countryRisk":"C","businessClimate":"B"},"liberia":{"countryRisk":"D","businessClimate":"D"},"libya":{"countryRisk":"E","businessClimate":"E"},"lithuania":{"countryRisk":"A4","businessClimate":"A1"},"luxembourg":{"countryRisk":"A1","businessClimate":"A1"},"madagascar":{"countryRisk":"D","businessClimate":"C"},"malawi":{"countryRisk":"D","businessClimate":"D"},"malaysia":{"countryRisk":"B","businessClimate":"A3"},"mali":{"countryRisk":"D","businessClimate":"D"},"malta":{"countryRisk":"A3","businessClimate":"A4"},"mauritania":{"countryRisk":"C","businessClimate":"C"},"mexico":{"countryRisk":"B","businessClimate":"B"},"moldova":{"countryRisk":"C","businessClimate":"B"},"mongolia":{"countryRisk":"C","businessClimate":"C"},"montenegro":{"countryRisk":"C","businessClimate":"A4"},"morocco":{"countryRisk":"B","businessClimate":"A4"},"mozambique":{"countryRisk":"D","businessClimate":"D"},"myanmar":{"countryRisk":"D","businessClimate":"E"},"namibia":{"countryRisk":"B","businessClimate":"A4"},"nepal":{"countryRisk":"C","businessClimate":"B"},"netherlands":{"countryRisk":"A2","businessClimate":"A1"},"new-zealand":{"countryRisk":"A3","businessClimate":"A1"},"nicaragua":{"countryRisk":"D","businessClimate":"C"},"niger":{"countryRisk":"D","businessClimate":"D"},"nigeria":{"countryRisk":"C","businessClimate":"D"},"north-macedonia":{"countryRisk":"C","businessClimate":"A4"},"norway":{"countryRisk":"A1","businessClimate":"A1"},"oman":{"countryRisk":"B","businessClimate":"A4"},"pakistan":{"countryRisk":"D","businessClimate":"C"},"panama":{"countryRisk":"B","businessClimate":"A4"},"papua-new-guinea":{"countryRisk":"B","businessClimate":"C"},"paraguay":{"countryRisk":"B","businessClimate":"B"},"peru":{"countryRisk":"B","businessClimate":"A4"},"philippines":{"countryRisk":"B","businessClimate":"B"},"poland":{"countryRisk":"A3","businessClimate":"A2"},"portugal":{"countryRisk":"A2","businessClimate":"A2"},"qatar":{"countryRisk":"A3","businessClimate":"A3"},"romania":{"countryRisk":"B","businessClimate":"A3"},"russia":{"countryRisk":"D","businessClimate":"D"},"rwanda":{"countryRisk":"A4","businessClimate":"A4"},"saudi-arabia":{"countryRisk":"A3","businessClimate":"A4"},"senegal":{"countryRisk":"C","businessClimate":"B"},"serbia":{"countryRisk":"C","businessClimate":"A4"},"sierra-leone":{"countryRisk":"D","businessClimate":"D"},"singapore":{"countryRisk":"A3","businessClimate":"A1"},"slovakia":{"countryRisk":"A4","businessClimate":"A2"},"slovenia":{"countryRisk":"A3","businessClimate":"A1"},"south-korea":{"countryRisk":"A2","businessClimate":"A1"},"southafrica":{"countryRisk":"C","businessClimate":"A4"},"spain":{"countryRisk":"A2","businessClimate":"A1"},"sri-lanka":{"countryRisk":"D","businessClimate":"B"},"sudan":{"countryRisk":"E","businessClimate":"E"},"suriname":{"countryRisk":"D","businessClimate":"C"},"sweden":{"countryRisk":"A2","businessClimate":"A1"},"switzerland":{"countryRisk":"A1","businessClimate":"A1"},"taiwan":{"countryRisk":"A2","businessClimate":"A1"},"tajikistan":{"countryRisk":"D","businessClimate":"D"},"tanzania":{"countryRisk":"C","businessClimate":"C"},"thailand":{"countryRisk":"B","businessClimate":"A3"},"timor-leste":{"countryRisk":"D","businessClimate":"C"},"togo":{"countryRisk":"C","businessClimate":"C"},"trinidad-and-tobago":{"countryRisk":"B","businessClimate":"A4"},"tunisia":{"countryRisk":"C","businessClimate":"C"},"turkmenistan":{"countryRisk":"D","businessClimate":"E"},"uae":{"countryRisk":"A2","businessClimate":"A2"},"uganda":{"countryRisk":"C","businessClimate":"C"},"uk":{"countryRisk":"A3","businessClimate":"A1"},"ukraine":{"countryRisk":"D","businessClimate":"D"},"uruguay":{"countryRisk":"A4","businessClimate":"A3"},"usa":{"countryRisk":"A2","businessClimate":"A1"},"uzbekistan":{"countryRisk":"B","businessClimate":"B"},"venezuela":{"countryRisk":"E","businessClimate":"E"},"vietnam":{"countryRisk":"B","businessClimate":"A4"},"zambia":{"countryRisk":"D","businessClimate":"C"},"zimbabwe":{"countryRisk":"E","businessClimate":"E"}};
+const COFACE_GRADE_ORDER = ['A1','A2','A3','A4','B','C','D','E'];
+function cofaceGradeToScore(grade){
+  const idx = COFACE_GRADE_ORDER.indexOf(grade);
+  if(idx === -1) return null;
+  return Math.round(8 + idx * (97-8) / (COFACE_GRADE_ORDER.length-1));
+}
+
 // Türkiye'nin 2025 TOPLAM mobilya ihracatı (tüm HS 94 kategorileri, TÜİK/Ticaret Bakanlığı kaynaklı,
 // kullanıcı tarafından sağlanmıştır). ITC verisinden daha geniş kapsamlı — 163 ülke.
 // NOT: Çekya bu listede YOK — kaynak veride araç koltuğu ihracatının karıştığı tespit edildiği için
@@ -470,7 +646,8 @@ function generateCountryProfile(iso, name, id, lat, lon){
     logistics: 'estimated',
     importGrowth: importGrowthKnown !== null ? 'real' : 'unknown',
   };
-  const eodb = ri(4, 189);
+  // EODB (İş Yapma Kolaylığı sırası) KALDIRILDI — bu alan hiçbir zaman gerçek
+  // Dünya Bankası verisiyle düzeltilmiyordu, tamamen rastgele üretiliyordu.
   // Pazar Büyüklüğü / Yıllık İthalat — bunlar aynı gerçek sayıdır (ülkenin ITC Trade Map'teki
   // yıllık toplam HS 9401.61 ithalatı). Gerçek veri yoksa KESİNLİKLE rastgele bir sayı
   // ÜRETİLMEZ — dürüstçe "Bilinmiyor" gösterilir. (Skor formülünde nötr bir sabit kullanılır,
@@ -501,7 +678,8 @@ function generateCountryProfile(iso, name, id, lat, lon){
       ? 'Kıyısı yok — komşu ülke limanları üzerinden transit'
       : (REAL_PORTS[iso] || name + ' ana limanları');
   }
-  const political = POLITICAL_RISK_LEVELS[ri(0, POLITICAL_RISK_LEVELS.length-1)];
+  // Siyasi Risk (rastgele üretilen) KALDIRILDI — yerine Coface'in gerçek
+  // "Ülke Risk Değerlendirmesi" verisi kullanılıyor (bkz. COFACE_RISK, aşağıda).
   const currency = CURRENCY_MAP[iso] || 'USD';
   const exRate = REAL_EXCHANGE_RATE[currency] !== undefined ? REAL_EXCHANGE_RATE[currency] : (currency==='USD' ? 1 : null);
 
@@ -527,7 +705,13 @@ function generateCountryProfile(iso, name, id, lat, lon){
   const turkeyGrowth = '+' + r(3,20).toFixed(1) + '%';
 
   const marketScore = Math.round(Math.min(95, Math.log10(marketSizeForScore+1)*24 + importGrowth*2));
-  const difficultyScore = Math.round(Math.min(95, importTaxForScore*3 + (190-eodb)/4));
+  // Giriş Zorluğu skoru artık rastgele EODB yerine, mevcutsa Coface'in gerçek
+  // "İş Ortamı Değerlendirmesi" notunu kullanıyor; veri yoksa nötr bir temel değer.
+  const cofaceEntry = COFACE_RISK[id] || null;
+  const businessClimateScore = cofaceEntry ? cofaceGradeToScore(cofaceEntry.businessClimate) : null;
+  const difficultyScore = Math.round(Math.min(95, Math.max(10,
+    importTaxForScore * 3 + (businessClimateScore !== null ? businessClimateScore * 0.6 : 40)
+  )));
   // Rekabet skoru — gerçek tedarikçi verisi varsa ana rakibin GERÇEK payını kullanır, yoksa sentetiktir.
   const realTopCompetitorShare = realSeatingData ? Math.max(...realSeatingData.suppliers.filter(s=>s.c!=='Türkiye'&&s.c!=='Diğer').map(s=>s.v), 0) : null;
   const competitionScore = Math.round(Math.min(95, realTopCompetitorShare !== null ? realTopCompetitorShare*1.6 : chinaShareNum*1.6 + fillerAShare));
@@ -564,18 +748,20 @@ function generateCountryProfile(iso, name, id, lat, lon){
     gdpPerCapita: hasNoRealPopulation ? 'Bilinmiyor' : ('$' + gdpPerCapita.toLocaleString('en-US')),
     minWage: hasNoRealPopulation ? 'Bilinmiyor' : ('$' + minWage),
     vat: vat + '%', importTax: importTaxKnown !== null ? importTaxKnown + '%' : 'Bilinmiyor', customsDuty: customsDutyKnown !== null ? customsDutyKnown + '%' : 'Bilinmiyor',
-    fta: isEU ? 'AB-Türkiye Gümrük Birliği' : (isEuropeFree ? 'Türkiye Serbest Ticaret Anlaşması Ağı (EFTA/Balkan)' : (rnd()>0.6 ? 'Değerlendirme aşamasında' : 'FTA yok / MFN tarife')),
+    fta: getSTAStatus(id, isEU, isEuropeFree).label,
+    staStatus: getSTAStatus(id, isEU, isEuropeFree).status,
     logisticsCost: '$' + freightCost.toLocaleString('en-US') + ' / ' + logisticsLabel,
     transitTime: transitLo + '–' + transitHi + ' gün',
     ports: portsLabel, transportMode, distanceKm: distKm,
     currency, exchangeRate: currency==='USD' ? '—' : (exRate !== null ? `1 USD ≈ ${exRate.toFixed(2)} ${currency}` : 'Bilinmiyor'),
-    eodb: eodb + ' / 190', marketSize: marketSizeM !== null ? ('$' + marketSizeM.toLocaleString('en-US') + 'M') : 'Bilinmiyor',
+    marketSize: marketSizeM !== null ? ('$' + marketSizeM.toLocaleString('en-US') + 'M') : 'Bilinmiyor',
     annualImports: annualImportsM !== null ? ('$' + annualImportsM.toLocaleString('en-US') + 'M') : 'Bilinmiyor', importGrowth: growthTxt,
     importDataVerified: false,
     freightCost: transportMode==='road' ? ('$' + freightCost.toLocaleString('en-US') + ' / TIR') : ('$' + freightCost.toLocaleString('en-US') + ' / TEU'),
-    politicalRisk: political,
+    cofaceCountryRisk: cofaceEntry ? cofaceEntry.countryRisk : 'Bilinmiyor',
+    cofaceBusinessClimate: cofaceEntry ? cofaceEntry.businessClimate : 'Bilinmiyor',
     importGrowth10, suppliers, turkeyHistory,
-    turkeyShare: '%' + suppliers[3].v, turkeyGrowth,
+    turkeyShare: pctFmt(suppliers[3].v), turkeyGrowth,
     exporters: [], certs: 'Standart uygunluk gereklilikleri uygulanır (örnek veri).',
     docs: 'Ticari fatura, menşe belgesi, taşıma belgesi (örnek veri).',
     scores: { market: Math.max(10,marketScore), difficulty: Math.max(10,difficultyScore), competition: Math.max(10,competitionScore), logistics: Math.max(10,logisticsScore), overall },
@@ -601,7 +787,7 @@ const TURKEY_PROFILE = {
 // Türkiye'nin gerçek en büyük 5 mobilya ihracat pazarı (kullanıcı tarafından sağlanan
 // gerçek ihracat sıralaması) — Fırsat Skoru hesaplamasında her koşulda öne çıkarılır.
 // Fırsat Skoru formülü — kullanıcıya şeffaflık için gösterilir.
-const SCORE_FORMULA_NOTE = 'AI Fırsat Skoru — 6 bileşen, tamamen gerçek verilerden: %30 Kanıtlanmış Türkiye Trafiği (yıllık ithalat × Türkiye payı, gerçek $ ihracat değeri), %20 Pazar Büyüklüğü (ülkenin toplam mobilya ithalatı), %15 Giriş Kolaylığı (gümrük vergisi), %15 Rekabet Yoğunluğu (en büyük rakip tedarikçinin payı), %10 Türkiye\'nin Büyüme Momentumu (yıllık ihracat büyümesi), %10 Pazar Büyüme Oranı (ülkenin toplam ithalat büyümesi). Bir ülke için veri doğrulanmamışsa o bileşen için nötr bir değer kullanılır — asla veri uydurulmaz.';
+const SCORE_FORMULA_NOTE = 'AI Fırsat Skoru — 6 bileşen, tamamen gerçek verilerden: %30 Kanıtlanmış Türkiye Trafiği (yıllık ithalat × Türkiye payı, gerçek $ ihracat değeri), %20 Pazar Büyüklüğü (ülkenin toplam mobilya ithalatı), %15 Giriş Kolaylığı (gümrük vergisi), %15 Rekabet Yoğunluğu (en büyük rakip tedarikçinin payı), %10 Türkiye\'nin Büyüme Momentumu (2017-2025 gerçek ITC Trade Map verisinden hesaplanan yıllık ortalama büyüme — CAGR), %10 Pazar Büyüme Oranı (ülkenin toplam ithalat büyümesi). Bir ülke için veri doğrulanmamışsa o bileşen için nötr bir değer kullanılır — asla veri uydurulmaz.';
 // GERÇEK tedarikçi/pazar payı verisi — ITC Trade Map 2025, kullanıcı tarafından sağlanan
 // 'ülkelerin ithalatı, tedarikçiye göre' (HS 940161 ve 940360) resmi raporlarından derlenmiştir.
 // 165+166 ülke için gerçek, doğrulanmış tedarikçi payları ve Türkiye'nin gerçek konumu içerir.
@@ -777,6 +963,15 @@ function getRequiredDocs(country){
   return docs;
 }
 
+const WOOD_TAX_OVERRIDES = {
+  usa: { importTax:'0%', customsDuty:'0.0% (mobilya/dolap değilse Section 232 muaf)' },
+  germany: { importTax:'0%', customsDuty:'0% (AB-Türkiye Gümrük Birliği)' },
+  france: { importTax:'0%', customsDuty:'0% (AB-Türkiye Gümrük Birliği)' },
+  poland: { importTax:'0%', customsDuty:'0% (AB-Türkiye Gümrük Birliği)' },
+  netherlands: { importTax:'0%', customsDuty:'0% (AB-Türkiye Gümrük Birliği)' },
+  uk: { importTax:'0%', customsDuty:'0.0%' },
+};
+
 (function generateAllCountries(){
   const existingIds = new Set(COUNTRIES.map(c=>c.id));
   // Elle hazırlanmış (curated) ülkeler dq.marketSize alanıyla oluşturulmamıştı — gerçek
@@ -820,7 +1015,7 @@ function getRequiredDocs(country){
     if(!c) return;
     c.suppliers = SUPPLIER_REAL_OVERRIDES[id];
     const tr = c.suppliers.find(s=>s.c==='Türkiye');
-    if(tr) c.turkeyShare = '%' + tr.v;
+    if(tr) c.turkeyShare = pctFmt(tr.v);
     c.suppliersVerified = true;
   });
 
@@ -841,10 +1036,15 @@ function getRequiredDocs(country){
     const c = COUNTRIES.find(x=>x.id===id);
     if(!c) return;
     const v = SUPPLIER_ESTIMATE_REVISIONS[id];
-    c.turkeyShare = '%' + v;
+    c.turkeyShare = pctFmt(v);
     const tr = c.suppliers.find(s=>s.c==='Türkiye');
     if(tr) tr.v = v; else c.suppliers.push({c:'Türkiye', v});
     c.turkeyShareEstimated = true; // gerçek değil ama makul bir tahmin — "Bilinmiyor" değil "Tahmini" gösterilir
+    // Bu ülkeler için Türkiye payı makul bir tahmine düzeltildi, ama Çin/İspanya/Hindistan gibi
+    // diğer tedarikçilerin payı hâlâ generateCountryProfile'daki rastgele üretimden kalmaydı.
+    // Gerçek bir tedarikçi dağılımı verimiz olmadığından, dürüstçe sadece Türkiye + "Diğer"
+    // olarak sadeleştiriyoruz — var olmayan bir kesinlik izlenimi vermemek için.
+    c.suppliers = [ {c:'Türkiye', v}, {c:'Diğer', v: 100-v} ];
   });
 
   // GERÇEK ITC verisi — yukarıdaki tüm eski tahmini/kısmi düzeltmelerin önüne geçer.
@@ -855,7 +1055,7 @@ function getRequiredDocs(country){
     if(!c) return;
     const real = REAL_SUPPLIERS_SEATING[id];
     c.suppliers = real.suppliers;
-    c.turkeyShare = '%' + real.turkeyShare;
+    c.turkeyShare = pctFmt(real.turkeyShare);
     c.suppliersVerified = true;
     c.turkeyShareEstimated = false; // artık tahmini değil, gerçek
     c.annualImports = '$' + Math.round(real.totalValueM) + 'M'; // gerçek toplam ithalat (HS 9401.61)
@@ -888,6 +1088,22 @@ function getRequiredDocs(country){
         `Bu ülke için tedarikçi payları ve Türkiye'nin pazar payına dair doğrulanmış bir veri yok (Bilinmiyor). ` +
         `Lojistik maliyeti ${c.logisticsCost} ve ortalama teslimat süresi ${c.transitTime} (her ikisi de tahmini).`;
     }
+  });
+
+  // STA (Serbest Ticaret Anlaşması) ve Coface Ülke/İş Ortamı Risk verisi — TÜM ülkelere
+  // (elle hazırlanan 10 + otomatik üretilen 167) tek bir gerçek kaynaktan tutarlı şekilde
+  // uygulanır. Ayrıca artık kaldırılan EODB/Siyasi Risk alanları (varsa) temizlenir.
+  COUNTRIES.forEach(c=>{
+    const isEU = EU_27.has(c.iso);
+    const isEuropeFree = (REGION_MAP[c.iso] || 'other') === 'europe';
+    const sta = getSTAStatus(c.id, isEU, isEuropeFree);
+    c.fta = sta.label;
+    c.staStatus = sta.status;
+    const cofaceEntry = COFACE_RISK[c.id] || null;
+    c.cofaceCountryRisk = cofaceEntry ? cofaceEntry.countryRisk : 'Bilinmiyor';
+    c.cofaceBusinessClimate = cofaceEntry ? cofaceEntry.businessClimate : 'Bilinmiyor';
+    delete c.eodb;
+    delete c.politicalRisk;
   });
 
   // Fırsat Skoru artık burada, TÜM gerçek veri düzeltmeleri (167 ülkenin üretimi,
@@ -941,15 +1157,6 @@ function adjustGrowthLabel(str, delta){
 
 // Gerçek/bilinen veriye dayalı "Ahşap Mobilya" (HS 9403.60) istisnaları.
 // Diğer tüm ülkeler için sentetik (örnek) türetme kullanılır.
-const WOOD_TAX_OVERRIDES = {
-  usa: { importTax:'0%', customsDuty:'0.0% (mobilya/dolap değilse Section 232 muaf)' },
-  germany: { importTax:'0%', customsDuty:'0% (AB-Türkiye Gümrük Birliği)' },
-  france: { importTax:'0%', customsDuty:'0% (AB-Türkiye Gümrük Birliği)' },
-  poland: { importTax:'0%', customsDuty:'0% (AB-Türkiye Gümrük Birliği)' },
-  netherlands: { importTax:'0%', customsDuty:'0% (AB-Türkiye Gümrük Birliği)' },
-  uk: { importTax:'0%', customsDuty:'0.0%' },
-};
-
 function buildWoodVariant(country){
   const rnd = mulberry32(hashSeed(country.id + 'wood-cat'));
   const r = (a,b) => a + rnd()*(b-a);
@@ -997,7 +1204,7 @@ function buildWoodVariant(country){
   if(country._realWoodSuppliers){
     // En iyi durum: bu ülke için AHŞAP kategorisine özel gerçek veri var.
     variant.suppliers = country._realWoodSuppliers.suppliers;
-    variant.turkeyShare = '%' + country._realWoodSuppliers.turkeyShare;
+    variant.turkeyShare = pctFmt(country._realWoodSuppliers.turkeyShare);
     variantSuppliersVerified = true;
   } else if(country.suppliersVerified){
     // Ahşap'a özel gerçek veri yok ama DÖŞEMELİ kategorisi için gerçek veri var — kategori
@@ -1015,37 +1222,33 @@ function buildWoodVariant(country){
       ? {...s, v: Math.min(99, Math.max(1, Math.round(s.v * trShareFactor)))}
       : s);
     const trSupplier = variant.suppliers.find(s=>s.c==='Türkiye');
-    variant.turkeyShare = '%' + (trSupplier ? trSupplier.v : 0);
+    variant.turkeyShare = pctFmt(trSupplier ? trSupplier.v : 0);
   }
   variant.suppliersVerified = variantSuppliersVerified;
   variant.turkeyHistory = !country.turkeyHistory ? null : (variantSuppliersVerified
     ? country.turkeyHistory
     : country.turkeyHistory.map(v => Math.round(v*trShareFactor*10)/10));
-  // Pazar büyüklüğü skoru (0-100) — sadece iç Fırsat Skoru hesaplamasında kullanılır, dolar
-  // tutarı olarak asla gösterilmez. Ahşap'a özel gerçek veri yoksa döşemeli kategorisinin
-  // skorundan kabaca türetilir (bu SADECE skor, ekrandaki "Pazar Büyüklüğü" tutarı değil).
+  // Pazar Büyüklüğü / Giriş Zorluğu / Lojistik alt-skor göstergeleri (gauge'lar) — bunlar
+  // Fırsat Skoru'nun kendisi değil, ayrı küçük göstergeler. Rekabet alt-skoru artık, varsa,
+  // ahşaba özel GERÇEK tedarikçi verisini kullanıyor (önceden her zaman döşemeliden miras
+  // alınıyordu, ahşaba özel gerçek veri olsa bile).
   const realWoodMarketM = country._realWoodSuppliers ? country._realWoodSuppliers.totalValueM : null;
   const market = realWoodMarketM !== null
     ? Math.round(Math.min(95, Math.log10(realWoodMarketM+1)*24 + numFromPercent(variant.importGrowth||'0')*2))
     : clampScore(country.scores.market * r(0.8,1.15));
   const difficulty = clampScore(country.scores.difficulty + taxDelta*2);
-  const competition = country.scores.competition;
+  const realWoodTopCompetitor = country._realWoodSuppliers
+    ? Math.max(...country._realWoodSuppliers.suppliers.filter(s=>s.c!=='Türkiye').map(s=>s.v), 0)
+    : null;
+  const competition = realWoodTopCompetitor !== null ? Math.round(Math.min(95, realWoodTopCompetitor*1.6)) : country.scores.competition;
   const logistics = country.scores.logistics;
-  const woodFundamentals = clampScore(market*0.32 + (100-difficulty)*0.22 + (100-competition)*0.2 + logistics*0.26);
   const woodShareNum = numFromPercent(variant.turkeyShare || '0');
-  // Fırsat Skoru — döşemeli kategorisiyle aynı mantık: Temel Pazar Potansiyeli asla düşürülmez,
-  // Türkiye'nin bu pazardaki kanıtlanmış başarısı (pay + mutlak hacim) sadece ek puan olarak eklenir.
-  let overall = woodFundamentals;
-  if(variantSuppliersVerified && realWoodMarketM !== null){
-    const shareBonus = Math.min(30, woodShareNum * 0.5);
-    const turkeyExportValueM = realWoodMarketM * woodShareNum / 100;
-    const volumeBonus = Math.min(20, Math.log10(turkeyExportValueM + 1) * 8);
-    overall = Math.round(woodFundamentals + shareBonus + volumeBonus);
-  } else if(variantSuppliersVerified){
-    // Ahşap'a özel toplam pazar verisi yoksa ama pay biliniyorsa (döşemeliden miras), sadece paya dayalı ek puan.
-    overall = Math.round(woodFundamentals + Math.min(30, woodShareNum*0.5));
-  }
-  overall = Math.min(90, Math.max(20, overall));
+
+  // FIRSAT SKORU — artık döşemeli kategorisiyle TAM OLARAK AYNI 6 bileşenli, gerçek-veri
+  // formülü kullanılıyor (bkz. computeOpportunityScores/WOOD_OPPORTUNITY_SCORES). Önceden
+  // burada tamamen ayrı, daha eski bir formül vardı; bu tutarsızlık giderildi.
+  const woodScore = WOOD_OPPORTUNITY_SCORES[country.id];
+  let overall = woodScore ? woodScore.overall : 50;
   const woodRestriction = IMPORT_RESTRICTIONS[country.id];
   let woodDifficulty = difficulty;
   if(woodRestriction){
@@ -1053,6 +1256,7 @@ function buildWoodVariant(country){
     woodDifficulty = woodRestriction.level === 'severe' ? 99 : Math.max(difficulty, 85);
   }
   variant.scores = { market, difficulty:woodDifficulty, competition, logistics, overall };
+  variant._scoreBreakdown = woodScore || null;
   variant.aiSummary = `${country.name} pazarında ${CATEGORIES.wood.label} (${CATEGORIES.wood.hs}) kategorisi için tahmini ithalat vergisi ${variant.importTax}, pazar büyüklüğü ${variant.marketSize} civarında. Bu kategori, döşemeli oturma grubuna kıyasla ${marketFactor>1?'daha geniş':'daha dar'} bir hacme sahip; ${variant.turkeyShare==='Bilinmiyor' ? "Türkiye'nin payına dair doğrulanmış bir veri yok (Bilinmiyor)" : `Türkiye'nin payı %${woodShareNum} seviyesinde`}. Genel fırsat skoru ${overall}/100.`;
   variant.categoryKey = 'wood';
   return variant;
@@ -1072,6 +1276,13 @@ function numFromPercent(str){
   const m = String(str).match(/(-?[\d.]+)/);
   return m ? parseFloat(m[1]) : 0;
 }
+// Gerçek ticaret verisinde %0 olarak yuvarlanan paylar (aslında küçük ama pozitif bir
+// varlığı temsil eder) sitede ASLA çıplak "%0" olarak gösterilmez — yanıltıcı olurdu
+// ("hiç yok" izlenimi verir). Bunun yerine daha doğru ve profesyonel "<%1" kullanılır.
+function pctFmt(v){
+  if(v == null || isNaN(v)) return 'Bilinmiyor';
+  return v <= 0 ? '<%1' : '%' + v;
+}
 // Türkiye pazar payı — sadece gerçek/doğrulanmış tedarikçi verisi varsa gösterilir, yoksa "Bilinmiyor".
 // Sentetik/tahmini bir yüzde kullanıcıyı yanıltmasın diye burada asla gösterilmez.
 function turkeyShareDisplay(c){
@@ -1087,7 +1298,8 @@ function turkeyShareDisplay(c){
 }
 function turkeyShareTier(c){ return c.suppliersVerified ? 'real' : c.turkeyShareEstimated ? 'estimated' : 'unknown'; }
 
-// Fırsat Skoru ⓘ ikonuna tıklanınca formül açıklamasını gösterir/gizler (üzerinde durunca değil).
+// Fırsat Skoru ⓘ ikonuna tıklanınca formül açıklamasını VE bu ülkeye özel gerçek
+// bileşen dökümünü gösterir/gizler (üzerinde durunca değil).
 function toggleScoreInfo(e){
   const pop = document.getElementById('scoreInfoPopover');
   const isShown = pop.classList.contains('show');
@@ -1095,9 +1307,31 @@ function toggleScoreInfo(e){
     pop.classList.remove('show');
     return;
   }
-  pop.textContent = SCORE_FORMULA_NOTE;
+  const c = currentBaseCountry ? withCategory(currentBaseCountry) : null;
+  const bd = c && c._scoreBreakdown;
+  const components = bd ? [
+    { label:'Kanıtlanmış Türkiye Trafiği', weight:30, val:bd.traction },
+    { label:'Pazar Büyüklüğü', weight:20, val:bd.marketSize },
+    { label:'Giriş Kolaylığı', weight:15, val:bd.easeOfEntry },
+    { label:'Rekabet Avantajı', weight:15, val:100-bd.competition },
+    { label:"Türkiye'nin Büyüme Momentumu", weight:10, val:bd.momentum },
+    { label:'Pazar Büyüme Oranı', weight:10, val:bd.marketGrowth },
+  ] : null;
+  pop.innerHTML = `
+    <div class="score-info-title">AI Fırsat Skoru — Nasıl Hesaplanıyor?</div>
+    ${components ? `
+    <div class="score-info-components">
+      ${components.map(cm=>`
+        <div class="score-info-row">
+          <div class="score-info-row-head"><span>${cm.label}</span><span class="score-info-weight">%${cm.weight} ağırlık</span></div>
+          <div class="score-info-bar"><div class="score-info-bar-fill" style="width:${Math.max(2,Math.round(cm.val))}%;"></div></div>
+        </div>
+      `).join('')}
+    </div>` : ''}
+    <div class="score-info-footnote">${SCORE_FORMULA_NOTE}</div>
+  `;
   pop.classList.add('show');
-  const rect = e.target.getBoundingClientRect();
+  const rect = e.target.closest('.score-info-icon').getBoundingClientRect();
   const popWidth = 320;
   let left = rect.left - popWidth/2 + rect.width/2;
   left = Math.max(12, Math.min(left, window.innerWidth - popWidth - 12));
@@ -1809,14 +2043,15 @@ function generateExtraFields(country){
   ];
   const holidays = HOLIDAY_SETS[Math.floor(r(0,HOLIDAY_SETS.length))];
   const risks = [
-    {label:'Politik Risk', score: Math.round(r(10,80)), note: country.politicalRisk},
+    {label:'Ülke Risk Değerlendirmesi', score: cofaceGradeToScore(country.cofaceCountryRisk), note: country.cofaceCountryRisk !== 'Bilinmiyor' ? `Coface ülke risk notu: ${country.cofaceCountryRisk}` : 'Coface tarafından henüz derecelendirilmemiş (Bilinmiyor).', isCoface:true, grade: country.cofaceCountryRisk},
     {label:'Kur Riski', score: Math.round(r(15,75)), note: parseFloat(inflation)>15?'Yüksek enflasyon nedeniyle kur oynaklığı riski var.':'Görece istikrarlı döviz kuru.'},
     {label:'Ödeme Riski', score: Math.round(r(10,70)), note: PAYMENT_HABITS[Math.floor(r(0,PAYMENT_HABITS.length))]},
     {label:'Ekonomik İstikrar', score: Math.round(100-r(10,60)), note: `GSYH büyüme trendi ${country.importGrowth}`},
     {label:'Regülasyon Riski', score: country.scores.difficulty, note:'İthalat mevzuatı ve standart uyumu karmaşıklığı.'},
     {label:'Yerel Rekabet', score: Math.round(r(20,75)), note:'Yerli üreticilerin pazar payı ve fiyat baskısı.'},
     {label:'Çin Rekabeti', score: ((country.suppliers||[]).find(s=>s.c==='Çin')||{v:30}).v + 15, note:'Çin menşeli düşük maliyetli ürünlerin pazar baskısı.'},
-    {label:'İthalat Kısıtlamaları', score: Math.round(r(10,55)), note: country.fta.includes('yok')?'Serbest ticaret anlaşması yok, tarife riski mevcut.':'Ticaret anlaşması avantajı mevcut.'}
+    {label:'İthalat Kısıtlamaları', score: Math.round(r(10,55)), note: country.fta.includes('yok')?'Serbest ticaret anlaşması yok, tarife riski mevcut.':'Ticaret anlaşması avantajı mevcut.'},
+    {label:'İş Ortamı Değerlendirmesi', score: cofaceGradeToScore(country.cofaceBusinessClimate), note: country.cofaceBusinessClimate !== 'Bilinmiyor' ? `Coface iş ortamı notu: ${country.cofaceBusinessClimate}` : 'Coface tarafından henüz derecelendirilmemiş (Bilinmiyor).', isCoface:true, grade: country.cofaceBusinessClimate}
   ];
   return { inflation, inflationVerified, tzOffset, totalExports, italianPremiumBrands, gdpGrowth, holidays, risks,
     language: LANGUAGES[country.id] || 'Yerel dil',
@@ -1873,7 +2108,7 @@ function generateReportHTML(baseCountry){
     <div class="sup-row">
       <span class="sup-name">${s.c}</span>
       <div class="sup-bar-wrap"><div class="sup-bar" style="width:${s.v}%; background:${s.c==='Türkiye'?'#3fd0c0':'#c9a961'}"></div></div>
-      <span class="sup-val">%${s.v}</span>
+      <span class="sup-val">${pctFmt(s.v)}</span>
     </div>`).join('');
 
   const trHistoryBars = !c.turkeyHistory
@@ -3023,8 +3258,8 @@ function showTurkeyCard(e){
     </div>
     <div class="hc-suppliers">
       <span class="hc-label">İhracatta Ülke Payları</span>
-      <div class="hc-bar">${t.exportDestinations.map(s=>`<span style="flex:${s.v}" class="${s.c==='Diğer'?'seg-other':'seg-tr'}" title="${s.c} %${s.v}"></span>`).join('')}</div>
-      <div class="hc-supplier-list">${t.exportDestinations.slice(0,5).map(s=>`<span>${s.c} %${s.v}</span>`).join('')}</div>
+      <div class="hc-bar">${t.exportDestinations.map(s=>`<span style="flex:${s.v}" class="${s.c==='Diğer'?'seg-other':'seg-tr'}" title="${s.c} ${pctFmt(s.v)}"></span>`).join('')}</div>
+      <div class="hc-supplier-list">${t.exportDestinations.slice(0,5).map(s=>`<span>${s.c} ${pctFmt(s.v)}</span>`).join('')}</div>
     </div>
     <div class="hc-footer"><span>Türkiye'nin ihracat kaynağı</span><span>—</span></div>
     <button class="hc-detail-btn" id="hcTurkeyDetailBtn">Detaya Git →</button>
@@ -3054,7 +3289,7 @@ function renderTurkeyPage(){
     <div class="cp-section-title" style="margin:28px 0 12px;"><span class="num"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 4 5.7 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.7-4-9s1.5-6.5 4-9z"/></svg></span> En Büyük 5 İhracat Pazarı</div>
     <div class="opp-grid">
       ${t.exportDestinations.filter(d=>d.c!=='Diğer').map(d=>`
-        <div class="opp-card"><div class="opp-t">${d.c}</div><div class="opp-d">İhracat payı: %${d.v}</div></div>
+        <div class="opp-card"><div class="opp-t">${d.c}</div><div class="opp-d">İhracat payı: ${pctFmt(d.v)}</div></div>
       `).join('')}
     </div>
 
@@ -3161,8 +3396,8 @@ function showHoverCard(baseCountry, e){
       }
       return `<div class="hc-suppliers">
       <span class="hc-label">İthalatta Tedarikçi Payları ${tier==='real' ? '<span style="color:var(--teal);font-size:8px;">✓</span>' : '<span style="color:var(--text-2);font-size:8px;opacity:0.7;">~ tahmini</span>'}</span>
-      <div class="hc-bar">${c.suppliers.map(s=>`<span style="flex:${s.v}" class="${s.c==='Türkiye'?'seg-tr':'seg-other'}" title="${s.c} %${s.v}"></span>`).join('')}</div>
-      <div class="hc-supplier-list">${c.suppliers.slice(0,4).map(s=>`<span class="${s.c==='Türkiye'?'tr-hl':''}">${s.c} %${s.v}</span>`).join('')}</div>
+      <div class="hc-bar">${c.suppliers.map(s=>`<span style="flex:${s.v}" class="${s.c==='Türkiye'?'seg-tr':'seg-other'}" title="${s.c} ${pctFmt(s.v)}"></span>`).join('')}</div>
+      <div class="hc-supplier-list">${c.suppliers.slice(0,4).map(s=>`<span class="${s.c==='Türkiye'?'tr-hl':''}">${s.c} ${pctFmt(s.v)}</span>`).join('')}</div>
     </div>`;
     })()}
     <div class="hc-footer" style="margin-bottom:2px;"><span>${c.ports}</span></div>
@@ -3375,6 +3610,8 @@ function renderCountryPage(baseCountry){
   ];
 
   const risks = [
+    { label:'Ülke Risk Değerlendirmesi', score: x.risks[0].score, note: x.risks[0].note, isCoface:true, grade: x.risks[0].grade },
+    { label:'İş Ortamı Değerlendirmesi', score: x.risks[8].score, note: x.risks[8].note, isCoface:true, grade: x.risks[8].grade },
     { label:'Kur Riski', score: x.risks[1].score, note: x.risks[1].note },
     { label:'Ödeme Riski', score: x.risks[2].score, note: x.risks[2].note },
     { label:'Rekabet Riski', score: Math.round((x.risks[5].score + x.risks[6].score)/2), note: 'Yerel ve Çin menşeli rakiplerin fiyat/hacim baskısı.' },
@@ -3410,7 +3647,7 @@ function renderCountryPage(baseCountry){
     <div class="sup-row">
       <span class="sup-name">${s.c}</span>
       <div class="sup-bar-wrap"><div class="sup-bar" style="width:${s.v}%; background:${s.c==='Türkiye'?'#3fd0c0':'#c9a961'}"></div></div>
-      <span class="sup-val">%${s.v}</span>
+      <span class="sup-val">${pctFmt(s.v)}</span>
     </div>`).join('');
   const turkeyRank = suppliersUnknown ? null : [...c.suppliers].sort((a,b)=>b.v-a.v).findIndex(s=>s.c==='Türkiye') + 1;
 
@@ -3433,6 +3670,8 @@ function renderCountryPage(baseCountry){
       </div>
     </div>
 
+    ${renderTurkeyGrowthChart(baseCountry.id, activeCategory, catInfo.label)}
+
     ${IMPORT_RESTRICTIONS[c.id] ? `
     <div class="import-restriction-banner ${IMPORT_RESTRICTIONS[c.id].level}">
       <div class="import-restriction-icon">${IMPORT_RESTRICTIONS[c.id].level==='severe' ? '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>' : '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/></svg>'}</div>
@@ -3453,7 +3692,7 @@ function renderCountryPage(baseCountry){
 
     <div class="teaser-kpi-row">
       <div class="teaser-kpi">
-        <div class="teaser-kpi-label">Fırsat Skoru <span class="score-info-icon" onclick="event.stopPropagation(); toggleScoreInfo(event);">ⓘ</span></div>
+        <div class="teaser-kpi-label">Fırsat Skoru <span class="score-info-icon" onclick="event.stopPropagation(); toggleScoreInfo(event);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.8 5.6L19.5 9l-5.7 1.4L12 16l-1.8-5.6L4.5 9l5.7-1.4L12 2z"/></svg></span></div>
         <div style="display:flex; align-items:center; justify-content:center; gap:14px;">
           <svg width="48" height="48" viewBox="0 0 40 40" style="flex-shrink:0;"><circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/><circle cx="20" cy="20" r="16" fill="none" stroke="${scoreColor(c.scores.overall)}" stroke-width="4" stroke-dasharray="100.5" stroke-dashoffset="${(100.5*(1-c.scores.overall/100)).toFixed(1)}" stroke-linecap="round" transform="rotate(-90 20 20)"/></svg>
           <div class="teaser-kpi-val" style="color:${scoreColor(c.scores.overall)}">${c.scores.overall}<span style="font-size:16px; color:var(--text-2);">/100</span></div>
@@ -3471,7 +3710,7 @@ function renderCountryPage(baseCountry){
     <div class="cp-section">
       <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12l2 2 4-4"/></svg><span class="num">01</span> Yönetici Özeti</h3>
       <div class="kpi-row">
-        <div class="kpi"><div class="kpi-label">AI Fırsat Skoru <span class="score-info-icon" onclick="event.stopPropagation(); toggleScoreInfo(event);">ⓘ Nasıl hesaplandı?</span></div><div style="display:flex; align-items:center; gap:12px;"><svg width="38" height="38" viewBox="0 0 40 40" style="flex-shrink:0;"><circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/><circle cx="20" cy="20" r="16" fill="none" stroke="${scoreColor(c.scores.overall)}" stroke-width="4" stroke-dasharray="100.5" stroke-dashoffset="${(100.5*(1-c.scores.overall/100)).toFixed(1)}" stroke-linecap="round" transform="rotate(-90 20 20)"/></svg><div class="kpi-val" style="color:${scoreColor(c.scores.overall)}">${c.scores.overall}/100</div></div></div>
+        <div class="kpi"><div class="kpi-label">AI Fırsat Skoru <button class="score-info-icon" onclick="event.stopPropagation(); toggleScoreInfo(event);" aria-label="Fırsat Skoru nasıl hesaplandı?" title="Fırsat Skoru nasıl hesaplandı?"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.8 5.6L19.5 9l-5.7 1.4L12 16l-1.8-5.6L4.5 9l5.7-1.4L12 2z"/><path d="M19 15l.8 2.4L22 18l-2.2.6L19 21l-.8-2.4L16 18l2.2-.6L19 15z"/></svg>Nasıl Hesaplandı?</button></div><div style="display:flex; align-items:center; gap:12px;"><svg width="38" height="38" viewBox="0 0 40 40" style="flex-shrink:0;"><circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/><circle cx="20" cy="20" r="16" fill="none" stroke="${scoreColor(c.scores.overall)}" stroke-width="4" stroke-dasharray="100.5" stroke-dashoffset="${(100.5*(1-c.scores.overall/100)).toFixed(1)}" stroke-linecap="round" transform="rotate(-90 20 20)"/></svg><div class="kpi-val" style="color:${scoreColor(c.scores.overall)}">${c.scores.overall}/100</div></div></div>
         <div class="kpi"><div class="kpi-label">Pazar Potansiyeli</div><div class="kpi-val">${potential}</div></div>
         <div class="kpi"><div class="kpi-label">Giriş Zorluğu</div><div class="kpi-val">${c.scores.difficulty}/100</div></div>
         <div class="kpi"><div class="kpi-label">Rekabet Seviyesi</div><div class="kpi-val">${competitionLabel}</div></div>
@@ -3573,12 +3812,29 @@ function renderCountryPage(baseCountry){
 
     <div class="cp-section">
       <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/></svg><span class="num">09</span> Riskler</h3>
-      <div class="rgrid">${risks.map(r=>`
+      <div class="rgrid">${risks.map(r=>{
+        if(r.isCoface){
+          if(r.score == null){
+            return `
+        <div class="rcard rcard-unknown">
+          <div class="rcard-head"><span>${r.label}</span><span class="rscore" style="color:var(--text-2);">Bilinmiyor</span></div>
+          <div class="rnote">${r.note}</div>
+        </div>`;
+          }
+          return `
+        <div class="rcard">
+          <div class="rcard-head"><span>${r.label}</span><span class="rscore rscore-grade" style="color:${riskColor(r.score)}">${r.grade}</span></div>
+          <div class="rbar"><div class="rbar-fill" style="width:${r.score}%; background:${riskColor(r.score)}"></div></div>
+          <div class="rnote">${r.note} <span class="footnote" style="margin:0;">(Kaynak: Coface)</span></div>
+        </div>`;
+        }
+        return `
         <div class="rcard">
           <div class="rcard-head"><span>${r.label}</span><span class="rscore" style="color:${riskColor(r.score)}">${r.score}/100</span></div>
           <div class="rbar"><div class="rbar-fill" style="width:${r.score}%; background:${riskColor(r.score)}"></div></div>
           <div class="rnote">${r.note}</div>
-        </div>`).join('')}</div>
+        </div>`;
+      }).join('')}</div>
     </div>
 
     <div class="cp-section">
@@ -4222,7 +4478,7 @@ function buildPrintReportHTML(baseCountry){
       ? `<div class="pr-lede">Bu ülke için doğrulanmış veya gözden geçirilmiş tahmini bir tedarikçi verisi yok (Bilinmiyor).</div>`
       : `<table class="pr-table">
           <thead><tr><th>Ülke</th><th style="text-align:right;">Pazar Payı</th></tr></thead>
-          <tbody>${c.suppliers.map(s=>`<tr><td>${s.c==='Türkiye' ? '🇹🇷 <b>Türkiye</b>' : s.c}</td><td style="text-align:right;">%${s.v}</td></tr>`).join('')}</tbody>
+          <tbody>${c.suppliers.map(s=>`<tr><td>${s.c==='Türkiye' ? '🇹🇷 <b>Türkiye</b>' : s.c}</td><td style="text-align:right;">${pctFmt(s.v)}</td></tr>`).join('')}</tbody>
         </table>
         <div class="pr-lede" style="font-size:9.5px; color:#9ca3af;">${c.importDataSource ? `Veri yılı: ${c.importDataSource}.` : ''}</div>`}
   </div>
@@ -4273,7 +4529,7 @@ function buildPrintReportHTML(baseCountry){
       <div class="pr-bar-row">
         <span class="pr-bar-label">${s.c==='Türkiye' ? '🇹🇷 Türkiye' : s.c}</span>
         <div class="pr-bar-track"><div class="pr-bar-fill" style="width:${s.v}%; background:${s.c==='Türkiye' ? '#1a2033' : '#c9b183'};"></div></div>
-        <span class="pr-bar-val">%${s.v}</span>
+        <span class="pr-bar-val">${pctFmt(s.v)}</span>
       </div>`).join('')}` : ''}
     <div class="pr-h2">Risk Değerlendirmesi</div>
     ${risks.map(r=>`
@@ -5623,11 +5879,11 @@ function numFromMoneyNormalized(str){
 function topSuppliersDisplay(c){
   if(!c.suppliers || !c.suppliers.length) return null;
   const top = c.suppliers.filter(s=>s.c!=='Diğer').slice(0,3);
-  return top.length ? top.map(s=>`${s.c} %${s.v}`).join(' · ') : null;
+  return top.length ? top.map(s=>`${s.c} ${pctFmt(s.v)}`).join(' · ') : null;
 }
 function supplierShareDisplay(c, name){
   const s = c.suppliers && c.suppliers.find(x=>x.c===name);
-  return s ? `%${s.v}` : null;
+  return s ? `${pctFmt(s.v)}` : null;
 }
 function supplierShareNum(c, name){
   const s = c.suppliers && c.suppliers.find(x=>x.c===name);
@@ -5666,7 +5922,8 @@ const COMPARE_SECTIONS = [
     { label:'Gümrük Vergisi', get:c=>c.customsDuty, num:c=>numFromPercent(c.customsDuty), better:'low' },
     { label:'KDV', get:c=>c.vat, num:c=>numFromPercent(c.vat), better:'low' },
     { label:'Ticaret Anlaşması', get:c=>c.fta, num:null, better:null },
-    { label:'İş Yapma Kolaylığı (Sıra)', get:c=>c.eodb, num:c=>numFromMoney(c.eodb), better:'low' },
+    { label:'Ülke Risk Değerlendirmesi (Coface)', get:c=>c.cofaceCountryRisk, num:c=>cofaceGradeToScore(c.cofaceCountryRisk), better:'low' },
+    { label:'İş Ortamı Değerlendirmesi (Coface)', get:c=>c.cofaceBusinessClimate, num:c=>cofaceGradeToScore(c.cofaceBusinessClimate), better:'low' },
     { label:'İthalat Kısıtlaması', get:c=>importRestrictionDisplay(c), num:null, better:null },
   ]},
   { title:'Lojistik', rows:[
