@@ -963,6 +963,22 @@ function getRequiredDocs(country){
   return docs;
 }
 
+// Bazı gerçek ITC kayıtlarında Türkiye'nin payı ayrı bir satır olarak değil, "Diğer"
+// içine gömülü halde geliyor (örn. Almanya: %3 Türkiye payı var ama suppliers dizisinde
+// Türkiye satırı yok). Bu durumda "Rekabet" bölümündeki sıralama/pazar payı gösterimi
+// Türkiye'yi bulamayıp yanlışlıkla %0 gösteriyordu. Bu fonksiyon Türkiye'yi, verisi varsa,
+// her zaman dizide açık bir satır olarak garanti eder.
+function ensureTurkeyInSuppliers(suppliers, turkeySharePct){
+  if(!suppliers || turkeySharePct == null || turkeySharePct <= 0) return suppliers;
+  if(suppliers.some(s=>s.c==='Türkiye')) return suppliers;
+  const list = suppliers.map(s=>({...s}));
+  const other = list.find(s=>s.c==='Diğer');
+  if(other && other.v >= turkeySharePct){
+    other.v = Math.round((other.v - turkeySharePct)*10)/10;
+  }
+  list.push({c:'Türkiye', v:turkeySharePct});
+  return list;
+}
 const WOOD_TAX_OVERRIDES = {
   usa: { importTax:'0%', customsDuty:'0.0% (mobilya/dolap değilse Section 232 muaf)' },
   germany: { importTax:'0%', customsDuty:'0% (AB-Türkiye Gümrük Birliği)' },
@@ -1054,7 +1070,7 @@ const WOOD_TAX_OVERRIDES = {
     const c = COUNTRIES.find(x=>x.id===id);
     if(!c) return;
     const real = REAL_SUPPLIERS_SEATING[id];
-    c.suppliers = real.suppliers;
+    c.suppliers = ensureTurkeyInSuppliers(real.suppliers, real.turkeyShare);
     c.turkeyShare = pctFmt(real.turkeyShare);
     c.suppliersVerified = true;
     c.turkeyShareEstimated = false; // artık tahmini değil, gerçek
@@ -1203,7 +1219,7 @@ function buildWoodVariant(country){
   let variantSuppliersVerified = false;
   if(country._realWoodSuppliers){
     // En iyi durum: bu ülke için AHŞAP kategorisine özel gerçek veri var.
-    variant.suppliers = country._realWoodSuppliers.suppliers;
+    variant.suppliers = ensureTurkeyInSuppliers(country._realWoodSuppliers.suppliers, country._realWoodSuppliers.turkeyShare);
     variant.turkeyShare = pctFmt(country._realWoodSuppliers.turkeyShare);
     variantSuppliersVerified = true;
   } else if(country.suppliersVerified){
@@ -3612,8 +3628,6 @@ function renderCountryPage(baseCountry){
   const risks = [
     { label:'Ülke Risk Değerlendirmesi', score: x.risks[0].score, note: x.risks[0].note, isCoface:true, grade: x.risks[0].grade },
     { label:'İş Ortamı Değerlendirmesi', score: x.risks[8].score, note: x.risks[8].note, isCoface:true, grade: x.risks[8].grade },
-    { label:'Kur Riski', score: x.risks[1].score, note: x.risks[1].note },
-    { label:'Ödeme Riski', score: x.risks[2].score, note: x.risks[2].note },
     { label:'Rekabet Riski', score: Math.round((x.risks[5].score + x.risks[6].score)/2), note: 'Yerel ve Çin menşeli rakiplerin fiyat/hacim baskısı.' },
   ];
 
@@ -3712,7 +3726,6 @@ function renderCountryPage(baseCountry){
       <div class="kpi-row">
         <div class="kpi"><div class="kpi-label">AI Fırsat Skoru <button class="score-info-icon" onclick="event.stopPropagation(); toggleScoreInfo(event);" aria-label="Fırsat Skoru nasıl hesaplandı?" title="Fırsat Skoru nasıl hesaplandı?"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.8 5.6L19.5 9l-5.7 1.4L12 16l-1.8-5.6L4.5 9l5.7-1.4L12 2z"/><path d="M19 15l.8 2.4L22 18l-2.2.6L19 21l-.8-2.4L16 18l2.2-.6L19 15z"/></svg>Nasıl Hesaplandı?</button></div><div style="display:flex; align-items:center; gap:12px;"><svg width="38" height="38" viewBox="0 0 40 40" style="flex-shrink:0;"><circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/><circle cx="20" cy="20" r="16" fill="none" stroke="${scoreColor(c.scores.overall)}" stroke-width="4" stroke-dasharray="100.5" stroke-dashoffset="${(100.5*(1-c.scores.overall/100)).toFixed(1)}" stroke-linecap="round" transform="rotate(-90 20 20)"/></svg><div class="kpi-val" style="color:${scoreColor(c.scores.overall)}">${c.scores.overall}/100</div></div></div>
         <div class="kpi"><div class="kpi-label">Pazar Potansiyeli</div><div class="kpi-val">${potential}</div></div>
-        <div class="kpi"><div class="kpi-label">Giriş Zorluğu</div><div class="kpi-val">${c.scores.difficulty}/100</div></div>
         <div class="kpi"><div class="kpi-label">Rekabet Seviyesi</div><div class="kpi-val">${competitionLabel}</div></div>
         <div class="kpi"><div class="kpi-label">Genel Öneri</div><div class="kpi-val" style="font-size:15px; color:${scoreColor(c.scores.overall)}">${recommendationLabel(c.scores.overall)}</div></div>
       </div>
@@ -3760,7 +3773,7 @@ function renderCountryPage(baseCountry){
             ? `<div class="card-value" style="font-size:20px; margin:8px 0; color:var(--text-2);">Bilinmiyor</div>
           <div class="footnote" style="margin:0;">Doğrulanmış tedarikçi verisi olmadan sıralama hesaplanamaz.</div>`
             : `<div class="card-value" style="font-size:26px; margin:8px 0;">${turkeyRank}. sıra</div>
-          <div class="footnote" style="margin:0;">${c.suppliers.length} tedarikçi arasında, %${(c.suppliers.find(s=>s.c==='Türkiye')||{v:0}).v} pazar payıyla.</div>`}
+          <div class="footnote" style="margin:0;">${c.suppliers.length} tedarikçi arasında, ${c.turkeyShare} pazar payıyla.</div>`}
         </div>
       </div>
     </div>
@@ -3780,7 +3793,7 @@ function renderCountryPage(baseCountry){
       <div class="panel-grid">
         <div class="card ${dqCardClass(c.dq.importTax)}"><div class="card-label">İthalat Vergisi${dqBadge(c.dq.importTax)}</div><div class="card-value" style="font-size:19px">${c.importTax}</div></div>
         <div class="card ${dqCardClass(c.dq.vat)}"><div class="card-label">KDV${dqBadge(c.dq.vat)}</div><div class="card-value" style="font-size:19px">${c.vat}</div></div>
-        <div class="card"><div class="card-label">Gümrük Zorluğu</div><div class="card-value" style="font-size:16px"><span class="indicator" style="background:${difficultyIndicatorColor(c.scores.difficulty)}"></span>${difficultyIndicatorLabel(c.scores.difficulty)}</div></div>
+        <div class="card ${dqCardClass('real')}"><div class="card-label">Serbest Ticaret Anlaşması${dqBadge('real')}</div><div class="card-value" style="font-size:15px">${c.fta}</div></div>
         <div class="card ${dqCardClass('estimated')}"><div class="card-label">Ort. Gümrük Süresi${dqBadge('estimated')}</div><div class="card-value" style="font-size:19px">${Math.round(2+c.scores.difficulty/12)} gün</div></div>
       </div>
       <div class="card-label" style="margin:18px 0 10px;">Gerekli Sertifikasyon</div>
