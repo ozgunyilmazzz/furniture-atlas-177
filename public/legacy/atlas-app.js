@@ -1404,26 +1404,44 @@ function fmtTurkeyValue(v){
   if(v >= 1) return '$' + v.toFixed(1) + 'M';
   return '$' + Math.round(v*1000).toLocaleString('en-US') + 'K';
 }
+// 2024->2025 gerçek büyüme oranını, kullanıcının sağladığı tam 2017-2025 ITC Trade Map
+// serisinden (TURKEY_GROWTH_SEATING/WOOD) hesaplar. Bu, getTurkeyImportInfo()'nun eskiden
+// kullandığı çok daha dar TURKEY_EXPORT_REAL veri setinden (sadece bazı ülkeler, sadece ahşap)
+// çok daha kapsamlı — 163-166 ülkeyi kapsıyor ve her iki kategoride de çalışıyor.
+function getTurkeyRecentGrowth(countryId, categoryKey){
+  const table = categoryKey === 'wood' ? TURKEY_GROWTH_WOOD : TURKEY_GROWTH_SEATING;
+  const series = table[countryId];
+  if(!series) return null;
+  const v2024 = series[7], v2025 = series[8]; // TURKEY_GROWTH_YEARS: [...,2024,2025]
+  if(v2024 == null || v2025 == null || v2024 <= 0) return null;
+  return Math.round(((v2025-v2024)/v2024)*1000)/10;
+}
 function getTurkeyImportInfo(country){
   const rd = country.turkeyRealData;
+  const realRecentGrowth = getTurkeyRecentGrowth(country.id, activeCategory);
   if(rd){
     if(activeCategory === 'wood' && rd.wood2025M !== undefined){
+      const growthPct = rd.woodGrowthPct !== undefined ? rd.woodGrowthPct : realRecentGrowth;
       let note = 'ITC Trade Map, 2025 (HS 9403.60) — Türkiye\'nin gerçek ihracat verisi.';
-      if(rd.woodGrowthPct !== undefined){
-        const sign = rd.woodGrowthPct >= 0 ? '+' : '';
-        note += ` 2024→2025 gerçek büyüme: ${sign}${rd.woodGrowthPct}% (TÜİK 2024 verisiyle karşılaştırma).`;
+      if(growthPct !== null){
+        const sign = growthPct >= 0 ? '+' : '';
+        note += ` 2024→2025 gerçek büyüme: ${sign}${growthPct}%.`;
       }
-      return { level:'real', display: fmtTurkeyValue(rd.wood2025M), note, growthPct: rd.woodGrowthPct !== undefined ? rd.woodGrowthPct : null };
+      return { level:'real', display: fmtTurkeyValue(rd.wood2025M), note, growthPct };
     }
     if(activeCategory === 'seating' && rd.seating2025M !== undefined){
-      return { level:'real', display: fmtTurkeyValue(rd.seating2025M), note: 'ITC Trade Map, 2025 (HS 9401.61) — Türkiye\'nin gerçek ihracat verisi. Bu kategori için 2024 karşılaştırma verisi mevcut değil.', growthPct: null };
+      const growthPct = realRecentGrowth;
+      const note = growthPct !== null
+        ? `ITC Trade Map, 2025 (HS 9401.61) — Türkiye\'nin gerçek ihracat verisi. 2024→2025 gerçek büyüme: ${growthPct>=0?'+':''}${growthPct}%.`
+        : 'ITC Trade Map, 2025 (HS 9401.61) — Türkiye\'nin gerçek ihracat verisi. Bu kategori için 2024 karşılaştırma verisi mevcut değil.';
+      return { level:'real', display: fmtTurkeyValue(rd.seating2025M), note, growthPct };
     }
     if(rd.total2025M !== undefined){
-      return { level:'real', display: fmtTurkeyValue(rd.total2025M), note: 'T.C. Ticaret Bakanlığı, 2025 — Türkiye\'nin bu ülkeye TÜM mobilya kategorilerindeki (HS 94 toplamı) gerçek ihracatı. Bu, seçili ürün kategorisine (Döşemeli/Ahşap) özel bir ayrım değildir.', growthPct: null, isTotal: true };
+      return { level:'real', display: fmtTurkeyValue(rd.total2025M), note: 'T.C. Ticaret Bakanlığı, 2025 — Türkiye\'nin bu ülkeye TÜM mobilya kategorilerindeki (HS 94 toplamı) gerçek ihracatı. Bu, seçili ürün kategorisine (Döşemeli/Ahşap) özel bir ayrım değildir.', growthPct: realRecentGrowth, isTotal: true };
     }
   }
   if(country.importDataVerified){
-    return { level:'estimated', display: '$' + turkeyImportVolumeM(country).toLocaleString('en-US') + 'M', note: 'Ülkenin toplam mobilya ithalatı UN Comtrade kaynaklı gerçek veridir; Türkiye\'nin payı tahminidir.', growthPct: null };
+    return { level:'estimated', display: '$' + turkeyImportVolumeM(country).toLocaleString('en-US') + 'M', note: 'Ülkenin toplam mobilya ithalatı UN Comtrade kaynaklı gerçek veridir; Türkiye\'nin payı tahminidir.', growthPct: realRecentGrowth };
   }
   return { level:'unknown', display: 'Bilinmiyor', note: null, growthPct: null };
 }
@@ -3779,52 +3797,7 @@ function renderCountryPage(baseCountry){
     </div>
 
     <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 6-3 12M15 3l-3 6 3 12"/></svg><span class="num">05</span> Premium İtalyan Mobilya Markaları — Pazar Varlığı</h3>
-      <div class="footnote" style="margin-bottom:14px;">${dqBadge('real')} Poliform ve Roche Bobois için resmi marka mağaza bulucularından derlenmiş gerçek veri. Natuzzi sadece bölgesel toplam açıklıyor (ülke bazlı resmi veri yok). BoConcept, Calligaris ve Rimadesio için henüz ülke bazlı doğrulanmış veri yok.</div>
-      <div class="table-scroll"><table class="compare-table" style="width:100%;">
-        <thead><tr><th>Marka</th><th>Mono-Marka Mağaza</th><th>Yetkili Bayi/Satış Noktası</th><th>Şehirler</th><th>Pazar Gücü</th></tr></thead>
-        <tbody>${buildPremiumBrandRows(c)}</tbody>
-      </table></div>
-      <div class="footnote" style="margin-top:10px;">Natuzzi (küresel, 31 Ara ${NATUZZI_GLOBAL.asOf.split(' ').pop()}): ${NATUZZI_GLOBAL.monoBrand} mono-marka mağaza + ${NATUZZI_GLOBAL.galleries} galeri, ${NATUZZI_GLOBAL.countries} ülkede. BoConcept (küresel): ${BOCONCEPT_GLOBAL.stores}+ mağaza, ${BOCONCEPT_GLOBAL.countries} ülke — ${BOCONCEPT_GLOBAL.note}</div>
-    </div>
-
-    <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="num">06</span> İthalat Koşulları</h3>
-      <div class="panel-grid">
-        <div class="card ${dqCardClass(c.dq.importTax)}"><div class="card-label">İthalat Vergisi${dqBadge(c.dq.importTax)}</div><div class="card-value" style="font-size:19px">${c.importTax}</div></div>
-        <div class="card ${dqCardClass(c.dq.vat)}"><div class="card-label">KDV${dqBadge(c.dq.vat)}</div><div class="card-value" style="font-size:19px">${c.vat}</div></div>
-        <div class="card ${dqCardClass('real')}"><div class="card-label">Serbest Ticaret Anlaşması${dqBadge('real')}</div><div class="card-value" style="font-size:15px">${c.fta}</div></div>
-        <div class="card ${dqCardClass('estimated')}"><div class="card-label">Ort. Gümrük Süresi${dqBadge('estimated')}</div><div class="card-value" style="font-size:19px">${Math.round(2+c.scores.difficulty/12)} gün</div></div>
-      </div>
-      <div class="card-label" style="margin:18px 0 10px;">Gerekli Sertifikasyon</div>
-      <div class="opp-grid">${getRequiredCerts(c, activeCategory).map(cert=>`
-        <div class="opp-card"><div class="opp-t">${cert.name}${dqBadge(cert.level)}</div><div class="opp-d">${cert.note}</div></div>
-      `).join('')}</div>
-      <div class="card-label" style="margin:18px 0 10px;">Gerekli İhracat Evrakları</div>
-      <div class="opp-grid">${getRequiredDocs(c).map(doc=>`
-        <div class="opp-card"><div class="opp-t">${doc.name}${dqBadge(doc.level)}</div><div class="opp-d">${doc.note}</div></div>
-      `).join('')}</div>
-      <div class="footnote" style="margin-top:6px;">${c.dq.importTax==='real' ? '✓ İthalat vergisi, WTO/USTR/TARIC gibi resmi kaynaklardan doğrulanmıştır.' : '⚠ İthalat vergisi bu ülke için henüz doğrulanmadı — sevkiyat kararı öncesi mutlaka resmi bir kaynaktan (gümrük müşaviri, TARIC, ilgili ülkenin gümrük idaresi) teyit edin.'}</div>
-    </div>
-
-    <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="13" height="9" rx="1"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg><span class="num">07</span> Lojistik ${c.transportMode==='road' ? '<span class=\"footnote\" style=\"margin:0 0 0 8px; display:inline;\"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><rect x="1" y="7" width="13" height="9" rx="1"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg> Karayolu (TIR)</span>' : '<span class=\"footnote\" style=\"margin:0 0 0 8px; display:inline;\"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M3 14l2 6h14l2-6"/><path d="M6 14V6h6l3 8"/><path d="M2 18c2 1.5 4 1.5 6 0s4-1.5 6 0 4 1.5 6 0"/></svg> Deniz Yolu (Konteyner)</span>'}</h3>
-      <div class="panel-grid">
-        <div class="card"><div class="card-label">${c.transportMode==='road' ? 'Ana Kara Sınır Kapısı' : 'Ana Liman'}</div><div class="card-value" style="font-size:15px">${c.ports}</div></div>
-        <div class="card ${dqCardClass('estimated')}"><div class="card-label">Türkiye'den Nakliye Süresi${dqBadge('estimated')}</div><div class="card-value" style="font-size:19px">${c.transitTime}</div></div>
-        <div class="card ${dqCardClass('estimated')}"><div class="card-label">${c.transportMode==='road' ? 'Ort. TIR Maliyeti' : 'Ort. Konteyner Maliyeti'}${dqBadge('estimated')}</div><div class="card-value" style="font-size:19px">${c.freightCost}</div></div>
-        <div class="card"><div class="card-label">Lojistik Zorluğu</div><div class="card-value" style="font-size:16px"><span class="indicator" style="background:${difficultyIndicatorColor(100-c.scores.logistics)}"></span>${difficultyIndicatorLabel(100-c.scores.logistics)}</div></div>
-      </div>
-      <div class="footnote" style="margin-top:14px;">~ Maliyet ve süre, İstanbul'a olan mesafeye dayalı bir formülle hesaplanmıştır — gerçek navlun teklifi değildir. Kesin fiyat için bir lojistik firmasından teklif alın.</div>
-    </div>
-
-    <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span class="num">08</span> Fırsatlar</h3>
-      <div class="opp-grid">${oppCards.map(o=>`<div class="opp-card"><div class="opp-t">${o.t}</div><div class="opp-d">${o.d}</div></div>`).join('')}</div>
-    </div>
-
-    <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/></svg><span class="num">09</span> Riskler</h3>
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/></svg><span class="num">05</span> Riskler</h3>
       <div class="rgrid">${risks.map(r=>{
         if(r.isCoface){
           if(r.score == null){
@@ -3851,13 +3824,59 @@ function renderCountryPage(baseCountry){
     </div>
 
     <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg><span class="num">10</span> AI Pazar Stratejisi</h3>
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 6-3 12M15 3l-3 6 3 12"/></svg><span class="num">06</span> Premium İtalyan Mobilya Markaları — Pazar Varlığı</h3>
+      <div class="footnote" style="margin-bottom:14px;">${dqBadge('real')} Poliform ve Roche Bobois için resmi marka mağaza bulucularından derlenmiş gerçek veri. Natuzzi sadece bölgesel toplam açıklıyor (ülke bazlı resmi veri yok). BoConcept, Calligaris ve Rimadesio için henüz ülke bazlı doğrulanmış veri yok.</div>
+      <div class="table-scroll"><table class="compare-table" style="width:100%;">
+        <thead><tr><th>Marka</th><th>Mono-Marka Mağaza</th><th>Yetkili Bayi/Satış Noktası</th><th>Şehirler</th><th>Pazar Gücü</th></tr></thead>
+        <tbody>${buildPremiumBrandRows(c)}</tbody>
+      </table></div>
+      <div class="footnote" style="margin-top:10px;">Natuzzi (küresel, 31 Ara ${NATUZZI_GLOBAL.asOf.split(' ').pop()}): ${NATUZZI_GLOBAL.monoBrand} mono-marka mağaza + ${NATUZZI_GLOBAL.galleries} galeri, ${NATUZZI_GLOBAL.countries} ülkede. BoConcept (küresel): ${BOCONCEPT_GLOBAL.stores}+ mağaza, ${BOCONCEPT_GLOBAL.countries} ülke — ${BOCONCEPT_GLOBAL.note}</div>
+    </div>
+
+    <div class="cp-section">
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="num">07</span> İthalat Koşulları</h3>
+      <div class="panel-grid">
+        <div class="card ${dqCardClass(c.dq.importTax)}"><div class="card-label">İthalat Vergisi${dqBadge(c.dq.importTax)}</div><div class="card-value" style="font-size:19px">${c.importTax}</div></div>
+        <div class="card ${dqCardClass(c.dq.vat)}"><div class="card-label">KDV${dqBadge(c.dq.vat)}</div><div class="card-value" style="font-size:19px">${c.vat}</div></div>
+        <div class="card ${dqCardClass('real')}"><div class="card-label">Serbest Ticaret Anlaşması${dqBadge('real')}</div><div class="card-value" style="font-size:15px">${c.fta}</div></div>
+        <div class="card ${dqCardClass('estimated')}"><div class="card-label">Ort. Gümrük Süresi${dqBadge('estimated')}</div><div class="card-value" style="font-size:19px">${Math.round(2+c.scores.difficulty/12)} gün</div></div>
+      </div>
+      <div class="footnote" style="margin-top:6px;">${c.dq.importTax==='real' ? '✓ İthalat vergisi, WTO/USTR/TARIC gibi resmi kaynaklardan doğrulanmıştır.' : '⚠ İthalat vergisi bu ülke için henüz doğrulanmadı — sevkiyat kararı öncesi mutlaka resmi bir kaynaktan (gümrük müşaviri, TARIC, ilgili ülkenin gümrük idaresi) teyit edin.'}</div>
+    </div>
+
+    <div class="cp-section">
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="13" height="9" rx="1"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg><span class="num">08</span> Lojistik ${c.transportMode==='road' ? '<span class=\"footnote\" style=\"margin:0 0 0 8px; display:inline;\"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><rect x="1" y="7" width="13" height="9" rx="1"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg> Karayolu (TIR)</span>' : '<span class=\"footnote\" style=\"margin:0 0 0 8px; display:inline;\"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M3 14l2 6h14l2-6"/><path d="M6 14V6h6l3 8"/><path d="M2 18c2 1.5 4 1.5 6 0s4-1.5 6 0 4 1.5 6 0"/></svg> Deniz Yolu (Konteyner)</span>'}</h3>
+      <div class="panel-grid">
+        <div class="card"><div class="card-label">${c.transportMode==='road' ? 'Ana Kara Sınır Kapısı' : 'Ana Liman'}</div><div class="card-value" style="font-size:15px">${c.ports}</div></div>
+        <div class="card ${dqCardClass('estimated')}"><div class="card-label">Türkiye'den Nakliye Süresi${dqBadge('estimated')}</div><div class="card-value" style="font-size:19px">${c.transitTime}</div></div>
+        <div class="card ${dqCardClass('estimated')}"><div class="card-label">${c.transportMode==='road' ? 'Ort. TIR Maliyeti' : 'Ort. Konteyner Maliyeti'}${dqBadge('estimated')}</div><div class="card-value" style="font-size:19px">${c.freightCost}</div></div>
+        <div class="card"><div class="card-label">Lojistik Zorluğu</div><div class="card-value" style="font-size:16px"><span class="indicator" style="background:${difficultyIndicatorColor(100-c.scores.logistics)}"></span>${difficultyIndicatorLabel(100-c.scores.logistics)}</div></div>
+      </div>
+      <div class="footnote" style="margin-top:14px;">~ Maliyet ve süre, İstanbul'a olan mesafeye dayalı bir formülle hesaplanmıştır — gerçek navlun teklifi değildir. Kesin fiyat için bir lojistik firmasından teklif alın.</div>
+    </div>
+
+    <div class="cp-section">
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15l-4-4 1.5-1.5L12 12l6.5-6.5L20 7z"/><circle cx="12" cy="12" r="9"/></svg><span class="num">09</span> Gerekli Sertifikasyon</h3>
+      <div class="opp-grid">${getRequiredCerts(c, activeCategory).map(cert=>`
+        <div class="opp-card"><div class="opp-t">${cert.name}${dqBadge(cert.level)}</div><div class="opp-d">${cert.note}</div></div>
+      `).join('')}</div>
+    </div>
+
+    <div class="cp-section">
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M6 3h8l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9 13h6M9 17h6"/></svg><span class="num">10</span> Gerekli Belgeler</h3>
+      <div class="opp-grid">${getRequiredDocs(c).map(doc=>`
+        <div class="opp-card"><div class="opp-t">${doc.name}${dqBadge(doc.level)}</div><div class="opp-d">${doc.note}</div></div>
+      `).join('')}</div>
+    </div>
+
+    <div class="cp-section">
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg><span class="num">11</span> AI Pazar Stratejisi</h3>
       <div class="footnote" style="margin-bottom:14px;">${dqBadge('estimated')} Bu çıkarımlar, ülkenin gerçek verilerinden (üretici durumu, gelir seviyesi, Türkiye'ye lojistik yakınlık, bölgesel algı) otomatik olarak türetilmiştir — kesin pazar araştırması yerine geçmez.</div>
       <table class="strategy-table">${strategyPoints.map(p=>`<tr><td>${p[0]}</td><td>${p[1]}</td></tr>`).join('')}</table>
     </div>
 
     <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6"/><path d="M13 6l1-1a3.5 3.5 0 0 1 5 5l-1 1"/><path d="M11 18l-1 1a3.5 3.5 0 0 1-5-5l1-1"/></svg><span class="num">11</span> İlgili Kaynaklar</h3>
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6"/><path d="M13 6l1-1a3.5 3.5 0 0 1 5 5l-1 1"/><path d="M11 18l-1 1a3.5 3.5 0 0 1-5-5l1-1"/></svg><span class="num">12</span> İlgili Kaynaklar</h3>
       <div class="related-list">
         <details class="related-item">
           <summary>Ticaret İstatistikleri</summary>
