@@ -1549,9 +1549,22 @@ function getFairOverlap(country, startDate, endDate){
   const months = new Set();
   const cur = new Date(startDate);
   while(cur <= endDate){ months.add(cur.getMonth()+1); cur.setDate(cur.getDate()+1); }
+
+  // Seyahat tarihinden ~1 hafta önce biten veya ~1 hafta sonra başlayan fuarlar da
+  // önemli olabilir — örn. İtalya'daki bir fuardan dönen alıcılar hâlâ yolda/bölgede
+  // olabilir. Bu yüzden hemen önceki ve sonraki haftayı da tarama penceresine katıyoruz;
+  // gerçek seyahat tarihleriyle tam çakışan fuarları (exactOverlap) ayırt ediyoruz ki
+  // "yakın dönem" ile "seyahat sırasında" birbirine karışmasın.
+  const beforeDate = new Date(startDate); beforeDate.setDate(beforeDate.getDate() - 7);
+  const afterDate = new Date(endDate); afterDate.setDate(afterDate.getDate() + 7);
+  const extendedMonths = new Set(months);
+  extendedMonths.add(beforeDate.getMonth() + 1);
+  extendedMonths.add(afterDate.getMonth() + 1);
+
   return {
-    inCountry: FURNITURE_FAIRS.filter(f=> f.iso===country.iso && f.months.some(m=>months.has(m))),
-    elsewhere: FURNITURE_FAIRS.filter(f=> f.iso!==country.iso && f.months.some(m=>months.has(m)))
+    inCountry: FURNITURE_FAIRS
+      .filter(f=> f.iso===country.iso && f.months.some(m=>extendedMonths.has(m)))
+      .map(f=> ({ ...f, exactOverlap: f.months.some(m=>months.has(m)) }))
   };
 }
 
@@ -1601,10 +1614,7 @@ async function renderTravelPlan(country, days, startDate, endDate){
     holidayHtml = holidayInfo.holidays.map(h=>`<div class="opp-card"><div class="opp-d">⚠ ${new Date(h.date+'T00:00:00').toLocaleDateString('tr-TR')} — ${h.localName || h.name} (resmi tatil). Bu günlerde işyerleri/showroomlar kapalı olabilir.</div></div>`).join('');
   }
   if(fairs.inCountry.length){
-    holidayHtml += fairs.inCountry.map(f=>`<div class="opp-card" style="border-color:rgba(63,208,192,0.35);"><div class="opp-d"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px; opacity:0.85;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg><b>${f.name}</b>${dqBadge(f.level)} (${f.city}, ${f.type}) bu dönemde gerçekleşiyor olabilir — sektör için büyük fırsat, tarihleri kesinleştirin!</div></div>`).join('');
-  }
-  if(fairs.elsewhere.length){
-    holidayHtml += `<div class="opp-card"><div class="opp-d">ℹ Aynı dönemde başka bir yerde şu fuar(lar) da olabilir: ${fairs.elsewhere.map(f=>f.name+' ('+f.city+', '+f.type+')').join(', ')}.</div></div>`;
+    holidayHtml += fairs.inCountry.map(f=>`<div class="opp-card" style="border-color:rgba(63,208,192,0.35);"><div class="opp-d"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px; opacity:0.85;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg><b>${f.name}</b>${dqBadge(f.level)} (${f.city}, ${f.type})${f.dateNote ? ' — <b>'+f.dateNote+'</b>' : ' bu dönemde gerçekleşiyor olabilir'}. ${f.exactOverlap ? 'Sektör için büyük fırsat, tarihleri kesinleştirin!' : 'Seyahat tarihlerinize yakın bir dönemde — fuardan dönen/fuara giden alıcılarla karşılaşma ihtimaline karşı tarihleri kontrol edin.'}</div></div>`).join('');
   }
 
   const simHtmlFinal = info.sim

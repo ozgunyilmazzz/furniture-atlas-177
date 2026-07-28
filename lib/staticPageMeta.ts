@@ -21,13 +21,13 @@ export function buildStaticPageMetadata({ title, description, path, noindex }: B
       description,
       url,
       locale: "tr_TR",
-      images: [{ url: "/og-icon.png", width: 512, height: 512, alt: "Furniture Atlas" }],
+      images: [{ url: "/og-icon-small.png", width: 200, height: 200, alt: "Furniture Atlas" }],
     },
     twitter: {
       card: "summary",
       title: fullTitle,
       description,
-      images: ["/og-icon.png"],
+      images: ["/og-icon-small.png"],
     },
     robots: noindex ? { index: false, follow: true } : { index: true, follow: true },
   };

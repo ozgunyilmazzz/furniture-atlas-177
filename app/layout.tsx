@@ -18,14 +18,16 @@ export const metadata: Metadata = {
     locale: "tr_TR",
     images: [
       {
-        // WhatsApp/Telegram gibi uygulamalarda büyük fotoğraf yerine, favicon
-        // görünümünde KÜÇÜK KARE bir simge çıkması için: kare (512×512) ve koyu
-        // zeminli özel ikon. (logo.png 2.2MB + şeffaf zemin — WhatsApp şeffaflığı
-        // siyah basabiliyor; favicon-180.png ise 180px ile WhatsApp'ın alt
-        // sınırının altında kalıp hiç görünmeyebiliyordu.)
-        url: "/og-icon.png",
-        width: 512,
-        height: 512,
+        // WhatsApp/Telegram gibi uygulamalarda büyük fotoğraf yerine KÜÇÜK,
+        // kompakt bir önizleme çıkması için: WhatsApp, og:image genişliği
+        // 300px'in ALTINDA olduğunda otomatik olarak küçük/kompakt önizleme
+        // biçimine geçiyor (300px+ ise büyük tam-genişlik kart gösteriyor).
+        // Bu yüzden bilerek 200×200 (küçük kare, opak zeminli) bir ikon
+        // kullanıyoruz — 512×512'lük eski versiyon 300px eşiğinin ÜZERİNDE
+        // kaldığı için hâlâ büyük kart olarak gösteriliyordu.
+        url: "/og-icon-small.png",
+        width: 200,
+        height: 200,
         alt: "Furniture Atlas",
       },
     ],
@@ -35,7 +37,7 @@ export const metadata: Metadata = {
     title: "Furniture Atlas — Mobilya İhracatı için Pazar İstihbarat Platformu",
     description:
       "Türk mobilya ihracatçıları için interaktif pazar istihbaratı: ithalat verileri, gümrük tarifeleri, rakip analizi ve lojistik maliyetleriyle bir sonraki ihracat pazarınızı keşfedin.",
-    images: ["/og-icon.png"],
+    images: ["/og-icon-small.png"],
   },
   robots: { index: true, follow: true },
 };

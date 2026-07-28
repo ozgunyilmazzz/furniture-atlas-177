@@ -588,8 +588,11 @@
   }
   .cp-section-title .num{ font-family:var(--mono); font-size:11px; color:var(--amber); font-style:normal; }
   .exec-box{
-    background:linear-gradient(135deg, rgba(201,169,97,0.06), rgba(63,208,192,0.04)); border:1px solid var(--border);
-    border-radius:18px; padding:30px 32px; font-family:var(--display); font-style:italic; font-size:15.5px; line-height:1.85;
+    background:linear-gradient(135deg, rgba(201,169,97,0.07), rgba(63,208,192,0.045));
+    border:1px solid var(--border); border-left:3px solid var(--amber);
+    border-radius:14px; padding:28px 32px;
+    font-family:var(--body); font-style:normal; font-weight:400;
+    font-size:15.5px; line-height:1.8; letter-spacing:0.1px; color:var(--text-0);
   }
   /* Ülke sayfası "Pazara İlk Bakış" hero'su — premium karşılama karti.
      Bölgeye göre renk teması (--hero-from/--hero-to) satır içi stille JS'ten geliyor. */
