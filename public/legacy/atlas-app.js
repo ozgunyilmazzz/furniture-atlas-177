@@ -4998,6 +4998,7 @@ function applyContentGate(){
       </div>
       <div class="dash-gate-trust">177 ülke · Yapay zekâ destekli analizler · Sürekli güncellenen veriler</div>
       <button class="dash-gate-cta" id="dashGateBtn">${btnLabel}</button>
+      ${visitor ? `<button class="dash-gate-login-link" id="dashGateLoginBtn">Zaten üye misiniz? <span>Giriş Yap</span></button>` : ''}
       <div class="dash-gate-footnote">${footnote}</div>
     </div>
   `;
@@ -5006,6 +5007,11 @@ function applyContentGate(){
     if(visitor){ openLoginModal(); showAuthTab('register'); }
     else { showPremiumModal(); }
   });
+  if(visitor){
+    document.getElementById('dashGateLoginBtn').addEventListener('click', ()=>{
+      openLoginModal(); showAuthTab('login');
+    });
+  }
 }
 
 function updateFavButton(){

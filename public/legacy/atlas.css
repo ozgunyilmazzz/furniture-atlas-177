@@ -834,6 +834,14 @@
   }
   .dash-gate-cta:hover{ transform:translateY(-1px); box-shadow:0 12px 28px rgba(201,169,97,0.35); filter:brightness(1.04); }
   .dash-gate-cta:active{ transform:translateY(0); }
+  .dash-gate-login-link{
+    display:block; width:100%; background:none; border:none; cursor:pointer;
+    font-family:var(--body); font-size:12.5px; color:var(--text-2);
+    margin-top:14px; padding:4px; transition:color 0.15s ease;
+  }
+  .dash-gate-login-link span{ color:var(--teal); font-weight:600; text-decoration:underline; }
+  .dash-gate-login-link:hover{ color:var(--text-1); }
+  .dash-gate-login-link:hover span{ color:var(--amber-bright); }
   .dash-gate-footnote{ font-family:var(--body); font-size:12px; color:var(--text-2); margin-top:20px; }
   @media(max-width:760px){
     .dash-gate-card{ padding:40px 28px; }
