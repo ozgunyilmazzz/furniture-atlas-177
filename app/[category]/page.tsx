@@ -42,9 +42,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url,
       locale: "tr_TR",
-      images: ["https://furnitureatlas.org/favicon-180.png"],
+      images: [{ url: "https://furnitureatlas.org/og-icon.png", width: 512, height: 512, alt: "Furniture Atlas" }],
     },
-    twitter: { card: "summary_large_image", title, description, images: ["https://furnitureatlas.org/favicon-180.png"] },
+    twitter: { card: "summary", title, description, images: ["https://furnitureatlas.org/og-icon.png"] },
     robots: { index: true, follow: true },
   };
 }

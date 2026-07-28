@@ -14,13 +14,13 @@ export const metadata: Metadata = {
       "Tüm ülkelerin mobilya ithalat verilerini, pazar büyüklüğünü ve fırsat skorunu tek bir listede karşılaştırın.",
     url: "https://furnitureatlas.org/liste",
     locale: "tr_TR",
-    images: ["https://furnitureatlas.org/favicon-180.png"],
+    images: [{ url: "https://furnitureatlas.org/og-icon.png", width: 512, height: 512, alt: "Furniture Atlas" }],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Mobilya İhracat Pazarları — Ülke Listesi | Furniture Atlas",
     description: "Tüm ülkelerin mobilya ithalat verilerini tek bir listede karşılaştırın.",
-    images: ["https://furnitureatlas.org/favicon-180.png"],
+    images: ["https://furnitureatlas.org/og-icon.png"],
   },
   robots: { index: true, follow: true },
 };
