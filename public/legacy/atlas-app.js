@@ -2991,11 +2991,44 @@ function renderTurkeyPage(){
         <div class="import-restriction-note">2025 yılında Türkiye'nin mobilya ihracatı sadece %1,8 büyürken, küresel rekabet çok daha sert hale geldi. Bundan sonraki büyüme, daha fazla üretmekten çok <b>doğru ülkeye ve doğru alıcıya ulaşabilen firmaların</b> başarısıyla şekillenecek.</div>
       </div>
     </div>
+
+    <div class="cp-section-title" style="margin:28px 0 12px;"><span class="num">🇹🇷</span> Sektör Rakamları (Genel Bakış)</div>
+    <div class="panel-grid" style="margin-bottom:20px;">
+      <div class="card"><div class="card-label">İstihdam</div><div class="card-value">~500.000 kişi</div></div>
+      <div class="card"><div class="card-label">Üretim Hacmi</div><div class="card-value">$14 milyar</div></div>
+      <div class="card"><div class="card-label">Dünya Mobilya Ticaretinden Pay</div><div class="card-value">~%2</div></div>
+      <div class="card"><div class="card-label">2030 İhracat Hedefi</div><div class="card-value">$12 milyar</div></div>
+    </div>
+    <div class="footnote" style="margin-bottom:20px;">Kaynak: MOSFED (Mobilya Dernekleri Federasyonu), Ticaret Gazetesi, Anadolu Ajansı — Temmuz 2026.</div>
+
+    <div class="cp-section-title" style="margin:28px 0 12px;"><span class="num"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><circle cx="9" cy="8" r="3"/><path d="M2.5 20v-1a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1"/><circle cx="17.5" cy="8.5" r="2.3"/><path d="M15.8 9.7a4 4 0 0 1 5.7 3.6V15"/></svg></span> Önündeki En Büyük Fırsat: Nitelikli İnsan Kaynağı</div>
+    <div class="exec-box" style="margin-bottom:24px;">
+      MOSFED Başkanı Ahmet Güleç'e göre sektörün yeni rekabet alanı artık üretim değil; tasarım geliştirecek, sürdürülebilirlik regülasyonlarını yönetecek ve marka değeri oluşturacak <b>nitelikli insan kaynağına erişim</b>. Küresel talepteki daralma ve finansmana erişim güçlüklerine rağmen sektör büyümesini sürdürüyor.
+    </div>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+      <button class="tray-btn tray-btn-primary" id="turkiyeNewsBtn" style="padding:12px 22px;">Sektör Haberlerini Takip Et →</button>
+      <button class="tray-btn" id="turkiyeExploreBtn" style="padding:12px 22px;">İhracat Pazarlarını Keşfet →</button>
+    </div>
   `;
+  document.getElementById('turkiyeNewsBtn').addEventListener('click', ()=>{
+    document.getElementById('turkeyModal').classList.remove('open');
+    renderNews();
+    document.getElementById('newsModal').classList.add('open');
+    pushHistoryState();
+  });
+  document.getElementById('turkiyeExploreBtn').addEventListener('click', ()=>{
+    document.getElementById('turkeyModal').classList.remove('open');
+    closeTrackedModals();
+    showView('globe');
+    pushHistoryState();
+  });
   document.getElementById('turkeyModal').classList.add('open');
+  pushHistoryState();
 }
 document.getElementById('closeTurkey').addEventListener('click', ()=>{
   document.getElementById('turkeyModal').classList.remove('open');
+  pushHistoryState();
 });
 
 function showHoverCard(baseCountry, e){
@@ -5823,7 +5856,6 @@ document.getElementById('closeCookiePolicy').addEventListener('click', ()=>{
   ['partnersLink', 'partnersModal', 'closePartners'],
   ['contactLink', 'contactModal', 'closeContact'],
   ['aboutLink', 'aboutModal', 'closeAbout'],
-  ['turkiyeLink', 'turkiyeModal', 'closeTurkiye'],
 ].forEach(([linkId, modalId, closeId])=>{
   document.getElementById(linkId).addEventListener('click', (e)=>{
     e.preventDefault();
@@ -5835,16 +5867,9 @@ document.getElementById('closeCookiePolicy').addEventListener('click', ()=>{
     pushHistoryState();
   });
 });
-document.getElementById('turkiyeNewsBtn').addEventListener('click', ()=>{
-  document.getElementById('turkiyeModal').classList.remove('open');
-  renderNews();
-  document.getElementById('newsModal').classList.add('open');
-  pushHistoryState();
-});
-document.getElementById('turkiyeExploreBtn').addEventListener('click', ()=>{
-  document.getElementById('turkiyeModal').classList.remove('open');
-  closeTrackedModals();
-  showView('globe');
+document.getElementById('turkiyeLink').addEventListener('click', (e)=>{
+  e.preventDefault();
+  renderTurkeyPage();
   pushHistoryState();
 });
 
@@ -5860,7 +5885,7 @@ document.getElementById('turkiyeExploreBtn').addEventListener('click', ()=>{
    bir app-state kalmadığında) tarayıcı normal şekilde siteden
    çıkar; burada buna müdahale edilmez.
    ========================================================= */
-const TRACKED_MODALS = { news:'newsModal', fairs:'fairsModal', targets:'targetsModal', travel:'travelModal', premium:'premiumModal', reports:'globalReportsModal', research:'atlasResearchModal', cookies:'cookiePolicyModal', terms:'termsModal', privacy:'privacyPolicyModal', help:'helpCenterModal', partners:'partnersModal', contact:'contactModal', about:'aboutModal', report:'reportModal', turkey:'turkiyeModal' };
+const TRACKED_MODALS = { news:'newsModal', fairs:'fairsModal', targets:'targetsModal', travel:'travelModal', premium:'premiumModal', reports:'globalReportsModal', research:'atlasResearchModal', cookies:'cookiePolicyModal', terms:'termsModal', privacy:'privacyPolicyModal', help:'helpCenterModal', partners:'partnersModal', contact:'contactModal', about:'aboutModal', report:'reportModal', turkey:'turkeyModal' };
 function getOpenModalName(){
   for(const name in TRACKED_MODALS){
     const el = document.getElementById(TRACKED_MODALS[name]);
@@ -6058,6 +6083,7 @@ function applyHistoryState(state){
         if(modalName === 'news') renderNews();
         else if(modalName === 'fairs') renderFairs();
         else if(modalName === 'targets') renderTargetsPanel();
+        else if(modalName === 'turkey') renderTurkeyPage();
         else if(modalName === 'premium'){
           const pricingSection = document.getElementById('premiumPricingSection');
           const freeMessage = document.getElementById('premiumFreeMessage');
