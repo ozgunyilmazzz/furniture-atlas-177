@@ -3808,9 +3808,6 @@ function renderCountryPage(baseCountry){
     ['Gelir seviyesi ve segment', `Kişi başı GSYH ${c.gdpPerCapita} (${c.dq.gdp==='real'?'doğrulanmış':'tahmini'}). ${incomeNote}`],
     ["Türkiye'ye lojistik/jeopolitik yakınlık", isNear ? `Karayoluyla (TIR) ulaşılabiliyor — bu, rakiplere göre hız ve maliyet avantajı sağlıyor.` : `Deniz/hava yoluyla ulaşılıyor${c.distanceKm ? `, mesafe ~${Math.round(c.distanceKm).toLocaleString('tr-TR')} km` : ''} — teslimat süresi ve navlun maliyeti buna göre planlanmalı.`],
     ['Türk malı algısı', turkishPerceptionNote],
-    ['Kimi hedeflemeli?', gdpPC>=15000 ? 'Otel, kurumsal proje ve üst-orta gelir grubu tüketiciler.' : 'Fiyata duyarlı orta segment perakende ve toptan alıcılar.'],
-    ['Hangi şehirlerle başlanmalı?', 'Ana liman/lojistik merkezine yakın büyük şehirler ilk etapta önceliklendirilmeli.'],
-    ['Distribütör mü perakendeci mi?', c.scores.difficulty>=50 ? 'Yerel mevzuat ve gümrük karmaşıklığı nedeniyle deneyimli bir distribütör önerilir.' : 'Doğrudan perakende ortaklıkları da değerlendirilebilir.'],
     ['İtalyan premium markalar var mı?', italianBrandsAnswer(c)],
   ];
 
@@ -4007,35 +4004,14 @@ function renderCountryPage(baseCountry){
       <table class="strategy-table">${strategyPoints.map(p=>`<tr><td>${p[0]}</td><td>${p[1]}</td></tr>`).join('')}</table>
     </div>
 
-    <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6"/><path d="M13 6l1-1a3.5 3.5 0 0 1 5 5l-1 1"/><path d="M11 18l-1 1a3.5 3.5 0 0 1-5-5l1-1"/></svg><span class="num">11</span> İlgili Kaynaklar</h3>
-      <div class="related-list">
-        <details class="related-item">
-          <summary>Ticaret İstatistikleri</summary>
-          <div class="related-body">Toplam ithalat: ${c.annualImports} · Türkiye payı: ${turkeyShareDisplay(c)} · Yıllık büyüme: ${c.importGrowth} · Pazar büyüklüğü: ${c.marketSize}</div>
-        </details>
-        <details class="related-item">
-          <summary>Gerekli Sertifikasyonlar</summary>
-          <div class="related-body">${c.certs}</div>
-        </details>
-        <details class="related-item">
-          <summary>Gümrük Prosedürleri</summary>
-          <div class="related-body">${getRequiredDocs(c).map(d=>d.name).join(' · ')} · Ortalama gümrük süresi: ${Math.round(2+c.scores.difficulty/12)} gün</div>
-        </details>
-        <details class="related-item">
-          <summary>İş Kültürü</summary>
-          <div class="related-body footnote">Bu bölüm için henüz doğrulanmış bir veri kaynağı bulunmuyor.</div>
-        </details>
-        <details class="related-item" id="holidaysDetails" data-country-id="${c.id}">
-          <summary>Resmi Tatiller (bu yıl)</summary>
-          <div class="related-body" id="holidaysBody">Açıldığında yüklenecek…</div>
-        </details>
-        <details class="related-item" id="notesDetails">
-          <summary>Notlarım (ekiple paylaşımlı)</summary>
-          <div class="related-body" id="relatedNotesBody">Notlar yükleniyor…</div>
-        </details>
+    <div class="cp-section" style="border-bottom:none;">
+      <div class="fn-cta-card">
+        <div>
+          <div class="fn-cta-title">Bu pazarda saha tecrübeniz mi var?</div>
+          <div class="footnote" style="margin-top:6px; margin-bottom:0;">Diğer ihracatçıların ${c.name} için bıraktığı saha notlarını okuyun, ya da kendi tecrübenizi paylaşın.</div>
+        </div>
+        <button class="tray-btn tray-btn-primary" onclick="openFieldNotesFor(currentBaseCountry)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:6px;"><path d="M14 3v5h5"/><path d="M6 3h8l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9 13h6M9 17h6"/></svg>Saha Notlarını Gör</button>
       </div>
-
     </div>
     </div>
   `;
@@ -6454,29 +6430,44 @@ document.getElementById('closeCookiePolicy').addEventListener('click', ()=>{
   document.getElementById('cookiePolicyModal').classList.remove('open');
   pushHistoryState();
 });
-// "Kullanım Şartları", "Gizlilik Politikası", "Yardım Merkezi", "İş Ortakları", "İletişim" — gerçek içeriğe sahip.
+// "Gizlilik Politikası", "Yardım Merkezi", "İş Ortakları", "İletişim", "Hakkımızda" — gerçek içeriğe sahip.
 [
-  ['termsLink', 'termsModal', 'closeTerms'],
   ['privacyPolicyLink', 'privacyPolicyModal', 'closePrivacyPolicy'],
   ['helpCenterLink', 'helpCenterModal', 'closeHelpCenter'],
   ['partnersLink', 'partnersModal', 'closePartners'],
   ['contactLink', 'contactModal', 'closeContact'],
   ['aboutLink', 'aboutModal', 'closeAbout'],
 ].forEach(([linkId, modalId, closeId])=>{
-  document.getElementById(linkId).addEventListener('click', (e)=>{
+  const linkEl = document.getElementById(linkId);
+  if(!linkEl) return;
+  linkEl.addEventListener('click', (e)=>{
     e.preventDefault();
     document.getElementById(modalId).classList.add('open');
     pushHistoryState();
   });
-  document.getElementById(closeId).addEventListener('click', ()=>{
+  const closeEl = document.getElementById(closeId);
+  if(closeEl) closeEl.addEventListener('click', ()=>{
     document.getElementById(modalId).classList.remove('open');
     pushHistoryState();
   });
 });
-document.getElementById('turkiyeLink').addEventListener('click', (e)=>{
+const turkiyeLinkEl = document.getElementById('turkiyeLink');
+if(turkiyeLinkEl) turkiyeLinkEl.addEventListener('click', (e)=>{
   e.preventDefault();
   renderTurkeyPage();
   pushHistoryState();
+});
+// Footer'daki kaynak isimleri (ITC Trade Map, TÜİK vb.) — tıklanınca önce onay ister,
+// onaylanırsa ilgili resmi siteyi yeni sekmede açar.
+document.querySelectorAll('[data-ext-link]').forEach(a=>{
+  a.addEventListener('click', (e)=>{
+    e.preventDefault();
+    const url = a.getAttribute('href');
+    const name = a.textContent.trim();
+    if(confirm(`${name} sitesine gitmek üzeresiniz (${url}). Devam edilsin mi?`)){
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  });
 });
 
 /* =========================================================
