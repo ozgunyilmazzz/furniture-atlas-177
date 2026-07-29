@@ -5954,13 +5954,44 @@ function importRestrictionDisplay(c){
   return r.level === 'severe' ? 'Var — ciddi kısıtlama' : 'Var — önemli kısıtlama';
 }
 
+// Karşılaştırma tablosu için küçük, eksenetiketsiz bir ithalat trendi grafiği — aynı gerçek
+// 2017-2025 verisinden (TURKEY_GROWTH_SEATING/WOOD). Veri yoksa null döner, satır otomatik gizlenir.
+function miniGrowthSparkline(countryId, categoryKey){
+  const table = categoryKey === 'wood' ? TURKEY_GROWTH_WOOD : TURKEY_GROWTH_SEATING;
+  const series = table[countryId];
+  if(!series || series.every(v=>v==null)) return null;
+  const W = 128, H = 34;
+  const vals = series.filter(v=>v!=null);
+  const maxV = Math.max(...vals), minV = Math.min(0, Math.min(...vals));
+  const range = (maxV - minV) || 1;
+  const n = series.length;
+  const xFor = i => (i/(n-1)) * W;
+  const yFor = v => H - ((v-minV)/range) * H;
+  let pathD = '', started = false, lastPt = null;
+  series.forEach((v,i)=>{
+    if(v == null){ started = false; return; }
+    const x = xFor(i), y = yFor(v);
+    pathD += (started ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+    started = true;
+    lastPt = {x, y};
+  });
+  const cagr = computeGrowthCAGR(series);
+  const color = (cagr != null && cagr < 0) ? 'var(--red)' : 'var(--teal)';
+  return `<div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
+    <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="overflow:visible; display:block;">
+      <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      ${lastPt ? `<circle cx="${lastPt.x.toFixed(1)}" cy="${lastPt.y.toFixed(1)}" r="2.5" fill="var(--amber-bright)"/>` : ''}
+    </svg>
+    ${cagr != null ? `<span style="font-family:var(--mono); font-size:10px; color:${color};">${cagr>=0?'+':''}${cagr}%/yıl</span>` : ''}
+  </div>`;
+}
 // Karşılaştırma satırları kategorilere ayrılmıştır. Her satır get()/num() ile veri
 // döndürmezse (null/undefined) o satır otomatik olarak tabloya eklenmez.
 const COMPARE_SECTIONS = [
   { title:'Pazar Genel Bakışı', rows:[
     { label:'Mobilya İthalatı', get:c=>c.annualImports, num:c=>numFromMoneyNormalized(c.annualImports), better:'high' },
     { label:'İthalat Büyümesi', get:c=>c.importGrowth, num:c=>numFromPercent(c.importGrowth), better:'high' },
-    { label:'Pazar Büyüklüğü', get:c=>c.marketSize, num:c=>numFromMoneyNormalized(c.marketSize), better:'high' },
+    { label:'İthalat Trendi (2017–2025)', get:c=>miniGrowthSparkline(c.id, activeCategory), num:null, better:null },
     { label:'Nüfus', get:c=>c.population, num:c=>numFromMoney(c.population), better:'high' },
     { label:'Kişi Başı GSYİH', get:c=>c.gdpPerCapita, num:c=>numFromMoney(c.gdpPerCapita), better:'high' },
     { label:'Para Birimi', get:c=>c.currency, num:null, better:null },
@@ -5990,13 +6021,66 @@ const COMPARE_SECTIONS = [
 // kadar bu bölüm hiç render edilmez (boş/yanıltıcı satır gösterilmez).
 const PREMIUM_BRAND_SECTION = { title:'Premium Marka Varlığı', rows:[] };
 
+// Karşılaştırılan ülkeler arasında öne çıkan farkları, TAMAMEN tabloda zaten görünen
+// gerçek verilerden (Fırsat Skoru, pazar büyüklüğü, Türkiye payı, Coface risk notu,
+// 2017-2025 gerçek büyüme) tek bir kısa metne dönüştürür. Hiçbir yeni/uydurma veri
+// üretmez — sadece mevcut sayıları karşılaştırıp cümleye döker.
+function generateCompareInsight(countries){
+  if(countries.length < 2) return null;
+  const byScore = [...countries].sort((a,b)=>b.scores.overall - a.scores.overall);
+  const topScore = byScore[0], bottomScore = byScore[byScore.length-1];
+  const scoreTied = topScore.scores.overall === bottomScore.scores.overall;
+
+  const byMarket = [...countries].sort((a,b)=>(numFromMoneyNormalized(b.annualImports)||0) - (numFromMoneyNormalized(a.annualImports)||0));
+  const biggestMarket = numFromMoneyNormalized(byMarket[0].annualImports) ? byMarket[0] : null;
+
+  const byShare = [...countries].sort((a,b)=>numFromPercent(b.turkeyShare) - numFromPercent(a.turkeyShare));
+  const strongestTraction = (turkeyShareDisplay(byShare[0]) !== 'Bilinmiyor') ? byShare[0] : null;
+
+  const withRisk = countries.filter(c=>c.cofaceCountryRisk !== 'Bilinmiyor');
+  const bySafety = [...withRisk].sort((a,b)=>cofaceGradeToScore(a.cofaceCountryRisk) - cofaceGradeToScore(b.cofaceCountryRisk));
+  const safest = bySafety[0] || null;
+
+  function cagrFor(c){
+    const table = activeCategory === 'wood' ? TURKEY_GROWTH_WOOD : TURKEY_GROWTH_SEATING;
+    return computeGrowthCAGR(table[c.id] || null);
+  }
+  const withGrowth = countries.map(c=>({c, cagr:cagrFor(c)})).filter(x=>x.cagr!==null);
+  withGrowth.sort((a,b)=>b.cagr-a.cagr);
+  const fastestGrowing = withGrowth[0] || null;
+
+  const parts = [];
+  if(!scoreTied){
+    parts.push(`<b>${topScore.name}</b>, seçili ${countries.length} ülke arasında en yüksek AI Fırsat Skoruna sahip (${topScore.scores.overall}/100) — <b>${bottomScore.name}</b> ise en düşük (${bottomScore.scores.overall}/100).`);
+  }
+  if(biggestMarket && countries.length > 1){
+    parts.push(`En büyük mobilya pazarı <b>${biggestMarket.name}</b> (${biggestMarket.annualImports}).`);
+  }
+  if(strongestTraction){
+    parts.push(`Türkiye'nin en güçlü pazar payı <b>${strongestTraction.name}</b>'de (${turkeyShareDisplay(strongestTraction)}).`);
+  }
+  if(fastestGrowing){
+    const sign = fastestGrowing.cagr >= 0 ? '+' : '';
+    parts.push(`2017-2025 arasında Türkiye ihracatı en hızlı <b>${fastestGrowing.c.name}</b>'de büyüdü (yıllık ort. ${sign}${fastestGrowing.cagr}%).`);
+  }
+  if(safest){
+    parts.push(`Coface'e göre en düşük ülke riski <b>${safest.name}</b>'de (${safest.cofaceCountryRisk} notu).`);
+  }
+  if(!parts.length) return null;
+  return parts.join(' ');
+}
 function renderCompareModal(){
   const countries = compareIds.map(id => withCategory(COUNTRIES.find(c=>c.id===id)));
   if(!countries.length){
     document.getElementById('compareBody').innerHTML = `<div class="footnote">Karşılaştırmak için bir ülke sayfasında "+ KARŞILAŞTIR" butonuna basın (en fazla 4 ülke).</div>`;
     return;
   }
-  let html = `<div class="footnote" style="margin-bottom:20px; text-align:center;">Kategori: ${CATEGORIES[activeCategory].label} (${CATEGORIES[activeCategory].hs}) · Her satırda en iyi değer <span style="color:var(--teal); font-weight:700;">teal</span> renkle vurgulanır.</div>`;
+  let html = '';
+  const insight = generateCompareInsight(countries);
+  if(insight){
+    html += `<div class="exec-box" style="margin-bottom:20px;"><div class="card-label" style="margin-bottom:8px; display:flex; align-items:center; gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.8 5.6L19.5 9l-5.7 1.4L12 16l-1.8-5.6L4.5 9l5.7-1.4L12 2z"/></svg>AI Karşılaştırma Değerlendirmesi</div>${insight}</div>`;
+  }
+  html += `<div class="footnote" style="margin-bottom:20px; text-align:center;">Kategori: ${CATEGORIES[activeCategory].label} (${CATEGORIES[activeCategory].hs}) · Her satırda en iyi değer <span style="color:var(--teal); font-weight:700;">teal</span> renkle vurgulanır.</div>`;
   html += `<div class="vs-grid" style="grid-template-columns:170px repeat(${countries.length}, 1fr);">`;
   // Başlık satırı — ülke kartları
   html += `<div></div>`;
