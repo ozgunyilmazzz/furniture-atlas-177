@@ -1431,7 +1431,7 @@ function italianBrandsAnswer(country){
   }
   const rb = ROCHE_BOBOIS_STORES[id];
   if(rb && rb > 0) parts.push(`Roche Bobois ${rb} mağaza`);
-  if(!parts.length) return 'Şu an bilinen bir Poliform veya Roche Bobois mağazası yok (Natuzzi, BoConcept, Calligaris, Rimadesio için ülke bazlı doğrulanmış veri de yok).';
+  if(!parts.length) return 'Bilinmiyor';
   return `Var — ${parts.join(', ')}.`;
 }
 function buildPremiumBrandRows(country){
