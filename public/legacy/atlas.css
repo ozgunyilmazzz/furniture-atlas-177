@@ -1982,3 +1982,17 @@
     .fn-head-row{ align-items:flex-start; }
     .fn-card{ padding:16px; }
   }
+
+  /* iOS Safari, odaklanılan bir <input>/<textarea>'nın font-size'ı 16px'in altındaysa
+     sayfayı otomatik olarak yakınlaştırır (erişilebilirlik amaçlı bir tarayıcı davranışı) —
+     ve modal kapandıktan sonra bu yakınlaştırılmış hâli kendiliğinden geri almaz, kullanıcı
+     elle uzaklaştırmak zorunda kalır. Bu, giriş/kayıt formundaki (14px), arama kutusundaki
+     (12.5px) ve filtre alanlarındaki (11px) küçük font boyutlarından kaynaklanıyordu. Çözüm:
+     SADECE mobilde tüm metin girişlerini 16px'e yükseltmek — masaüstü tasarımı değişmez,
+     ve tarayıcı artık hiç yakınlaştırma ihtiyacı duymaz.  */
+  @media(max-width:760px){
+    input, textarea, select,
+    .auth-input, .search-input, .filter-num-input, .link-popover-input{
+      font-size:16px !important;
+    }
+  }
