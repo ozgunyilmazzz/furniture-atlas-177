@@ -1585,7 +1585,6 @@
     padding-bottom:46px; border-bottom:1px solid var(--border-soft);
   }
   .footer-brand{ max-width:340px; padding-right:24px; }
-  .footer-brand-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; }
   .footer-brand .brand-atlas{ font-size:26px; }
   .footer-tagline{
     font-family:var(--body); font-size:12.5px; color:var(--text-2); line-height:1.85; margin-top:20px;
