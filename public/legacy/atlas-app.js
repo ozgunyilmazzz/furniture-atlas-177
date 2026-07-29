@@ -249,6 +249,15 @@ function computeGrowthCAGR(series){
 }
 // Türkiye'nin 2017-2025 ihracat trendini gösteren, sitenin tasarım diline uygun,
 // premium bir SVG çizgi grafiği. Veri yoksa dürüstçe "Bilinmiyor" gösterir.
+// Grafikteki bir yıl noktasına dokunulduğunda/tıklandığında, o yılın tam değerini
+// GÖRÜNÜR bir rozette gösterir. Native SVG <title> ipucu mobilde dokunmatik ekranlarda
+// güvenilir çalışmadığı için (genelde uzun basma gerektirir), bu daha sağlam bir alternatif.
+function tgShowPoint(el, text){
+  const card = el.closest('.tg-chart-card');
+  if(!card) return;
+  const readout = card.querySelector('.tg-chart-readout');
+  if(readout) readout.textContent = text;
+}
 function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
   const series = getTurkeyGrowthSeries(countryId, categoryKey);
   if(!series || series.every(v => v == null)){
@@ -258,7 +267,7 @@ function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
         <div class="footnote">Bilinmiyor — bu ülke/kategori için 2017-2025 yıllık ihracat trend verisi henüz yok.</div>
       </div>`;
   }
-  const W = 680, H = 190, padL = 8, padR = 8, padT = 14, padB = 26;
+  const W = 680, H = 220, padL = 46, padR = 10, padT = 14, padB = 28;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const n = series.length;
   const vals = series.filter(v => v != null);
@@ -267,6 +276,7 @@ function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
   const range = (maxV - minV) || 1;
   const xFor = i => padL + (i / (n - 1)) * plotW;
   const yFor = v => padT + plotH - ((v - minV) / range) * plotH;
+  const fmtM = v => v >= 100 ? Math.round(v) : (Math.round(v*10)/10);
 
   let pathD = '';
   const dots = [];
@@ -283,16 +293,24 @@ function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
   const gradId = 'tgGrad-' + countryId + '-' + categoryKey;
   const lastDot = dots[dots.length - 1];
   const cagr = computeGrowthCAGR(series);
+
+  // X ekseni — her yıl (2017-2025) etiketlenir.
   const yearLabels = TURKEY_GROWTH_YEARS.map((y, i) =>
-    (i === 0 || i === n - 1 || i === Math.floor((n-1)/2))
-      ? `<text x="${xFor(i).toFixed(1)}" y="${H-8}" font-size="10" fill="var(--text-2)" text-anchor="${i===0?'start':i===n-1?'end':'middle'}">${y}</text>`
-      : ''
+    `<text x="${xFor(i).toFixed(1)}" y="${H-8}" font-size="9.5" fill="var(--text-2)" text-anchor="${i===0?'start':i===n-1?'end':'middle'}">${y}</text>`
   ).join('');
+
+  // Y ekseni — alt/orta/üst olmak üzere 3 kılavuz çizgi ve $ değeri.
+  const yTicks = [minV, minV + range/2, maxV];
+  const yAxis = yTicks.map(v=>{
+    const y = yFor(v);
+    return `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="var(--border-soft)" stroke-width="1" stroke-dasharray="2,3"/>
+      <text x="${(padL-8).toFixed(1)}" y="${(y+3).toFixed(1)}" font-size="9.5" fill="var(--text-2)" text-anchor="end">$${fmtM(v)}M</text>`;
+  }).join('');
 
   return `
     <div class="cp-section" style="border-bottom:none; padding-top:0;">
       <h3 class="cp-section-title" style="font-size:19px; margin-bottom:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Türkiye İhracat Trendi (2017–2025)</h3>
-      <div class="footnote" style="margin-bottom:14px;">${categoryLabel} kategorisinde Türkiye'den bu ülkeye yıllık ihracat, milyon $ (ITC Trade Map, gerçek veri).</div>
+      <div class="footnote" style="margin-bottom:14px;">${categoryLabel} kategorisinde Türkiye'den bu ülkeye yıllık ihracat, milyon $ (ITC Trade Map, gerçek veri). Bir noktanın üzerine gelince o yılın tam değerini görebilirsiniz.</div>
       <div class="tg-chart-card">
         <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="overflow:visible; display:block;">
           <defs>
@@ -301,16 +319,18 @@ function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
               <stop offset="100%" stop-color="var(--teal)" stop-opacity="0"/>
             </linearGradient>
           </defs>
+          ${yAxis}
           <path d="${areaD}" fill="url(#${gradId})" stroke="none"/>
           <path d="${pathD}" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          ${dots.map(d => `<circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="${d.i===lastDot.i?4.5:2.5}" fill="${d.i===lastDot.i?'var(--amber-bright)':'var(--teal)'}"/>`).join('')}
+          ${dots.map(d => `<circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="14" fill="transparent" style="cursor:pointer;" onclick="tgShowPoint(this, '${TURKEY_GROWTH_YEARS[d.i]}: \$${fmtM(d.v)}M')"></circle><circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="${d.i===lastDot.i?4.5:3.5}" fill="${d.i===lastDot.i?'var(--amber-bright)':'var(--teal)'}" style="pointer-events:none;"><title>${TURKEY_GROWTH_YEARS[d.i]}: $${fmtM(d.v)}M</title></circle>`).join('')}
           ${yearLabels}
         </svg>
       </div>
       <div class="tg-chart-footer">
-        <span class="footnote" style="margin:0;">${lastDot ? `${TURKEY_GROWTH_YEARS[lastDot.i]}: $${lastDot.v}M` : ''}</span>
+        <span class="footnote tg-chart-readout" style="margin:0; font-weight:700; color:var(--text-0);">${lastDot ? `${TURKEY_GROWTH_YEARS[lastDot.i]}: $${fmtM(lastDot.v)}M` : ''}</span>
         ${cagr !== null ? `<span class="tg-chart-cagr ${cagr>=0?'up':'down'}">Yıllık ortalama büyüme (CAGR): ${cagr>=0?'+':''}${cagr}%</span>` : ''}
       </div>
+      <div class="footnote" style="margin-top:6px; text-align:center;">📍 Herhangi bir noktaya dokunarak/tıklayarak o yılın değerini yukarıda görebilirsiniz.</div>
     </div>`;
 }
 
