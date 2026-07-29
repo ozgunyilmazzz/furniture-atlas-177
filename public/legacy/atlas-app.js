@@ -6438,7 +6438,17 @@ const footerSourcesArrowEl = document.getElementById('footerSourcesArrow');
 const footerSourcesScrollEl = document.getElementById('footerSourcesScroll');
 if(footerSourcesArrowEl && footerSourcesScrollEl){
   footerSourcesArrowEl.addEventListener('click', ()=>{
-    footerSourcesScrollEl.scrollBy({ left: 220, behavior:'smooth' });
+    const el = footerSourcesScrollEl;
+    const singleSetWidth = el.scrollWidth / 2; // içerik bir kez tekrarlandı (sonsuz akış hissi için)
+    let target = el.scrollLeft + 220;
+    if(target >= singleSetWidth){
+      // Aynı görsel noktaya sessizce (animasyonsuz) geri sar — içerik aynı olduğu için fark edilmez,
+      // kaynaklar akmaya devam ediyormuş gibi görünür, asla "bitmiş" hissi vermez.
+      el.scrollTo({ left: target, behavior:'smooth' });
+      setTimeout(()=>{ el.scrollLeft = target - singleSetWidth; }, 420);
+    } else {
+      el.scrollTo({ left: target, behavior:'smooth' });
+    }
   });
 }
 if(atlasResearchLinkEl) atlasResearchLinkEl.addEventListener('click', (e)=>{
