@@ -1620,6 +1620,7 @@
   .footer-sources-band{
     display:flex; align-items:center; gap:16px; padding:24px 0 30px;
   }
+  .footer-sources-row{ display:flex; align-items:center; gap:16px; flex:1; min-width:0; }
   .footer-sources-band-title{
     font-family:var(--mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
     color:var(--text-2); white-space:nowrap; flex-shrink:0;
@@ -1666,8 +1667,8 @@
     .footer-inner{ padding:52px 24px 26px; }
     .footer-top{ flex-direction:column; gap:34px; }
     .footer-columns{ gap:34px; }
-    .footer-sources-band{ flex-direction:column; align-items:flex-start; gap:14px; }
-    .footer-sources-arrow{ display:none; }
+    .footer-sources-band{ flex-direction:column; align-items:flex-start; gap:12px; }
+    .footer-sources-row{ width:100%; }
   }
 
   /* ---------- PİYASA ŞERİDİ (ATLAS TICKER) ---------- */
