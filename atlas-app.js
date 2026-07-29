@@ -2500,6 +2500,24 @@ function getTargetIdsCache(){
 }
 function invalidateTargetIdsCache(){ targetIdsCache = null; styleVersion++; needsRender = true; }
 
+// Açılış ekranı — gerçek hazır olma anına (küre/işaretçiler oluşturulduğunda) göre
+// kaybolur. Çok hızlı yüklenen cihazlarda ekranın "yanıp sönmemesi" için en az
+// ~400ms gösterilir, ama asla yapay olarak uzatılmaz.
+const ATLAS_LOAD_START = Date.now();
+function hideLoadingScreen(){
+  const el = document.getElementById('atlasLoadingScreen');
+  if(!el || el.classList.contains('is-hidden')) return;
+  const elapsed = Date.now() - ATLAS_LOAD_START;
+  const wait = Math.max(0, 400 - elapsed);
+  setTimeout(()=>{
+    el.classList.add('is-hidden');
+    setTimeout(()=>{ if(el.parentNode) el.parentNode.removeChild(el); }, 550);
+  }, wait);
+}
+// Güvenlik ağı: globe init kancası herhangi bir sebeple hiç tetiklenmezse (beklenmeyen
+// bir görünüm/durum), açılış ekranı sonsuza kadar takılı kalmasın diye 4 saniye sonra
+// yine de kaldırılır.
+setTimeout(hideLoadingScreen, 4000);
 function initSvgSkeleton(){
   svg.innerHTML = `<defs>
     <radialGradient id="sphereGrad" cx="35%" cy="30%" r="75%">
@@ -2594,6 +2612,7 @@ function initSvgSkeleton(){
   markerEls['turkey'] = { g: tg };
 
   svgReady = true;
+  hideLoadingScreen();
 }
 
 function updateGrid(){
