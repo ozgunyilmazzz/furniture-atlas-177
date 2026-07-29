@@ -1419,6 +1419,21 @@ document.addEventListener('click', (e)=>{
 });
 
 // Premium mobilya markalarının ülke bazlı gerçek varlık tablosunu oluşturur.
+// "AI Pazar Stratejisi"ndeki "İtalyan premium markalar var mı?" sorusunun cevabı —
+// aynı gerçek Poliform/Roche Bobois mağaza verisinden (resmi mağaza bulucuları) türetilir.
+function italianBrandsAnswer(country){
+  const id = country.id;
+  const parts = [];
+  const pf = POLIFORM_STORES[id];
+  if(pf && pf.total > 0){
+    const dealerTotal = pf.dealer + pf.general;
+    parts.push(`Poliform ${pf.mono} mono-marka mağaza${dealerTotal>0 ? ` + ${dealerTotal} bayi/satış noktası` : ''}`);
+  }
+  const rb = ROCHE_BOBOIS_STORES[id];
+  if(rb && rb > 0) parts.push(`Roche Bobois ${rb} mağaza`);
+  if(!parts.length) return 'Şu an bilinen bir Poliform veya Roche Bobois mağazası yok (Natuzzi, BoConcept, Calligaris, Rimadesio için ülke bazlı doğrulanmış veri de yok).';
+  return `Var — ${parts.join(', ')}.`;
+}
 function buildPremiumBrandRows(country){
   const id = country.id;
   const rows = [];
@@ -2835,8 +2850,12 @@ function moveDrag(x,y){
   if(!dragging) return;
   const dx = x-lastX, dy = y-lastY;
   if(Math.abs(x-dragStartX)>4 || Math.abs(y-dragStartY)>4){ dragMoved=true; autoRotate=false; }
-  const dRotY = dx*0.006;
-  const dTiltX = dy*0.004; // aşağı sürükleyince küre yukarıdan bakılıyormuş gibi doğru yönde döner
+  // Yakınlaştırıldıkça (zoomLevel arttıkça) sürükleme hassasiyeti azalır — yani küre daha
+  // yavaş/hassas döner. Bu, özellikle mobilde küçük bir ülkeyi parmakla seçmeyi çok kolaylaştırır
+  // (uzaklaştırıldığında ise daha hızlı döner, geniş mesafe kat etmek kolay olur).
+  const dragSensitivity = 1 / zoomLevel;
+  const dRotY = dx*0.006*dragSensitivity;
+  const dTiltX = dy*0.004*dragSensitivity; // aşağı sürükleyince küre yukarıdan bakılıyormuş gibi doğru yönde döner
   rotY += dRotY;
   tiltX = Math.max(-0.9, Math.min(0.9, tiltX + dTiltX));
   velRotY = dRotY; velTiltX = dTiltX; // son hareket, bırakıldığında ivme olarak kullanılır
@@ -3792,6 +3811,7 @@ function renderCountryPage(baseCountry){
     ['Kimi hedeflemeli?', gdpPC>=15000 ? 'Otel, kurumsal proje ve üst-orta gelir grubu tüketiciler.' : 'Fiyata duyarlı orta segment perakende ve toptan alıcılar.'],
     ['Hangi şehirlerle başlanmalı?', 'Ana liman/lojistik merkezine yakın büyük şehirler ilk etapta önceliklendirilmeli.'],
     ['Distribütör mü perakendeci mi?', c.scores.difficulty>=50 ? 'Yerel mevzuat ve gümrük karmaşıklığı nedeniyle deneyimli bir distribütör önerilir.' : 'Doğrudan perakende ortaklıkları da değerlendirilebilir.'],
+    ['İtalyan premium markalar var mı?', italianBrandsAnswer(c)],
   ];
 
   const suppliersUnknown = !c.suppliers || turkeyShareTier(c) === 'unknown';
@@ -3893,7 +3913,7 @@ function renderCountryPage(baseCountry){
         <div class="card ${dqCardClass(getTurkeyImportInfo(c).level==='real'?'real':getTurkeyImportInfo(c).level==='estimated'?'estimated':'unknown')}"><div class="card-label">Türkiyeden Mobilya İthalatı${dqBadge(getTurkeyImportInfo(c).level==='real'?'real':getTurkeyImportInfo(c).level==='estimated'?'estimated':'unknown')}${getTurkeyImportInfo(c).isTotal ? ' <span class="footnote" style="margin:0;">(tüm kategoriler)</span>' : ''}</div><div class="card-value">${getTurkeyImportInfo(c).display}</div></div>
         <div class="card ${dqCardClass(turkeyShareTier(c))}"><div class="card-label">Türkiye Pazar Payı${dqBadge(turkeyShareTier(c))}</div><div class="card-value">${turkeyShareDisplay(c)}</div></div>
         <div class="card ${dqCardClass('estimated')}"><div class="card-label">Pazar Büyüklüğü${dqBadge('estimated')}</div><div class="card-value">${c.marketSize}</div></div>
-        <div class="card ${dqCardClass(getTurkeyImportInfo(c).growthPct!==null?'real':(c.turkeyGrowth==='Bilinmiyor'?'unknown':'estimated'))}"><div class="card-label">Türkiye İhracat Büyümesi${dqBadge(getTurkeyImportInfo(c).growthPct!==null?'real':(c.turkeyGrowth==='Bilinmiyor'?'unknown':'estimated'))}</div><div class="card-value ${(()=>{const g=getTurkeyImportInfo(c).growthPct; if(g!==null) return g<0?'down':'up'; return c.turkeyGrowth==='Bilinmiyor'?'':'up';})()}">${(()=>{const g=getTurkeyImportInfo(c).growthPct; if(g!==null) return (g>=0?'+':'')+g+'%'; return c.turkeyGrowth;})()}</div></div>
+        <div class="card ${dqCardClass(getTurkeyImportInfo(c).growthPct!==null?'real':'unknown')}"><div class="card-label">Türkiye İhracat Büyümesi${dqBadge(getTurkeyImportInfo(c).growthPct!==null?'real':'unknown')}</div><div class="card-value ${(()=>{const g=getTurkeyImportInfo(c).growthPct; return g!==null ? (g<0?'down':'up') : '';})()}">${(()=>{const g=getTurkeyImportInfo(c).growthPct; return g!==null ? (g>=0?'+':'')+g+'%' : 'ITC verisi bulunamadı';})()}</div></div>
       </div>
       <div class="footnote" style="margin-top:10px;">${(()=>{const ti=getTurkeyImportInfo(c); if(ti.level==='real') return '✓ '+ti.note; if(ti.level==='estimated') return '~ '+ti.note; return '⚠ Bu ülke için Türkiye\'ye özel doğrulanmış ticaret verisi bulunamadı — rakamlar örnek/tahminidir.';})()}</div>
       <div class="footnote" style="margin-top:4px;">${dqBadge('estimated')} Pazar Büyüklüğü ve ülkenin toplam ithalat büyüme oranı (bkz. İlgili Kaynaklar) için henüz tek bir kapsamlı, ücretsiz gerçek veri kaynağı bulunamadı — model tahminidir.</div>
@@ -3946,17 +3966,7 @@ function renderCountryPage(baseCountry){
     </div>
 
     <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 6-3 12M15 3l-3 6 3 12"/></svg><span class="num">06</span> Premium İtalyan Mobilya Markaları — Pazar Varlığı</h3>
-      <div class="footnote" style="margin-bottom:14px;">${dqBadge('real')} Poliform ve Roche Bobois için resmi marka mağaza bulucularından derlenmiş gerçek veri. Natuzzi sadece bölgesel toplam açıklıyor (ülke bazlı resmi veri yok). BoConcept, Calligaris ve Rimadesio için henüz ülke bazlı doğrulanmış veri yok.</div>
-      <div class="table-scroll"><table class="compare-table" style="width:100%;">
-        <thead><tr><th>Marka</th><th>Mono-Marka Mağaza</th><th>Yetkili Bayi/Satış Noktası</th><th>Şehirler</th><th>Pazar Gücü</th></tr></thead>
-        <tbody>${buildPremiumBrandRows(c)}</tbody>
-      </table></div>
-      <div class="footnote" style="margin-top:10px;">Natuzzi (küresel, 31 Ara ${NATUZZI_GLOBAL.asOf.split(' ').pop()}): ${NATUZZI_GLOBAL.monoBrand} mono-marka mağaza + ${NATUZZI_GLOBAL.galleries} galeri, ${NATUZZI_GLOBAL.countries} ülkede. BoConcept (küresel): ${BOCONCEPT_GLOBAL.stores}+ mağaza, ${BOCONCEPT_GLOBAL.countries} ülke — ${BOCONCEPT_GLOBAL.note}</div>
-    </div>
-
-    <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="num">07</span> İthalat Koşulları</h3>
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="num">06</span> İthalat Koşulları</h3>
       <div class="panel-grid">
         <div class="card ${dqCardClass(c.dq.importTax)}"><div class="card-label">İthalat Vergisi${dqBadge(c.dq.importTax)}</div><div class="card-value" style="font-size:19px">${c.importTax}</div></div>
         <div class="card ${dqCardClass(c.dq.vat)}"><div class="card-label">KDV${dqBadge(c.dq.vat)}</div><div class="card-value" style="font-size:19px">${c.vat}</div></div>
@@ -3967,7 +3977,7 @@ function renderCountryPage(baseCountry){
     </div>
 
     <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="13" height="9" rx="1"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg><span class="num">08</span> Lojistik ${c.transportMode==='road' ? '<span class=\"footnote\" style=\"margin:0 0 0 8px; display:inline;\"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><rect x="1" y="7" width="13" height="9" rx="1"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg> Karayolu (TIR)</span>' : '<span class=\"footnote\" style=\"margin:0 0 0 8px; display:inline;\"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M3 14l2 6h14l2-6"/><path d="M6 14V6h6l3 8"/><path d="M2 18c2 1.5 4 1.5 6 0s4-1.5 6 0 4 1.5 6 0"/></svg> Deniz Yolu (Konteyner)</span>'}</h3>
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="13" height="9" rx="1"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg><span class="num">07</span> Lojistik ${c.transportMode==='road' ? '<span class=\"footnote\" style=\"margin:0 0 0 8px; display:inline;\"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><rect x="1" y="7" width="13" height="9" rx="1"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg> Karayolu (TIR)</span>' : '<span class=\"footnote\" style=\"margin:0 0 0 8px; display:inline;\"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M3 14l2 6h14l2-6"/><path d="M6 14V6h6l3 8"/><path d="M2 18c2 1.5 4 1.5 6 0s4-1.5 6 0 4 1.5 6 0"/></svg> Deniz Yolu (Konteyner)</span>'}</h3>
       <div class="panel-grid">
         <div class="card"><div class="card-label">${c.transportMode==='road' ? 'Ana Kara Sınır Kapısı' : 'Ana Liman'}</div><div class="card-value" style="font-size:15px">${c.ports}</div></div>
         <div class="card ${dqCardClass('estimated')}"><div class="card-label">Türkiye'den Nakliye Süresi${dqBadge('estimated')}</div><div class="card-value" style="font-size:19px">${c.transitTime}</div></div>
@@ -3978,27 +3988,27 @@ function renderCountryPage(baseCountry){
     </div>
 
     <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15l-4-4 1.5-1.5L12 12l6.5-6.5L20 7z"/><circle cx="12" cy="12" r="9"/></svg><span class="num">09</span> Gerekli Sertifikasyon</h3>
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15l-4-4 1.5-1.5L12 12l6.5-6.5L20 7z"/><circle cx="12" cy="12" r="9"/></svg><span class="num">08</span> Gerekli Sertifikasyon</h3>
       <div class="opp-grid">${getRequiredCerts(c, activeCategory).map(cert=>`
         <div class="opp-card"><div class="opp-t">${cert.name}${dqBadge(cert.level)}</div><div class="opp-d">${cert.note}</div></div>
       `).join('')}</div>
     </div>
 
     <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M6 3h8l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9 13h6M9 17h6"/></svg><span class="num">10</span> Gerekli Belgeler</h3>
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M6 3h8l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9 13h6M9 17h6"/></svg><span class="num">09</span> Gerekli Belgeler</h3>
       <div class="opp-grid">${getRequiredDocs(c).map(doc=>`
         <div class="opp-card"><div class="opp-t">${doc.name}${dqBadge(doc.level)}</div><div class="opp-d">${doc.note}</div></div>
       `).join('')}</div>
     </div>
 
     <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg><span class="num">11</span> AI Pazar Stratejisi</h3>
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg><span class="num">10</span> AI Pazar Stratejisi</h3>
       <div class="footnote" style="margin-bottom:14px;">${dqBadge('estimated')} Bu çıkarımlar, ülkenin gerçek verilerinden (üretici durumu, gelir seviyesi, Türkiye'ye lojistik yakınlık, bölgesel algı) otomatik olarak türetilmiştir — kesin pazar araştırması yerine geçmez.</div>
       <table class="strategy-table">${strategyPoints.map(p=>`<tr><td>${p[0]}</td><td>${p[1]}</td></tr>`).join('')}</table>
     </div>
 
     <div class="cp-section">
-      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6"/><path d="M13 6l1-1a3.5 3.5 0 0 1 5 5l-1 1"/><path d="M11 18l-1 1a3.5 3.5 0 0 1-5-5l1-1"/></svg><span class="num">12</span> İlgili Kaynaklar</h3>
+      <h3 class="cp-section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6"/><path d="M13 6l1-1a3.5 3.5 0 0 1 5 5l-1 1"/><path d="M11 18l-1 1a3.5 3.5 0 0 1-5-5l1-1"/></svg><span class="num">11</span> İlgili Kaynaklar</h3>
       <div class="related-list">
         <details class="related-item">
           <summary>Ticaret İstatistikleri</summary>
