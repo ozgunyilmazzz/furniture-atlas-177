@@ -3060,7 +3060,7 @@ function updateSearchGlobeFocus(q){
     needsScroll = rect.top < 0 || rect.bottom > window.innerHeight;
     if(needsScroll) stageEl.scrollIntoView({ behavior:'smooth', block:'center' });
   }
-  setTimeout(()=>{ flyToCountry(target, null, {duration:950}); }, needsScroll ? 350 : 0);
+  setTimeout(()=>{ flyToCountry(target, null, {duration:950, zoom:zoomLevel}); }, needsScroll ? 350 : 0);
 }
 searchInput.addEventListener('input', ()=>{
   const q = normalizeTr(searchInput.value.trim());
@@ -3080,18 +3080,7 @@ searchInput.addEventListener('input', ()=>{
       if(!c) return;
       searchInput.value=''; listSearchQ=''; searchResults.classList.remove('show'); hideHoverCard();
       updateGlobeSearchDim(''); searchFocusId = null;
-      if(isMobileViewport()){
-        openDashboard(c);
-      } else {
-        const stageEl = document.getElementById('globeStage');
-        let needsScroll = false;
-        if(stageEl){
-          const rect = stageEl.getBoundingClientRect();
-          needsScroll = rect.top < 0 || rect.bottom > window.innerHeight;
-          if(needsScroll) stageEl.scrollIntoView({ behavior:'smooth', block:'center' });
-        }
-        setTimeout(()=>{ flyToCountry(c, ()=> openDashboard(c)); }, needsScroll ? 450 : 0);
-      }
+      openDashboard(c);
     });
     item.addEventListener('mouseenter', (e)=>{
       const c = COUNTRIES.find(x=>x.id===item.getAttribute('data-id'));
