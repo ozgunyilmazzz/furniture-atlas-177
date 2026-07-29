@@ -3009,7 +3009,10 @@ function highlightSearchedCountry(country){
   m.g.classList.add('is-search-highlight');
   setTimeout(()=> m.g.classList.remove('is-search-highlight'), 2600);
 }
-function flyToCountry(country, onDone){
+let flyToToken = 0;
+function flyToCountry(country, onDone, opts){
+  opts = opts || {};
+  const myToken = ++flyToToken; // yeni bir uçuş başlarsa öncekini sessizce durdurur (çakışma olmasın)
   autoRotate = false;
   momentumActive = false;
   const targetRotY0 = -(country.lon * Math.PI/180);
@@ -3017,10 +3020,11 @@ function flyToCountry(country, onDone){
   while(diff > Math.PI) diff -= Math.PI*2;
   while(diff < -Math.PI) diff += Math.PI*2;
   const startRotY = rotY, finalRotY = rotY + diff;
-  const startZoom = zoomLevel, targetZoom = Math.max(zoomLevel, 2.1);
-  const duration = 1400; // yeterince uzun ki kullanıcı dönüşü gerçekten görebilsin
+  const startZoom = zoomLevel, targetZoom = opts.zoom !== undefined ? opts.zoom : Math.max(zoomLevel, 2.1);
+  const duration = opts.duration || 1400; // yeterince uzun ki kullanıcı dönüşü gerçekten görebilsin
   const startTs = performance.now();
   function step(ts){
+    if(myToken !== flyToToken) return; // daha yeni bir hedef seçildi, bu eski animasyon iptal
     const t = Math.min(1, (ts - startTs) / duration);
     const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
     rotY = startRotY + (finalRotY - startRotY) * eased;
@@ -3031,14 +3035,37 @@ function flyToCountry(country, onDone){
       requestAnimationFrame(step);
     } else {
       highlightSearchedCountry(country);
-      setTimeout(()=>{ if(onDone) onDone(); }, 900); // parlama efekti bir an görülsün diye kısa bekleme
+      if(onDone) setTimeout(()=>{ if(myToken === flyToToken) onDone(); }, 900); // parlama efekti bir an görülsün diye kısa bekleme
     }
   }
   requestAnimationFrame(step);
 }
+// Kullanıcı arama kutusuna HARF YAZARKEN (tıklamadan önce), sadece anasayfadaysa
+// (ülke sayfası açık değilse): ışığı yanan (eşleşen) ülkelerden birini küçük bir
+// rastgele seçimle küreye getirip parlatır. Önceki hedef hâlâ eşleşme kümesindeyse
+// aynı ülkede kalır — harfler eklendikçe seçenekler daralır ve doğal olarak tek
+// bir ülkede sabitlenir (kullanıcının istediği "yan yana geldikçe tek olasılık kalır" davranışı).
+let searchFocusId = null;
+function updateSearchGlobeFocus(q){
+  if(!q || dashboard.classList.contains('open')){ searchFocusId = null; return; }
+  const matches = COUNTRIES.filter(c => countryMatchesGlobeSearch(c));
+  if(!matches.length){ searchFocusId = null; return; }
+  if(searchFocusId && matches.some(c=>c.id===searchFocusId)) return; // hâlâ geçerli, dokunma
+  const target = matches[Math.floor(Math.random()*matches.length)];
+  searchFocusId = target.id;
+  const stageEl = document.getElementById('globeStage');
+  let needsScroll = false;
+  if(stageEl){
+    const rect = stageEl.getBoundingClientRect();
+    needsScroll = rect.top < 0 || rect.bottom > window.innerHeight;
+    if(needsScroll) stageEl.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+  setTimeout(()=>{ flyToCountry(target, null, {duration:950}); }, needsScroll ? 350 : 0);
+}
 searchInput.addEventListener('input', ()=>{
   const q = normalizeTr(searchInput.value.trim());
   updateGlobeSearchDim(q);
+  updateSearchGlobeFocus(q);
   if(!q){ searchResults.classList.remove('show'); searchResults.innerHTML=''; return; }
   const matches = COUNTRIES.filter(c => normalizeTr(c.name).includes(q)).slice(0,8);
   if(!matches.length){ searchResults.innerHTML = `<div class="search-empty">Sonuç bulunamadı</div>`; searchResults.classList.add('show'); return; }
@@ -3052,7 +3079,7 @@ searchInput.addEventListener('input', ()=>{
       const c = COUNTRIES.find(x=>x.id===item.getAttribute('data-id'));
       if(!c) return;
       searchInput.value=''; listSearchQ=''; searchResults.classList.remove('show'); hideHoverCard();
-      updateGlobeSearchDim('');
+      updateGlobeSearchDim(''); searchFocusId = null;
       if(isMobileViewport()){
         openDashboard(c);
       } else {
