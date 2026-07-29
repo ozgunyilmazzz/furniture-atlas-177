@@ -1585,6 +1585,7 @@
     padding-bottom:46px; border-bottom:1px solid var(--border-soft);
   }
   .footer-brand{ max-width:340px; padding-right:24px; }
+  .footer-brand-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; }
   .footer-brand .brand-atlas{ font-size:26px; }
   .footer-tagline{
     font-family:var(--body); font-size:12.5px; color:var(--text-2); line-height:1.85; margin-top:20px;
@@ -1596,8 +1597,8 @@
   .footer-stats{ display:flex; justify-content:space-between; gap:16px; margin-top:28px; max-width:280px; }
   .footer-stat{ display:flex; flex-direction:column; gap:5px; }
   .footer-stat-num{
-    font-family:var(--body); font-weight:700; font-size:29px; line-height:1;
-    color:var(--amber-bright); letter-spacing:-0.5px;
+    font-family:var(--body); font-weight:700; font-size:21px; line-height:1;
+    color:var(--amber); letter-spacing:-0.3px;
   }
   .footer-stat-label{
     font-family:var(--mono); font-size:9px; letter-spacing:1.1px; text-transform:uppercase; color:var(--text-2);
@@ -1618,8 +1619,7 @@
 
   /* Güvenilir Veri Kaynaklarımız — tek satır, yumuşak yatay kaydırma (marquee/otomatik kayma YOK) */
   .footer-sources-band{
-    display:flex; align-items:center; gap:32px; padding:24px 0;
-    border-bottom:1px solid var(--border-soft);
+    display:flex; align-items:center; gap:16px; padding:24px 0 30px;
   }
   .footer-sources-band-title{
     font-family:var(--mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
@@ -1627,7 +1627,7 @@
   }
   .footer-sources-scroll{
     display:flex; align-items:center; gap:32px; overflow-x:auto; flex:1; min-width:0;
-    scrollbar-width:none; -ms-overflow-style:none;
+    scroll-behavior:smooth; scrollbar-width:none; -ms-overflow-style:none;
     -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
     mask-image:linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
     padding:2px 4px;
@@ -1646,14 +1646,15 @@
     color:var(--text-2); transition:border-color 0.2s ease, color 0.2s ease;
   }
   .footer-source-badge:hover .footer-source-mark{ border-color:var(--amber); color:var(--amber-bright); }
-
-  .footer-bottom{
-    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
-    padding-top:26px; font-family:var(--mono); font-size:9.5px; font-weight:300; letter-spacing:0.3px;
-    color:var(--text-2); opacity:0.68;
+  .footer-sources-arrow{
+    display:flex; align-items:center; justify-content:center; width:28px; height:28px; flex-shrink:0;
+    border-radius:50%; border:1px solid var(--border-soft); background:none; color:var(--text-2); cursor:pointer;
+    transition:border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
   }
+  .footer-sources-arrow:hover{ border-color:var(--amber); color:var(--amber-bright); transform:translateX(2px); }
+
   .footer-linkedin{
-    display:flex; align-items:center; justify-content:center; width:34px; height:34px;
+    display:flex; align-items:center; justify-content:center; width:32px; height:32px; flex-shrink:0;
     border-radius:50%; border:1px solid var(--border-soft); color:var(--text-2); opacity:1;
     transition:border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
   }
@@ -1667,7 +1668,7 @@
     .footer-top{ flex-direction:column; gap:34px; }
     .footer-columns{ gap:34px; }
     .footer-sources-band{ flex-direction:column; align-items:flex-start; gap:14px; }
-    .footer-bottom{ flex-direction:column; align-items:flex-start; }
+    .footer-sources-arrow{ display:none; }
   }
 
   /* ---------- PİYASA ŞERİDİ (ATLAS TICKER) ---------- */

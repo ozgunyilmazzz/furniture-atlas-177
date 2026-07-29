@@ -6447,6 +6447,14 @@ document.getElementById('closeGlobalReports').addEventListener('click', ()=>{
 });
 // "Atlas Research+" gerçek içeriğe sahip — kendi modalını açar.
 const atlasResearchLinkEl = document.getElementById('atlasResearchLink');
+// Footer "Güvenilir Veri Kaynaklarımız" satırı — ok butonu tıklanınca sağa doğru kaydırır.
+const footerSourcesArrowEl = document.getElementById('footerSourcesArrow');
+const footerSourcesScrollEl = document.getElementById('footerSourcesScroll');
+if(footerSourcesArrowEl && footerSourcesScrollEl){
+  footerSourcesArrowEl.addEventListener('click', ()=>{
+    footerSourcesScrollEl.scrollBy({ left: 220, behavior:'smooth' });
+  });
+}
 if(atlasResearchLinkEl) atlasResearchLinkEl.addEventListener('click', (e)=>{
   e.preventDefault();
   if(!isPremiumUser()){ showPremiumModal(); return; }
