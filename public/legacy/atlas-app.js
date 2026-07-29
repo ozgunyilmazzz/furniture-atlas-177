@@ -4375,7 +4375,7 @@ function prBadge(tier){
 function prGauge(score, label, size){
   const s = size || 84;
   const r = s/2 - 8, cx = s/2, cy = s/2, circ = 2*Math.PI*r;
-  const col = score>=80 ? '#1f7a5c' : score>=55 ? '#b8862f' : '#6b7280';
+  const col = score>=70 ? '#1f7a5c' : score>=50 ? '#b8862f' : '#6b7280';
   return `<div class="pr-gauge-box">
     <svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">
       <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#e5e7eb" stroke-width="7"/>
