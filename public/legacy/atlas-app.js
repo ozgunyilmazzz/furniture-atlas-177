@@ -346,18 +346,27 @@ function normalizeScoreField(v, range, invert, logScale){
   if(invert) score = 100 - score;
   return Math.max(0, Math.min(100, score));
 }
+// FORMÜL (5 bileşen — Giriş Kolaylığı kaldırıldı):
+//   %30 Kanıtlanmış Türkiye Trafiği   %20 Pazar Büyüklüğü
+//   %20 Türkiye'nin Büyüme Momentumu  (10 → 20: +%10)
+//   %20 Rekabet Avantajı              (15 → 20: +%5)
+//   %10 Pazar Büyüme Oranı
+// Giriş Kolaylığı (customsDuty'e dayalı) kaldırıldı çünkü Avrupa dışındaki ~140 ülkede
+// gerçek gümrük vergisi verisi yok, bu yüzden neredeyse her ülkede nötr 50 alıyordu ve
+// gerçek sinyali olan bileşenleri (özellikle traction'ı çok güçlü olan ülkelerde) haksız
+// yere aşağı çekiyordu. Kaldırılan %15'lik ağırlık, gerçek veri kapsamı çok daha güçlü olan
+// Büyüme Momentumu (+%10) ve Rekabet Avantajı'na (+%5) aktarıldı.
 function computeScoreFromFields(f, ranges){
   const marketSize = normalizeScoreField(f.annualImports, ranges.annualImports, false, true) ?? 40;
   const traction = normalizeScoreField(f.derivedTurkeyValue, ranges.derivedTurkeyValue, false, true) ?? 20;
   const momentum = normalizeScoreField(f.growthCAGR, ranges.growthCAGR, false, false) ?? 50;
   const marketGrowth = normalizeScoreField(f.importGrowth, ranges.importGrowth, false, false) ?? 50;
-  const easeOfEntry = normalizeScoreField(f.customsDuty, ranges.customsDuty, true, false) ?? 50;
   const competition = normalizeScoreField(f.topSupplierShare, ranges.topSupplierShare, true, false) ?? 50;
   const overall = Math.round(
-    0.20*marketSize + 0.30*traction + 0.10*momentum + 0.10*marketGrowth + 0.15*easeOfEntry + 0.15*competition
+    0.20*marketSize + 0.30*traction + 0.20*momentum + 0.10*marketGrowth + 0.20*competition
   );
   return {
-    marketSize, traction, momentum, marketGrowth, easeOfEntry, competition,
+    marketSize, traction, momentum, marketGrowth, competition,
     derivedTurkeyValue: f.derivedTurkeyValue,
     overall: Math.max(5, Math.min(97, overall)),
   };
@@ -384,10 +393,10 @@ function computeOpportunityScores(countries){
   // hiçbir gerçek veriyle düzeltilmiyor; formülde kullanmak "gerçek veri" ilkesini bozar.
   const seatingFieldsArr = countries.map(extractSeatingFields);
   const seatingRanges = buildScoreRanges(seatingFieldsArr);
+  const seatingResults = seatingFieldsArr.map(f=>computeScoreFromFields(f, seatingRanges));
   countries.forEach((c,i)=>{
-    const result = computeScoreFromFields(seatingFieldsArr[i], seatingRanges);
-    c.scores.overall = result.overall;
-    c._scoreBreakdown = result;
+    c.scores.overall = seatingResults[i].overall;
+    c._scoreBreakdown = seatingResults[i];
   });
 
   // AHŞAP MOBİLYA — aynı 6 bileşenli formül, bu sefer ahşap kategorisine özel gerçek
@@ -412,8 +421,9 @@ function computeOpportunityScores(countries){
   }
   const woodFieldsArr = countries.map(extractWoodFields);
   const woodRanges = buildScoreRanges(woodFieldsArr);
+  const woodResults = woodFieldsArr.map(f=>computeScoreFromFields(f, woodRanges));
   countries.forEach((c,i)=>{
-    WOOD_OPPORTUNITY_SCORES[c.id] = computeScoreFromFields(woodFieldsArr[i], woodRanges);
+    WOOD_OPPORTUNITY_SCORES[c.id] = woodResults[i];
   });
 }
 // (computeOpportunityScores tanımlandı; gerçek 167 ülke verisi ve tüm gerçek-veri
@@ -787,7 +797,7 @@ const TURKEY_PROFILE = {
 // Türkiye'nin gerçek en büyük 5 mobilya ihracat pazarı (kullanıcı tarafından sağlanan
 // gerçek ihracat sıralaması) — Fırsat Skoru hesaplamasında her koşulda öne çıkarılır.
 // Fırsat Skoru formülü — kullanıcıya şeffaflık için gösterilir.
-const SCORE_FORMULA_NOTE = 'AI Fırsat Skoru — 6 bileşen, tamamen gerçek verilerden: %30 Kanıtlanmış Türkiye Trafiği (yıllık ithalat × Türkiye payı, gerçek $ ihracat değeri), %20 Pazar Büyüklüğü (ülkenin toplam mobilya ithalatı), %15 Giriş Kolaylığı (gümrük vergisi), %15 Rekabet Yoğunluğu (en büyük rakip tedarikçinin payı), %10 Türkiye\'nin Büyüme Momentumu (2017-2025 gerçek ITC Trade Map verisinden hesaplanan yıllık ortalama büyüme — CAGR), %10 Pazar Büyüme Oranı (ülkenin toplam ithalat büyümesi). Bir ülke için veri doğrulanmamışsa o bileşen için nötr bir değer kullanılır — asla veri uydurulmaz.';
+const SCORE_FORMULA_NOTE = 'AI Fırsat Skoru — 5 bileşen, tamamen gerçek verilerden: %30 Kanıtlanmış Türkiye Trafiği (yıllık ithalat × Türkiye payı, gerçek $ ihracat değeri), %20 Pazar Büyüklüğü (ülkenin toplam mobilya ithalatı), %20 Rekabet Avantajı (en büyük rakip tedarikçinin payı, ters orantılı), %20 Türkiye\'nin Büyüme Momentumu (2017-2025 gerçek ITC Trade Map verisinden hesaplanan yıllık ortalama büyüme — CAGR), %10 Pazar Büyüme Oranı (ülkenin toplam ithalat büyümesi). Giriş Kolaylığı bileşeni kaldırıldı — Avrupa dışı ülkelerin çoğunda gerçek gümrük vergisi verisi olmadığı için formülü gereksiz yere nötrleştiriyordu. Bir ülke için veri doğrulanmamışsa o bileşen için nötr bir değer kullanılır — asla veri uydurulmaz.';
 // GERÇEK tedarikçi/pazar payı verisi — ITC Trade Map 2025, kullanıcı tarafından sağlanan
 // 'ülkelerin ithalatı, tedarikçiye göre' (HS 940161 ve 940360) resmi raporlarından derlenmiştir.
 // 165+166 ülke için gerçek, doğrulanmış tedarikçi payları ve Türkiye'nin gerçek konumu içerir.
@@ -1328,9 +1338,8 @@ function toggleScoreInfo(e){
   const components = bd ? [
     { label:'Kanıtlanmış Türkiye Trafiği', weight:30, val:bd.traction },
     { label:'Pazar Büyüklüğü', weight:20, val:bd.marketSize },
-    { label:'Giriş Kolaylığı', weight:15, val:bd.easeOfEntry },
-    { label:'Rekabet Avantajı', weight:15, val:100-bd.competition },
-    { label:"Türkiye'nin Büyüme Momentumu", weight:10, val:bd.momentum },
+    { label:'Rekabet Avantajı', weight:20, val:100-bd.competition },
+    { label:"Türkiye'nin Büyüme Momentumu", weight:20, val:bd.momentum },
     { label:'Pazar Büyüme Oranı', weight:10, val:bd.marketGrowth },
   ] : null;
   pop.innerHTML = `
@@ -2119,7 +2128,7 @@ function generateReportHTML(baseCountry){
   ];
 
   const strategyPoints = [
-    ['Bu pazar öneriliyor mu?', c.scores.overall>=55 ? `Evet — fırsat skoru ${c.scores.overall}/100.` : `Temkinli — fırsat skoru ${c.scores.overall}/100, önce küçük hacimli test siparişi önerilir.`],
+    ['Bu pazar öneriliyor mu?', c.scores.overall>=50 ? `Evet — fırsat skoru ${c.scores.overall}/100.` : `Temkinli — fırsat skoru ${c.scores.overall}/100, önce küçük hacimli test siparişi önerilir.`],
     ['Hangi şehirler hedeflenmeli?', 'Ana liman/lojistik merkezine yakın büyük şehirler ilk etapta önceliklendirilmeli.'],
     ['Distribütörle mi çalışılmalı?', c.scores.difficulty>=50 ? 'Evet, yerel mevzuat ve gümrük karmaşıklığı nedeniyle deneyimli bir distribütör önerilir.' : 'Doğrudan ihracat da değerlendirilebilir, distribütör şart değil.'],
     ['Perakende mi toptan mı?', c.scores.market>=60 ? 'Toptan/B2B kanalıyla hacim yakalamak, sonra perakende ortaklıklarına geçmek mantıklı.' : 'Küçük ölçekli perakende/butik ortaklıklarla başlamak daha düşük risklidir.'],
@@ -2405,13 +2414,13 @@ function buildLineChartSvg(values, labels, color){
 }
 
 function scoreColor(overall){
-  if(overall >= 80) return '#3fd0c0';
-  if(overall >= 55) return '#c9a961';
+  if(overall >= 70) return '#3fd0c0';
+  if(overall >= 50) return '#c9a961';
   return '#6b6f78';
 }
 function scoreLabel(overall){
-  if(overall >= 80) return 'Yüksek Fırsat';
-  if(overall >= 55) return 'Orta Fırsat';
+  if(overall >= 70) return 'Yüksek Fırsat';
+  if(overall >= 50) return 'Orta Fırsat';
   return 'Değerlendirmede';
 }
 
@@ -3535,7 +3544,7 @@ function formatTimeDiff(countryId){
 // Rekabet skorları, zaten uygulamanın başka yerlerinde de kullanılan aynı
 // eşik değerleriyle) türetilir; ülkeye özel uydurma bir iddia içermez.
 function heroTagline(baseCountry, c){
-  if(c.scores.overall >= 80){
+  if(c.scores.overall >= 70){
     return `Türkiye'nin en güçlü ihracat potansiyeli taşıyan pazarlardan biri.`;
   }
   const potential = potentialLabel(c.scores.market);
