@@ -322,7 +322,7 @@ function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
           ${yAxis}
           <path d="${areaD}" fill="url(#${gradId})" stroke="none"/>
           <path d="${pathD}" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          ${dots.map(d => `<circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="14" fill="transparent" style="cursor:pointer;" onclick="tgShowPoint(this, '${TURKEY_GROWTH_YEARS[d.i]}: \$${fmtM(d.v)}M')"></circle><circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="${d.i===lastDot.i?4.5:3.5}" fill="${d.i===lastDot.i?'var(--amber-bright)':'var(--teal)'}" style="pointer-events:none;"><title>${TURKEY_GROWTH_YEARS[d.i]}: $${fmtM(d.v)}M</title></circle>`).join('')}
+          ${dots.map(d => `<circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="14" fill="transparent" style="cursor:pointer; pointer-events:all;" onclick="tgShowPoint(this, '${TURKEY_GROWTH_YEARS[d.i]}: \$${fmtM(d.v)}M')" ontouchstart="tgShowPoint(this, '${TURKEY_GROWTH_YEARS[d.i]}: \$${fmtM(d.v)}M')"></circle><circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="${d.i===lastDot.i?4.5:3.5}" fill="${d.i===lastDot.i?'var(--amber-bright)':'var(--teal)'}" style="pointer-events:none;"><title>${TURKEY_GROWTH_YEARS[d.i]}: $${fmtM(d.v)}M</title></circle>`).join('')}
           ${yearLabels}
         </svg>
       </div>
