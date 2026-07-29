@@ -6500,7 +6500,7 @@ document.querySelectorAll('[data-ext-link]').forEach(a=>{
   a.addEventListener('click', (e)=>{
     e.preventDefault();
     const url = a.getAttribute('href');
-    const name = a.textContent.trim();
+    const name = a.getAttribute('data-name') || a.textContent.trim();
     if(confirm(`${name} sitesine gitmek üzeresiniz (${url}). Devam edilsin mi?`)){
       window.open(url, '_blank', 'noopener,noreferrer');
     }
