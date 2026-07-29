@@ -5982,7 +5982,7 @@ function miniGrowthSparkline(countryId, categoryKey){
       <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       ${lastPt ? `<circle cx="${lastPt.x.toFixed(1)}" cy="${lastPt.y.toFixed(1)}" r="2.5" fill="var(--amber-bright)"/>` : ''}
     </svg>
-    ${cagr != null ? `<span style="font-family:var(--mono); font-size:10px; color:${color};">${cagr>=0?'+':''}${cagr}%/yıl</span>` : ''}
+    ${cagr != null ? `<span title="2017-2025 arası yıllık ortalama bileşik büyüme oranı (CAGR) — tek bir yıl karşılaştırması değildir" style="font-family:var(--mono); font-size:10px; color:${color}; cursor:help; border-bottom:1px dotted ${color};">yıllık ort. ${cagr>=0?'+':''}${cagr}%</span>` : ''}
   </div>`;
 }
 // Karşılaştırma satırları kategorilere ayrılmıştır. Her satır get()/num() ile veri
@@ -5991,7 +5991,7 @@ const COMPARE_SECTIONS = [
   { title:'Pazar Genel Bakışı', rows:[
     { label:'Mobilya İthalatı', get:c=>c.annualImports, num:c=>numFromMoneyNormalized(c.annualImports), better:'high' },
     { label:'İthalat Büyümesi', get:c=>c.importGrowth, num:c=>numFromPercent(c.importGrowth), better:'high' },
-    { label:'İthalat Trendi (2017–2025)', get:c=>miniGrowthSparkline(c.id, activeCategory), num:null, better:null },
+    { label:'Türkiye\'den İthalat Trendi (2017–2025)', get:c=>miniGrowthSparkline(c.id, activeCategory), num:null, better:null },
     { label:'Nüfus', get:c=>c.population, num:c=>numFromMoney(c.population), better:'high' },
     { label:'Kişi Başı GSYİH', get:c=>c.gdpPerCapita, num:c=>numFromMoney(c.gdpPerCapita), better:'high' },
     { label:'Para Birimi', get:c=>c.currency, num:null, better:null },
