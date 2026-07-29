@@ -254,8 +254,10 @@ function computeGrowthCAGR(series){
 // "$0M" olarak gösterilmez — "%0" için uyguladığımız aynı ilke burada da geçerli.
 function fmtDollarM(v){
   if(v == null || isNaN(v)) return 'Bilinmiyor';
-  if(v <= 0) return '<$0.1M';
-  return '$' + (v >= 100 ? Math.round(v) : Math.round(v*10)/10) + 'M';
+  if(v <= 0) return '<$1K';
+  if(v < 1) return '$' + Math.round(v*1000).toLocaleString('en-US') + 'K';
+  if(v < 10) return '$' + v.toFixed(1) + 'M';
+  return '$' + Math.round(v).toLocaleString('en-US') + 'M';
 }
 function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
   const series = getTurkeyGrowthSeries(countryId, categoryKey);
@@ -328,38 +330,48 @@ function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
         <span class="footnote tg-chart-readout" style="margin:0; font-weight:700; color:var(--text-0);">${lastDot ? `${TURKEY_GROWTH_YEARS[lastDot.i]}: ${fmtDollarM(lastDot.v)}` : ''}</span>
         ${cagr !== null ? `<span class="tg-chart-cagr ${cagr>=0?'up':'down'}">Yıllık ortalama büyüme (CAGR): ${cagr>=0?'+':''}${cagr}%</span>` : ''}
       </div>
-      <div class="footnote" style="margin-top:6px; text-align:center;">📍 Herhangi bir noktaya dokunarak/tıklayarak o yılın değerini yukarıda görebilirsiniz.</div>
+      <div class="footnote tg-chart-hint" style="margin-top:8px; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11a3 3 0 1 0 6 0 3 3 0 1 0-6 0"/><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/></svg>Herhangi bir noktaya dokunarak/tıklayarak o yılın değerini yukarıda görebilirsiniz.</div>
     </div>`;
 }
 // Grafikteki bir yıl noktasına dokunulduğunda/tıklandığında, o yılın tam değerini
 // GÖRÜNÜR bir rozette gösterir. Küçük SVG dairelerine TAM isabet aramak yerine
 // (dokunmatik ekranlarda parmak hassasiyeti/isabet sorunlarına açık), grafiğin
-// HERHANGİ bir yerine tıklanınca en yakın yıl noktası matematiksel olarak bulunur —
-// bu yöntem SVG hit-testing tuhaflıklarından tamamen bağımsızdır.
-document.addEventListener('click', (e)=>{
-  const svg = e.target.closest('.tg-chart-svg');
-  if(!svg) return;
-  const card = svg.closest('.tg-chart-card');
-  const readout = card && card.querySelector('.tg-chart-readout');
-  const pts = svg.querySelectorAll('.tg-chart-hit');
-  if(!readout || !pts.length) return;
-  const rect = svg.getBoundingClientRect();
-  if(!rect.width) return;
-  const vb = svg.viewBox.baseVal;
-  const clickX = e.clientX - rect.left;
-  const svgX = vb.x + (clickX / rect.width) * vb.width;
-  let nearest = null, nearestDist = Infinity;
-  pts.forEach(p=>{
-    const cx = parseFloat(p.getAttribute('cx'));
-    const d = Math.abs(cx - svgX);
-    if(d < nearestDist){ nearestDist = d; nearest = p; }
+// HERHANGİ bir yerine tıklanınca en yakın yıl noktası matematiksel olarak bulunur.
+// Belge-seviyesi (document) delege edilmiş dinleyici yerine, grafik DOM'a her
+// eklendiğinde DOĞRUDAN o SVG'ye bağlanır — böylece üstteki başka bir elementin
+// olayı yutması (stopPropagation vb.) ihtimali tamamen ortadan kalkar.
+function wireTurkeyGrowthChartTaps(){
+  document.querySelectorAll('.tg-chart-svg').forEach(svg=>{
+    if(svg.getAttribute('data-tg-wired') === '1') return;
+    svg.setAttribute('data-tg-wired', '1');
+    function handlePoint(clientX){
+      const card = svg.closest('.tg-chart-card');
+      const readout = card && card.querySelector('.tg-chart-readout');
+      const pts = svg.querySelectorAll('.tg-chart-hit');
+      if(!readout || !pts.length) return;
+      const rect = svg.getBoundingClientRect();
+      if(!rect.width) return;
+      const vb = svg.viewBox.baseVal;
+      const x = clientX - rect.left;
+      const svgX = vb.x + (x / rect.width) * vb.width;
+      let nearest = null, nearestDist = Infinity;
+      pts.forEach(p=>{
+        const cx = parseFloat(p.getAttribute('cx'));
+        const d = Math.abs(cx - svgX);
+        if(d < nearestDist){ nearestDist = d; nearest = p; }
+      });
+      if(nearest){
+        const year = nearest.getAttribute('data-year');
+        const val = parseFloat(nearest.getAttribute('data-val'));
+        readout.textContent = `${year}: ${fmtDollarM(val)}`;
+      }
+    }
+    svg.addEventListener('click', e=>{ handlePoint(e.clientX); });
+    svg.addEventListener('touchstart', e=>{
+      if(e.touches && e.touches.length){ handlePoint(e.touches[0].clientX); }
+    }, {passive:true});
   });
-  if(nearest){
-    const year = nearest.getAttribute('data-year');
-    const val = parseFloat(nearest.getAttribute('data-val'));
-    readout.textContent = `${year}: ${fmtDollarM(val)}`;
-  }
-});
+}
 
 function opScoreParseNum(s){
   if(s == null || s === 'Bilinmiyor') return null;
@@ -3678,7 +3690,7 @@ function renderCountryPage(baseCountry){
 
   const tInfo = getTurkeyImportInfo(c);
   const exportSentence = tInfo.level !== 'unknown'
-    ? `Türkiye'den ${c.name}'ye ${catInfo.label.toLowerCase()} ihracatı ${tInfo.display} seviyesinde (${tInfo.level==='real'?'doğrulanmış veri':'tahmini'})${tInfo.growthPct !== null ? `, 2024→2025 döneminde gerçek verilerle ${tInfo.growthPct>=0?'+':''}${tInfo.growthPct}% değişti` : ''}.`
+    ? `Türkiye'den ${c.name}'ye ${tInfo.isTotal ? 'tüm mobilya kategorilerinde (bu, seçili kategoriye özel bir rakam değildir)' : catInfo.label.toLowerCase() + ' ihracatı'} ${tInfo.display} seviyesinde (${tInfo.level==='real'?'doğrulanmış veri':'tahmini'})${tInfo.growthPct !== null ? `, 2024→2025 döneminde gerçek verilerle ${tInfo.growthPct>=0?'+':''}${tInfo.growthPct}% değişti` : ''}.`
     : `Türkiye'den ${c.name}'ye bu kategoride doğrulanmış bir ihracat verisi henüz yok.`;
   const shareSentence = c.suppliersVerified
     ? `Türkiye'nin bu pazardaki doğrulanmış tedarikçi payı %${numFromPercent(c.turkeyShare)}.`
@@ -3741,12 +3753,12 @@ function renderCountryPage(baseCountry){
 
   document.getElementById('dashBody').innerHTML = `
     ${renderCountryHero(baseCountry, c)}
-    <div class="tr-export-hero ${getTurkeyImportInfo(c).level}">
-      <div class="tr-export-hero-label">🇹🇷 Türkiye'den ${catInfo.label} İhracatı ${dqBadge(getTurkeyImportInfo(c).level==='real'?'real':getTurkeyImportInfo(c).level==='estimated'?'estimated':'unknown')}</div>
-      <div class="tr-export-hero-value">${getTurkeyImportInfo(c).display}</div>
-      <div class="tr-export-hero-caption">${c.name} pazarına yönelik yıllık ihracat değeri</div>
+    <div class="tr-export-hero ${tInfo.level}">
+      <div class="tr-export-hero-label">🇹🇷 Türkiye'den ${tInfo.isTotal ? 'TÜM Mobilya Kategorilerinde' : catInfo.label} İhracatı ${dqBadge(tInfo.level==='real'?'real':tInfo.level==='estimated'?'estimated':'unknown')}</div>
+      <div class="tr-export-hero-value">${tInfo.display}</div>
+      <div class="tr-export-hero-caption">${c.name} pazarına yönelik yıllık ihracat değeri${tInfo.isTotal ? ` — <b style="color:var(--amber-bright);">bu rakam ${catInfo.label.toLowerCase()}'a özel değil, tüm mobilya kategorilerinin (HS 94) toplamıdır</b>` : ''}</div>
       <div class="tr-export-stats">
-        ${(()=>{ const g=getTurkeyImportInfo(c).growthPct; return g!==null ? `
+        ${(()=>{ const g=tInfo.growthPct; return g!==null ? `
         <div class="tr-export-chip">
           <div class="tr-export-chip-label">2024→2025 Büyüme</div>
           <div class="tr-export-chip-val ${g<0?'down':'up'}">${g>=0?'+':''}${g}%</div>
@@ -3967,6 +3979,7 @@ function renderCountryPage(baseCountry){
   fillNotes(baseCountry);
   applyContentGate();
   animateFillBars();
+  wireTurkeyGrowthChartTaps();
 
   const holidaysEl = document.getElementById('holidaysDetails');
   if(holidaysEl){
