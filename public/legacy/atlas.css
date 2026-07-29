@@ -210,6 +210,19 @@
   }
   .node.hovered .node-dot{ r:6; }
   .node.hovered .node-ring{ opacity:0.7; r:14; }
+  .node.is-search-highlight .node-dot{
+    fill:var(--amber-bright) !important; animation:searchTargetPulse 0.85s ease-in-out 3;
+    filter:drop-shadow(0 0 8px var(--amber-bright));
+  }
+  .node.is-search-highlight .node-ring{
+    stroke:var(--amber-bright); animation:searchTargetRing 0.85s ease-out 3;
+  }
+  @keyframes searchTargetPulse{
+    0%,100%{ r:6; } 50%{ r:12; }
+  }
+  @keyframes searchTargetRing{
+    0%{ r:8; opacity:0.9; } 100%{ r:26; opacity:0; }
+  }
   .node-label{
     font-family:var(--mono); font-size:9px; fill:var(--text-2); letter-spacing:0.5px;
     pointer-events:none; opacity:0.8;

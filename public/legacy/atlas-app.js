@@ -3003,6 +3003,12 @@ function updateGlobeSearchDim(q){
 }
 // Arama sonucuna tıklanınca küreyi o ülkenin boylamına yumuşakça döndürür, bitince ülke
 // sayfasını açar. Sadece masaüstünde — mobilde performans/his için doğrudan açılır.
+function highlightSearchedCountry(country){
+  const m = markerEls[country.id];
+  if(!m || !m.g) return;
+  m.g.classList.add('is-search-highlight');
+  setTimeout(()=> m.g.classList.remove('is-search-highlight'), 2600);
+}
 function flyToCountry(country, onDone){
   autoRotate = false;
   momentumActive = false;
@@ -3011,15 +3017,22 @@ function flyToCountry(country, onDone){
   while(diff > Math.PI) diff -= Math.PI*2;
   while(diff < -Math.PI) diff += Math.PI*2;
   const startRotY = rotY, finalRotY = rotY + diff;
-  const duration = 750;
+  const startZoom = zoomLevel, targetZoom = Math.max(zoomLevel, 2.1);
+  const duration = 1400; // yeterince uzun ki kullanıcı dönüşü gerçekten görebilsin
   const startTs = performance.now();
   function step(ts){
     const t = Math.min(1, (ts - startTs) / duration);
     const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
     rotY = startRotY + (finalRotY - startRotY) * eased;
+    zoomLevel = startZoom + (targetZoom - startZoom) * eased;
+    applyZoom();
     needsRender = true;
-    if(t < 1) requestAnimationFrame(step);
-    else if(onDone) onDone();
+    if(t < 1){
+      requestAnimationFrame(step);
+    } else {
+      highlightSearchedCountry(country);
+      setTimeout(()=>{ if(onDone) onDone(); }, 900); // parlama efekti bir an görülsün diye kısa bekleme
+    }
   }
   requestAnimationFrame(step);
 }
@@ -3043,7 +3056,14 @@ searchInput.addEventListener('input', ()=>{
       if(isMobileViewport()){
         openDashboard(c);
       } else {
-        flyToCountry(c, ()=> openDashboard(c));
+        const stageEl = document.getElementById('globeStage');
+        let needsScroll = false;
+        if(stageEl){
+          const rect = stageEl.getBoundingClientRect();
+          needsScroll = rect.top < 0 || rect.bottom > window.innerHeight;
+          if(needsScroll) stageEl.scrollIntoView({ behavior:'smooth', block:'center' });
+        }
+        setTimeout(()=>{ flyToCountry(c, ()=> openDashboard(c)); }, needsScroll ? 450 : 0);
       }
     });
     item.addEventListener('mouseenter', (e)=>{
@@ -6410,7 +6430,8 @@ document.getElementById('closeGlobalReports').addEventListener('click', ()=>{
   pushHistoryState();
 });
 // "Atlas Research+" gerçek içeriğe sahip — kendi modalını açar.
-document.getElementById('atlasResearchLink').addEventListener('click', (e)=>{
+const atlasResearchLinkEl = document.getElementById('atlasResearchLink');
+if(atlasResearchLinkEl) atlasResearchLinkEl.addEventListener('click', (e)=>{
   e.preventDefault();
   if(!isPremiumUser()){ showPremiumModal(); return; }
   document.getElementById('atlasResearchModal').classList.add('open');
