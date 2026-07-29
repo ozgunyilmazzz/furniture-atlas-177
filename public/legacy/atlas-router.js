@@ -90,6 +90,10 @@
   // Sonsuz döngü için içeriği iki kez basıyoruz (animasyon %-50 kayınca sıfırlanıyor)
   var html = buildItems();
   track.innerHTML = html + html;
+  // Kayma hızı, bilgi sayısına göre dinamik hesaplanır (bilgi başına ~6.5 saniye okuma payı) —
+  // böylece ileride yeni bilgi eklendiğinde şerit otomatik olarak okunabilir hızda kalır.
+  var scrollSeconds = Math.max(150, Math.round(FACTS.length * 6.5));
+  track.style.animationDuration = scrollSeconds + 's';
 
   // Şerit artık varsayılan olarak KAPALI — ana sayfada kendiliğinden görünmez.
   // Harita/Liste sekmelerinin yanındaki "Sektör Nabzı" butonuyla isteğe bağlı açılır.
