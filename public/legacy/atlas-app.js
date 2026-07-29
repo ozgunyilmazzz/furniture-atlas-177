@@ -5296,7 +5296,7 @@ function updateLoginUI(){
   const user = getCurrentUser();
   const loginBtn = document.getElementById('loginBtn');
   const targetsBtn = document.getElementById('myTargetsBtn');
-  const gatedBtns = ['newsBtn','fairsBtn','travelPlanBtn','reportIssueBtn'].map(id=>document.getElementById(id));
+  const gatedBtns = ['newsBtn','fairsBtn','reportIssueBtn'].map(id=>document.getElementById(id));
   const eyebrowEl = document.getElementById('heroEyebrow');
   const titleEl = document.getElementById('heroTitle');
   const subEl = document.getElementById('heroSub');
@@ -5666,7 +5666,6 @@ function renderTargetsPanel(){
     return;
   }
   body.innerHTML = introBanner + `
-    <div class="footnote" style="margin-bottom:16px;">⚠ Rapor/abonelik talepleri şu an e-posta taslağı oluşturur — ödeme ve otomatik gönderim altyapısı henüz bağlı değil.</div>
     ${ids.map(id=>{
       const c = COUNTRIES.find(x=>x.id===id);
       if(!c) return '';
@@ -5693,11 +5692,13 @@ function renderTargetsPanel(){
     });
   });
   body.querySelectorAll('[data-report]').forEach(el=>{
-    el.addEventListener('click', ()=> requestReportMailto(COUNTRIES.find(x=>x.id===el.getAttribute('data-report')), 'onetime'));
+    el.addEventListener('click', ()=>{
+      const c = COUNTRIES.find(x=>x.id===el.getAttribute('data-report'));
+      document.getElementById('targetsModal').classList.remove('open');
+      if(c) openCountry(c);
+    });
   });
-  body.querySelectorAll('[data-subscribe]').forEach(el=>{
-    el.addEventListener('click', ()=> requestReportMailto(COUNTRIES.find(x=>x.id===el.getAttribute('data-subscribe')), 'subscribe'));
-  });
+  // "Ekonomi Bülteni" şimdilik hiçbir aksiyon almıyor (yakında).
   body.querySelectorAll('[data-remove]').forEach(el=>{
     el.addEventListener('click', ()=>{
       toggleTarget(user, el.getAttribute('data-remove'));
@@ -6008,21 +6009,6 @@ document.getElementById('closeNews').addEventListener('click', ()=>{
   pushHistoryState();
 });
 
-document.getElementById('travelPlanBtn').addEventListener('click', ()=>{
-  document.getElementById('travelModal').classList.add('open');
-  document.getElementById('travelResults').innerHTML = '';
-  const startInput = document.getElementById('travelStartInput');
-  const endInput = document.getElementById('travelEndInput');
-  if(!startInput.value){
-    const start = new Date(); start.setDate(start.getDate() + 30);
-    const end = new Date(start); end.setDate(end.getDate() + 5);
-    startInput.value = fmtDateInput(start);
-    endInput.value = fmtDateInput(end);
-    startInput.min = fmtDateInput(new Date());
-    endInput.min = fmtDateInput(start);
-  }
-  pushHistoryState();
-});
 document.getElementById('travelStartInput').addEventListener('change', (e)=>{
   const endInput = document.getElementById('travelEndInput');
   endInput.min = e.target.value;
