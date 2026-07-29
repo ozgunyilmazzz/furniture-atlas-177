@@ -591,6 +591,13 @@
     background:var(--panel); border:1px solid var(--border-soft); border-radius:14px;
     padding:16px 18px 10px; margin-bottom:10px;
   }
+  .tg-chart-btns{ pointer-events:none; }
+  .tg-chart-btn{
+    flex:1; background:transparent; border:none; margin:0; padding:0; cursor:pointer;
+    pointer-events:all; -webkit-tap-highlight-color:rgba(63,208,192,0.15);
+  }
+  .tg-chart-btn:hover{ background:rgba(63,208,192,0.06); }
+  .tg-chart-btn:disabled{ cursor:default; pointer-events:none; }
   .tg-chart-footer{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
   .tg-chart-cagr{ font-family:var(--mono); font-size:11.5px; letter-spacing:0.3px; padding:4px 11px; border-radius:20px; }
   .tg-chart-cagr.up{ color:var(--teal); background:rgba(63,208,192,0.1); border:1px solid rgba(63,208,192,0.3); }

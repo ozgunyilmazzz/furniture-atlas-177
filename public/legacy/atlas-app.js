@@ -307,12 +307,11 @@ function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
       <text x="${(padL-8).toFixed(1)}" y="${(y+3).toFixed(1)}" font-size="9.5" fill="var(--text-2)" text-anchor="end">${fmtDollarM(v)}</text>`;
   }).join('');
 
-  return `
-    <div class="cp-section" style="border-bottom:none; padding-top:0;">
-      <h3 class="cp-section-title" style="font-size:19px; margin-bottom:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Türkiye İhracat Trendi (2017–2025)</h3>
-      <div class="footnote" style="margin-bottom:14px;">${categoryLabel} kategorisinde Türkiye'den bu ülkeye yıllık ihracat, milyon $ (ITC Trade Map, gerçek veri). Bir noktaya dokunarak/tıklayarak o yılın tam değerini görebilirsiniz.</div>
-      <div class="tg-chart-card">
-        <svg class="tg-chart-svg" viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="overflow:visible; display:block; cursor:pointer;">
+  // SVG SADECE görsel — çizgi, alan, eksenler, noktalar. Etkileşim yok. Dokunma/tıklama
+  // için, SVG'nin ÜZERİNE bindirilmiş GERÇEK HTML <button> elemanları kullanılıyor (aşağıda) —
+  // bu, her tarayıcıda/cihazda %100 güvenilir çalışır; SVG şekil hit-testing'ine bağlı değildir.
+  const svgMarkup = `
+        <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="overflow:visible; display:block;">
           <defs>
             <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="var(--teal)" stop-opacity="0.3"/>
@@ -322,55 +321,43 @@ function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
           ${yAxis}
           <path d="${areaD}" fill="url(#${gradId})" stroke="none"/>
           <path d="${pathD}" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          ${dots.map(d => `<circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="14" fill="transparent" class="tg-chart-hit" data-year="${TURKEY_GROWTH_YEARS[d.i]}" data-val="${d.v}" style="cursor:pointer; pointer-events:all;"></circle><circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="${d.i===lastDot.i?4.5:3.5}" fill="${d.i===lastDot.i?'var(--amber-bright)':'var(--teal)'}" style="pointer-events:none;"><title>${TURKEY_GROWTH_YEARS[d.i]}: ${fmtDollarM(d.v)}</title></circle>`).join('')}
+          ${dots.map(d => `<circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="${d.i===lastDot.i?4.5:3.5}" fill="${d.i===lastDot.i?'var(--amber-bright)':'var(--teal)'}"/>`).join('')}
           ${yearLabels}
-        </svg>
+        </svg>`;
+
+  // Her yıl için gerçek bir <button> — grafiğin genişliğini eşit dilimlere böler.
+  // onclick doğrudan bu fonksiyonun kendi parametrelerini kullanır, DOM aramasına
+  // (closest/querySelector) ya da SVG koordinat dönüşümüne hiç ihtiyaç duymaz.
+  const buttonsMarkup = `
+        <div class="tg-chart-btns" style="position:absolute; inset:0; display:flex;">
+          ${series.map((v,i) => `<button type="button" class="tg-chart-btn" ${v==null?'disabled':''} onclick="tgChartShow(this, '${TURKEY_GROWTH_YEARS[i]}', ${v==null?'null':v})" aria-label="${TURKEY_GROWTH_YEARS[i]}"></button>`).join('')}
+        </div>`;
+
+  return `
+    <div class="cp-section" style="border-bottom:none; padding-top:0;">
+      <h3 class="cp-section-title" style="font-size:19px; margin-bottom:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Türkiye İhracat Trendi (2017–2025)</h3>
+      <div class="footnote" style="margin-bottom:14px;">${categoryLabel} kategorisinde Türkiye'den bu ülkeye yıllık ihracat, milyon $ (ITC Trade Map, gerçek veri). Bir yıla dokunarak/tıklayarak tam değerini görebilirsiniz.</div>
+      <div class="tg-chart-card">
+        <div style="position:relative;">
+          ${svgMarkup}
+          ${buttonsMarkup}
+        </div>
       </div>
       <div class="tg-chart-footer">
         <span class="footnote tg-chart-readout" style="margin:0; font-weight:700; color:var(--text-0);">${lastDot ? `${TURKEY_GROWTH_YEARS[lastDot.i]}: ${fmtDollarM(lastDot.v)}` : ''}</span>
         ${cagr !== null ? `<span class="tg-chart-cagr ${cagr>=0?'up':'down'}">Yıllık ortalama büyüme (CAGR): ${cagr>=0?'+':''}${cagr}%</span>` : ''}
       </div>
-      <div class="footnote tg-chart-hint" style="margin-top:8px; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11a3 3 0 1 0 6 0 3 3 0 1 0-6 0"/><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/></svg>Herhangi bir noktaya dokunarak/tıklayarak o yılın değerini yukarıda görebilirsiniz.</div>
+      <div class="footnote tg-chart-hint" style="margin-top:8px; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11a3 3 0 1 0 6 0 3 3 0 1 0-6 0"/><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/></svg>Herhangi bir yıla dokunarak/tıklayarak değerini yukarıda görebilirsiniz.</div>
     </div>`;
 }
-// Grafikteki bir yıl noktasına dokunulduğunda/tıklandığında, o yılın tam değerini
-// GÖRÜNÜR bir rozette gösterir. Küçük SVG dairelerine TAM isabet aramak yerine
-// (dokunmatik ekranlarda parmak hassasiyeti/isabet sorunlarına açık), grafiğin
-// HERHANGİ bir yerine tıklanınca en yakın yıl noktası matematiksel olarak bulunur.
-// Belge-seviyesi (document) delege edilmiş dinleyici yerine, grafik DOM'a her
-// eklendiğinde DOĞRUDAN o SVG'ye bağlanır — böylece üstteki başka bir elementin
-// olayı yutması (stopPropagation vb.) ihtimali tamamen ortadan kalkar.
-function wireTurkeyGrowthChartTaps(){
-  document.querySelectorAll('.tg-chart-svg').forEach(svg=>{
-    if(svg.getAttribute('data-tg-wired') === '1') return;
-    svg.setAttribute('data-tg-wired', '1');
-    function handlePoint(clientX){
-      const card = svg.closest('.tg-chart-card');
-      const readout = card && card.querySelector('.tg-chart-readout');
-      const pts = svg.querySelectorAll('.tg-chart-hit');
-      if(!readout || !pts.length) return;
-      const rect = svg.getBoundingClientRect();
-      if(!rect.width) return;
-      const vb = svg.viewBox.baseVal;
-      const x = clientX - rect.left;
-      const svgX = vb.x + (x / rect.width) * vb.width;
-      let nearest = null, nearestDist = Infinity;
-      pts.forEach(p=>{
-        const cx = parseFloat(p.getAttribute('cx'));
-        const d = Math.abs(cx - svgX);
-        if(d < nearestDist){ nearestDist = d; nearest = p; }
-      });
-      if(nearest){
-        const year = nearest.getAttribute('data-year');
-        const val = parseFloat(nearest.getAttribute('data-val'));
-        readout.textContent = `${year}: ${fmtDollarM(val)}`;
-      }
-    }
-    svg.addEventListener('click', e=>{ handlePoint(e.clientX); });
-    svg.addEventListener('touchstart', e=>{
-      if(e.touches && e.touches.length){ handlePoint(e.touches[0].clientX); }
-    }, {passive:true});
-  });
+// Bir yıl butonuna dokunulduğunda/tıklandığında çağrılır — DOM'da arama yapmaz, doğrudan
+// parametre olarak gelen yıl/değeri gösterir. Gerçek HTML <button> + inline onclick,
+// SVG şekillerine dokunma/tıklamadan çok daha güvenilirdir (her tarayıcıda çalışır).
+function tgChartShow(btn, year, val){
+  if(val == null) return;
+  const card = btn.closest('.tg-chart-card');
+  const readout = card && card.parentElement && card.parentElement.querySelector('.tg-chart-readout');
+  if(readout) readout.textContent = `${year}: ${fmtDollarM(val)}`;
 }
 
 function opScoreParseNum(s){
@@ -3979,7 +3966,6 @@ function renderCountryPage(baseCountry){
   fillNotes(baseCountry);
   applyContentGate();
   animateFillBars();
-  wireTurkeyGrowthChartTaps();
 
   const holidaysEl = document.getElementById('holidaysDetails');
   if(holidaysEl){
