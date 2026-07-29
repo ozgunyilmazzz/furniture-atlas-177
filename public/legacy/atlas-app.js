@@ -2701,12 +2701,17 @@ let displayCache = null;
 // ~200 path × 6 öznitelik × 60fps gereksiz DOM yazımını ortadan kaldırır.
 let styleVersion = 0, worldStyledVersion = -1, markerStyledVersion = -1;
 function invalidateDisplayCache(){ displayCache = null; styleVersion++; needsRender = true; }
+let globeSearchQuery = ''; // arama kutusuna yazılırken küredeki eşleşmeyen ülkeleri söndürmek için
+function countryMatchesGlobeSearch(country){
+  if(!globeSearchQuery) return true;
+  return normalizeTr(country.name).startsWith(globeSearchQuery);
+}
 function getDisplayCache(){
   if(displayCache) return displayCache;
   displayCache = {};
   COUNTRIES.forEach(c=>{
     const cd = withCategory(c);
-    const passes = countryPassesFilters(c);
+    const passes = countryPassesFilters(c) && countryMatchesGlobeSearch(c);
     displayCache[c.id] = { cd, passes, color: passes ? scoreColor(cd.scores.overall) : null };
   });
   return displayCache;
@@ -2969,8 +2974,39 @@ const searchResults = document.getElementById('searchResults');
 function normalizeTr(s){
   return String(s).toLocaleLowerCase('tr').replace(/[İI]/g,'i');
 }
+function isMobileViewport(){ return window.innerWidth <= 760; }
+// Aramaya yazarken küre üzerinde eşleşmeyen ülkelerin ışığını söndürür (opacity 0.35),
+// eşleşenler tam parlaklıkta kalır — countryMatchesGlobeSearch() üzerinden getDisplayCache()'e
+// bağlanır, ayrı bir sayaç sistemi gerektirmez.
+function updateGlobeSearchDim(q){
+  globeSearchQuery = q;
+  invalidateDisplayCache();
+}
+// Arama sonucuna tıklanınca küreyi o ülkenin boylamına yumuşakça döndürür, bitince ülke
+// sayfasını açar. Sadece masaüstünde — mobilde performans/his için doğrudan açılır.
+function flyToCountry(country, onDone){
+  autoRotate = false;
+  momentumActive = false;
+  const targetRotY0 = -(country.lon * Math.PI/180);
+  let diff = targetRotY0 - rotY;
+  while(diff > Math.PI) diff -= Math.PI*2;
+  while(diff < -Math.PI) diff += Math.PI*2;
+  const startRotY = rotY, finalRotY = rotY + diff;
+  const duration = 750;
+  const startTs = performance.now();
+  function step(ts){
+    const t = Math.min(1, (ts - startTs) / duration);
+    const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    rotY = startRotY + (finalRotY - startRotY) * eased;
+    needsRender = true;
+    if(t < 1) requestAnimationFrame(step);
+    else if(onDone) onDone();
+  }
+  requestAnimationFrame(step);
+}
 searchInput.addEventListener('input', ()=>{
   const q = normalizeTr(searchInput.value.trim());
+  updateGlobeSearchDim(q);
   if(!q){ searchResults.classList.remove('show'); searchResults.innerHTML=''; return; }
   const matches = COUNTRIES.filter(c => normalizeTr(c.name).includes(q)).slice(0,8);
   if(!matches.length){ searchResults.innerHTML = `<div class="search-empty">Sonuç bulunamadı</div>`; searchResults.classList.add('show'); return; }
@@ -2982,7 +3018,14 @@ searchInput.addEventListener('input', ()=>{
   searchResults.querySelectorAll('.search-item').forEach(item=>{
     item.addEventListener('click', ()=>{
       const c = COUNTRIES.find(x=>x.id===item.getAttribute('data-id'));
-      if(c){ openDashboard(c); searchInput.value=''; listSearchQ=''; searchResults.classList.remove('show'); hideHoverCard(); }
+      if(!c) return;
+      searchInput.value=''; listSearchQ=''; searchResults.classList.remove('show'); hideHoverCard();
+      updateGlobeSearchDim('');
+      if(isMobileViewport()){
+        openDashboard(c);
+      } else {
+        flyToCountry(c, ()=> openDashboard(c));
+      }
     });
     item.addEventListener('mouseenter', (e)=>{
       const c = COUNTRIES.find(x=>x.id===item.getAttribute('data-id'));
@@ -2996,7 +3039,10 @@ searchInput.addEventListener('input', ()=>{
   });
 });
 document.addEventListener('click', (e)=>{
-  if(!e.target.closest('.search-wrap')) searchResults.classList.remove('show');
+  if(!e.target.closest('.search-wrap')){
+    searchResults.classList.remove('show');
+    if(globeSearchQuery){ updateGlobeSearchDim(''); }
+  }
 });
 
 /* =========================================================
