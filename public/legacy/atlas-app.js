@@ -343,8 +343,10 @@ function renderTurkeyGrowthChart(countryId, categoryKey, categoryLabel){
           ${buttonsMarkup}
         </div>
       </div>
-      <div class="tg-chart-footer">
-        <span class="footnote tg-chart-readout" style="margin:0; font-weight:700; color:var(--text-0);">${lastDot ? `${TURKEY_GROWTH_YEARS[lastDot.i]}: ${fmtDollarM(lastDot.v)}` : ''}</span>
+      <div class="tg-chart-readout-row">
+        <span class="footnote tg-chart-readout" style="margin:0; font-size:15px; font-weight:700; color:var(--text-0);">${lastDot ? `${TURKEY_GROWTH_YEARS[lastDot.i]}: ${fmtDollarM(lastDot.v)}` : ''}</span>
+      </div>
+      <div class="tg-chart-footer" style="justify-content:center;">
         ${cagr !== null ? `<span class="tg-chart-cagr ${cagr>=0?'up':'down'}">Yıllık ortalama büyüme (CAGR): ${cagr>=0?'+':''}${cagr}%</span>` : ''}
       </div>
       <div class="footnote tg-chart-hint" style="margin-top:8px; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11a3 3 0 1 0 6 0 3 3 0 1 0-6 0"/><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/></svg>Herhangi bir yıla dokunarak/tıklayarak değerini yukarıda görebilirsiniz.</div>
@@ -2498,6 +2500,24 @@ function getTargetIdsCache(){
 }
 function invalidateTargetIdsCache(){ targetIdsCache = null; styleVersion++; needsRender = true; }
 
+// Açılış ekranı — gerçek hazır olma anına (küre/işaretçiler oluşturulduğunda) göre
+// kaybolur. Çok hızlı yüklenen cihazlarda ekranın "yanıp sönmemesi" için en az
+// ~400ms gösterilir, ama asla yapay olarak uzatılmaz.
+const ATLAS_LOAD_START = Date.now();
+function hideLoadingScreen(){
+  const el = document.getElementById('atlasLoadingScreen');
+  if(!el || el.classList.contains('is-hidden')) return;
+  const elapsed = Date.now() - ATLAS_LOAD_START;
+  const wait = Math.max(0, 400 - elapsed);
+  setTimeout(()=>{
+    el.classList.add('is-hidden');
+    setTimeout(()=>{ if(el.parentNode) el.parentNode.removeChild(el); }, 550);
+  }, wait);
+}
+// Güvenlik ağı: globe init kancası herhangi bir sebeple hiç tetiklenmezse (beklenmeyen
+// bir görünüm/durum), açılış ekranı sonsuza kadar takılı kalmasın diye 4 saniye sonra
+// yine de kaldırılır.
+setTimeout(hideLoadingScreen, 4000);
 function initSvgSkeleton(){
   svg.innerHTML = `<defs>
     <radialGradient id="sphereGrad" cx="35%" cy="30%" r="75%">
@@ -2592,6 +2612,7 @@ function initSvgSkeleton(){
   markerEls['turkey'] = { g: tg };
 
   svgReady = true;
+  hideLoadingScreen();
 }
 
 function updateGrid(){
