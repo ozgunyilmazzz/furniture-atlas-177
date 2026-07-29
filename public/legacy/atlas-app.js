@@ -3083,10 +3083,12 @@ searchInput.addEventListener('input', ()=>{
       openDashboard(c);
     });
     item.addEventListener('mouseenter', (e)=>{
+      if(isMobileViewport()) return; // mobilde dokunuşta önce özet kart yanıp sönmesin, direkt gitsin
       const c = COUNTRIES.find(x=>x.id===item.getAttribute('data-id'));
       if(c) showHoverCard(c, e);
     });
     item.addEventListener('mousemove', (e)=>{
+      if(isMobileViewport()) return;
       const c = COUNTRIES.find(x=>x.id===item.getAttribute('data-id'));
       if(c) positionHoverCard(e);
     });
