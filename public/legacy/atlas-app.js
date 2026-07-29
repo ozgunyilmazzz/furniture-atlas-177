@@ -3047,7 +3047,7 @@ function flyToCountry(country, onDone, opts){
 // bir ülkede sabitlenir (kullanıcının istediği "yan yana geldikçe tek olasılık kalır" davranışı).
 let searchFocusId = null;
 function updateSearchGlobeFocus(q){
-  if(!q || dashboard.classList.contains('open')){ searchFocusId = null; return; }
+  if(!q || dashboard.classList.contains('open') || isMobileViewport()){ searchFocusId = null; return; }
   const matches = COUNTRIES.filter(c => countryMatchesGlobeSearch(c));
   if(!matches.length){ searchFocusId = null; return; }
   if(searchFocusId && matches.some(c=>c.id===searchFocusId)) return; // hâlâ geçerli, dokunma
