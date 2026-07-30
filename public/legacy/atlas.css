@@ -68,7 +68,7 @@
     -webkit-backdrop-filter: blur(16px);
     border-bottom:1px solid var(--border-soft);
   }
-  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand{ display:flex; align-items:center; gap:14px; }
   .brand-mark{
     display:flex; align-items:baseline; gap:8px; letter-spacing:0.5px;
     color:var(--text-0);
@@ -82,9 +82,10 @@
     color:var(--text-0);
   }
   .brand-dot{ color:var(--amber); }
+  .brand-divider{ width:1px; height:28px; background:var(--border-soft); flex-shrink:0; }
   .brand-sub{
-    font-family:var(--mono); font-size:10px; letter-spacing:2.5px; text-transform:uppercase;
-    color:var(--text-2);
+    font-family:var(--mono); font-size:9.5px; font-weight:500; letter-spacing:1.6px; text-transform:uppercase;
+    color:var(--text-2); line-height:1.55;
   }
   .header-right{ display:flex; align-items:center; gap:22px; }
   .header-actions-wrap{ position:relative; }
@@ -1616,36 +1617,28 @@
   }
   .footer-link:hover{ color:var(--text-0); transform:translateX(4px); }
 
-  /* Güvenilir Veri Kaynaklarımız — tek satır, yumuşak yatay kaydırma (marquee/otomatik kayma YOK) */
+  /* Güvenilir kaynak logoları — tek satır, yumuşak yatay kaydırma (marquee/otomatik kayma YOK) */
   .footer-sources-band{
-    display:flex; align-items:center; gap:16px; padding:24px 0 30px;
+    display:flex; align-items:center; gap:16px; padding:26px 0 32px;
   }
   .footer-sources-row{ display:flex; align-items:center; gap:16px; flex:1; min-width:0; }
-  .footer-sources-band-title{
-    font-family:var(--mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
-    color:var(--text-2); white-space:nowrap; flex-shrink:0;
-  }
   .footer-sources-scroll{
-    display:flex; align-items:center; gap:32px; overflow-x:auto; flex:1; min-width:0;
+    display:flex; align-items:center; gap:38px; overflow-x:auto; flex:1; min-width:0;
     scroll-behavior:smooth; scrollbar-width:none; -ms-overflow-style:none;
     -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
     mask-image:linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
-    padding:2px 4px;
+    padding:6px 4px;
   }
   .footer-sources-scroll::-webkit-scrollbar{ display:none; }
-  .footer-source-badge{
-    display:flex; align-items:center; gap:9px; flex-shrink:0; text-decoration:none;
-    font-family:var(--body); font-size:12px; color:var(--text-2); white-space:nowrap;
-    transition:color 0.2s ease;
+  .footer-source-logo{
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; height:24px;
   }
-  .footer-source-badge:hover{ color:var(--text-0); }
-  .footer-source-mark{
-    display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; padding:0 6px;
-    border-radius:7px; border:1px solid var(--border-soft);
-    font-family:var(--mono); font-size:8.5px; font-weight:700; letter-spacing:0.3px;
-    color:var(--text-2); transition:border-color 0.2s ease, color 0.2s ease;
+  .footer-source-logo img{
+    height:100%; width:auto; max-width:104px; object-fit:contain; display:block;
+    filter:grayscale(1) brightness(1.9) opacity(0.5);
+    transition:filter 0.25s ease, opacity 0.25s ease;
   }
-  .footer-source-badge:hover .footer-source-mark{ border-color:var(--amber); color:var(--amber-bright); }
+  .footer-source-logo:hover img{ filter:none; opacity:1; }
   .footer-sources-arrow{
     display:flex; align-items:center; justify-content:center; width:28px; height:28px; flex-shrink:0;
     border-radius:50%; border:1px solid var(--border-soft); background:none; color:var(--text-2); cursor:pointer;
@@ -1910,6 +1903,7 @@
     .brand-atlas{ font-size:19px; }
     .brand-pre{ font-size:9px; }
     .brand-sub{ display:none; }
+    .brand-divider{ display:none; }
 
     /* Önizleme kartı: parmağın altında kalmasın diye ekranın altına sabitlenir */
     .hover-card{

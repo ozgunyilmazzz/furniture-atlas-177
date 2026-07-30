@@ -3255,7 +3255,6 @@ const LIST_COLUMNS = [
   { key:'population', label:'Nüfus' },
   { key:'gdpPerCapita', label:'Kişi Başı GSYH' },
   { key:'logisticsCost', label:'Lojistik Maliyeti' },
-  { key:'importTax', label:'İthalat Vergisi' },
   { key:'isManufacturer', label:'Mobilya Üreticisi mi?' },
   { key:'inflation', label:'Enflasyon' },
 ];
@@ -3280,7 +3279,7 @@ function getColumnCellHtml(key, cd, xf){
 function renderListHead(){
   const thead = document.getElementById('countryTableHead');
   const cols = listColumnOrder.map(key => LIST_COLUMNS.find(c=>c.key===key));
-  const dynamicLabel = (c) => c.key === 'turkeyExport' ? `Türkiye'nin ${CATEGORIES[activeCategory].label} İhracatı` : c.label;
+  const dynamicLabel = (c) => c.key === 'turkeyExport' ? `Türkiye İhracatı<br><span style="font-size:9px; font-weight:400; opacity:0.6;">${CATEGORIES[activeCategory].label}</span>` : c.label;
   thead.innerHTML = `<tr>
     <th></th>
     ${cols.map(c=>`<th draggable="true" data-sort="${c.key}" data-colkey="${c.key}" class="${listSortKey===c.key ? (listSortDir===1?'sorted-asc':'sorted-desc') : ''}" title="Sıralamak için tıkla, taşımak için sürükle">${dynamicLabel(c)}</th>`).join('')}
