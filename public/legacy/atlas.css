@@ -1639,6 +1639,14 @@
     transition:filter 0.25s ease, opacity 0.25s ease;
   }
   .footer-source-logo:hover img{ filter:none; opacity:1; }
+  /* MOSFED logosu koyu lacivert/siyah — genel gri filtre üzerinde neredeyse görünmüyordu.
+     Beyaza çevirip (invert) görünürlüğünü garanti ediyoruz; hover'da tam parlaklık. */
+  .footer-source-logo.is-mosfed img{
+    filter:brightness(0) invert(1) opacity(0.55);
+  }
+  .footer-source-logo.is-mosfed:hover img{
+    filter:brightness(0) invert(1) opacity(1);
+  }
   .footer-sources-arrow{
     display:flex; align-items:center; justify-content:center; width:28px; height:28px; flex-shrink:0;
     border-radius:50%; border:1px solid var(--border-soft); background:none; color:var(--text-2); cursor:pointer;
