@@ -1631,10 +1631,10 @@
   }
   .footer-sources-scroll::-webkit-scrollbar{ display:none; }
   .footer-source-logo{
-    display:flex; align-items:center; justify-content:center; flex-shrink:0; height:24px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; height:36px;
   }
   .footer-source-logo img{
-    height:100%; width:auto; max-width:104px; object-fit:contain; display:block;
+    height:100%; width:auto; max-width:150px; object-fit:contain; display:block;
     filter:grayscale(1) brightness(1.9) opacity(0.5);
     transition:filter 0.25s ease, opacity 0.25s ease;
   }
